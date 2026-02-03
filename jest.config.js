@@ -11,7 +11,11 @@ module.exports = {
     '<rootDir>/.jest/test-utils.tsx',
     '<rootDir>/__mocks__/*'
   ],
-  transformIgnorePatterns: ['/node_modules/', '^.+\\.module\\.(css|sass|scss)$'],
+  transformIgnorePatterns: [
+    '/node_modules/',
+    '^.+\\.module\\.(css|sass|scss)$',
+    '/node_modules/(?!(zustand|@t3-oss/env-nextjs|@t3-oss/env-core)/)'
+  ],
 
   transform: {
     // Use babel-jest to transpile tests with the next/babel preset
@@ -50,10 +54,11 @@ module.exports = {
     '^.+\\.(png|jpg|jpeg|gif|webp|avif|ico|bmp|svg)$': `<rootDir>/__mocks__/fileMock.js`,
 
     // Handle module aliases
+    '^@/(.*)$': '<rootDir>/src/$1',
     '^@/components/(.*)$': '<rootDir>/src/components/$1',
     '^@/pages/(.*)$': '<rootDir>/src/pages/$1',
     '^@/lib(.*)$': '<rootDir>/src/lib$1',
-    '^@/hooks(.*)$': '<rootDir>/hooks$1',
+    '^@/hooks(.*)$': '<rootDir>/src/hooks$1',
     '^@/mocks(.*)$': '<rootDir>/__mocks__$1',
     '^@/tests(.*)$': '<rootDir>/.jest$1'
   }

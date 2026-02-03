@@ -1,6 +1,13 @@
+import type { User } from '@/types/user';
+
 export type LoginRequest = {
-  email: string;
+  username: string;
   password: string;
+};
+
+export type LoginResponse = {
+  user: User;
+  token: string;
 };
 
 export type RegisterRequest = {

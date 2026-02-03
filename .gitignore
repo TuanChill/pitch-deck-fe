@@ -37,3 +37,6 @@ yarn-error.log*
 
 # storybook
 storybook-static
+.claude
+CLAUDE.md
+plans
