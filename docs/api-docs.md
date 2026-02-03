@@ -511,11 +511,11 @@ export type CategoryScores = {
 
 ## 10. Version History
 
-| Version | Date       | Changes                           |
-| ------- | ---------- | --------------------------------- |
-| 1.0.0   | 2026-02-03 | Initial API documentation         |
-| 1.1.0   | 2026-02-03 | Added VC framework types          |
-| 1.2.0   | 2026-02-03 | Added retry utility documentation |
+| Version | Date       | Changes                             |
+| ------- | ---------- | ----------------------------------- |
+| 1.0.0   | 2026-02-03 | Initial API documentation           |
+| 1.1.0   | 2026-02-03 | Added VC framework types            |
+| 1.2.0   | 2026-02-03 | Added retry utility documentation   |
 | 1.3.0   | 2026-02-03 | Wave 3: Pitch deck management pages |
 
 ---
@@ -523,11 +523,13 @@ export type CategoryScores = {
 ## 11. Wave 3 Implementation Notes
 
 ### Current Status
+
 The pitch deck management UI components are fully implemented with mock data. Actual API integration is pending backend implementation.
 
 ### Implemented Components
 
 #### 1. Pitch Deck Store
+
 ```typescript
 // src/stores/pitch-deck-management.store.ts
 export const usePitchDeckManagementStore = create<PitchDeckState & PitchDeckActions>()(
@@ -561,7 +563,7 @@ export const usePitchDeckManagementStore = create<PitchDeckState & PitchDeckActi
       removePitchDeck: (uuid) => {
         // Optimistic update
         set((state) => ({
-          pitchDecks: state.pitchDecks.filter(deck => deck.uuid !== uuid)
+          pitchDecks: state.pitchDecks.filter((deck) => deck.uuid !== uuid)
         }));
       }
     }),
@@ -573,6 +575,7 @@ export const usePitchDeckManagementStore = create<PitchDeckState & PitchDeckActi
 ```
 
 #### 2. Service Layer Implementation
+
 ```typescript
 // src/services/api/pitch-deck-management.service.ts
 export const deletePitchDeckByUuid = async (uuid: string): Promise<void> => {
@@ -594,6 +597,7 @@ export const mockFetchPitchDecks = async (
 ```
 
 ### Mock Data Generation
+
 The current implementation uses mock data for development and testing purposes. The `mock-analysis.ts` utility generates realistic pitch deck data with:
 
 - Random UUIDs using valid UUID v4 format
@@ -603,9 +607,11 @@ The current implementation uses mock data for development and testing purposes. 
 - Sample descriptions and tags
 
 ### API Integration Points
+
 When the backend API is ready, the following integration points need to be updated:
 
 1. **Fetch Pitch Decks List**
+
    ```typescript
    // Replace mock with actual API call
    const response = await httpClient.get<ListPitchDecksResponse>('/pitch-deck', {
@@ -618,6 +624,7 @@ When the backend API is ready, the following integration points need to be updat
    ```
 
 2. **Delete Pitch Deck**
+
    ```typescript
    // Replace mock with actual API call
    await httpClient.delete(`/pitch-deck/${uuid}`);
@@ -630,6 +637,7 @@ When the backend API is ready, the following integration points need to be updat
    ```
 
 ### UI-Ready Features
+
 The Wave 3 implementation includes all UI components needed for:
 
 - ✅ Pitch deck listing with pagination
@@ -642,6 +650,7 @@ The Wave 3 implementation includes all UI components needed for:
 - ✅ Responsive design with Tailwind CSS
 
 ### Next Steps for API Integration
+
 1. Implement backend API endpoints
 2. Replace mock functions with actual HTTP calls
 3. Add authentication headers (already handled by HTTP client)

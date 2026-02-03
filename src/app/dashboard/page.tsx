@@ -57,6 +57,37 @@ function DashboardContent() {
               This is a basic dashboard placeholder. Add your features here.
             </p>
           </div>
+
+          {/* Quick Actions */}
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              onClick={() => router.push(APP_URL.PITCH_DECKS)}
+              className="p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 transition-colors text-left"
+            >
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Pitch Decks</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                View and manage your pitch decks
+              </p>
+            </button>
+
+            <button
+              onClick={() => router.push(APP_URL.PITCH_DECK_UPLOAD)}
+              className="p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 transition-colors text-left"
+            >
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Upload Deck</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Upload a new pitch deck</p>
+            </button>
+
+            <button
+              onClick={() => router.push(APP_URL.PITCH_DECK)}
+              className="p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 transition-colors text-left"
+            >
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Analyze Deck</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Analyze a pitch deck with VC framework
+              </p>
+            </button>
+          </div>
         </div>
       </main>
     </div>

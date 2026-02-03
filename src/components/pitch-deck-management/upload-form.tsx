@@ -1,5 +1,6 @@
 'use client';
 
+import { APP_URL } from '@/constants/routes';
 import { uploadPitchDeck } from '@/services/api/pitch-deck.service';
 import type { PitchDeckListItem } from '@/types/response/pitch-deck';
 import { useRouter } from 'next/navigation';
@@ -182,12 +183,12 @@ export const UploadForm = ({ onSuccess, onCancel, className }: UploadFormProps) 
 
   const handleViewDeck = useCallback(() => {
     if (uploadedDeck) {
-      router.push(`/dashboard/pitch-decks/${uploadedDeck.uuid}`);
+      router.push(APP_URL.PITCH_DECK_DETAIL(uploadedDeck.uuid));
     }
   }, [uploadedDeck, router]);
 
   const handleBackToList = useCallback(() => {
-    router.push('/dashboard/pitch-decks');
+    router.push(APP_URL.PITCH_DECKS);
   }, [router]);
 
   return (

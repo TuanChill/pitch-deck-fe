@@ -4,6 +4,7 @@ import { APP_URL } from '@/constants/routes';
 import { deletePitchDeckByUuid } from '@/services/api';
 import { usePitchDeckManagementStore } from '@/stores';
 import { ArrowLeft, FileX } from 'lucide-react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -29,34 +30,35 @@ const LoadingSkeleton = () => (
 );
 
 // Not found component
-const NotFoundState = ({ error }: { error?: string | null }) => (
-  <div className="container max-w-4xl mx-auto py-16 px-4 text-center">
-    <div className="flex justify-center mb-4">
-      <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-        <FileX className="w-8 h-8 text-muted-foreground" />
+const NotFoundState = ({ error }: { error?: string | null }) => {
+  const router = useRouter();
+
+  return (
+    <div className="container max-w-4xl mx-auto py-16 px-4 text-center">
+      <div className="flex justify-center mb-4">
+        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+          <FileX className="w-8 h-8 text-muted-foreground" />
+        </div>
       </div>
+      <h2 className="text-2xl font-semibold mb-2">Pitch Deck Not Found</h2>
+      <p className="text-muted-foreground mb-6">
+        {error ||
+          'The pitch deck you are looking for does not exist or you do not have access to it.'}
+      </p>
+      <Button variant="outline" onClick={() => router.push(APP_URL.PITCH_DECKS)}>
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back to Pitch Decks
+      </Button>
     </div>
-    <h2 className="text-2xl font-semibold mb-2">Pitch Deck Not Found</h2>
-    <p className="text-muted-foreground mb-6">
-      {error ||
-        'The pitch deck you are looking for does not exist or you do not have access to it.'}
-    </p>
-    <Button variant="outline" onClick={() => window.history.back()}>
-      <ArrowLeft className="w-4 h-4 mr-2" />
-      Go Back
-    </Button>
-  </div>
-);
+  );
+};
 
 // Breadcrumb component
 const Breadcrumb = ({ title }: { title: string }) => (
   <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-    <button
-      onClick={() => window.history.back()}
-      className="hover:text-foreground transition-colors"
-    >
+    <Link href={APP_URL.PITCH_DECKS} className="hover:text-foreground transition-colors">
       Pitch Decks
-    </button>
+    </Link>
     <span>/</span>
     <span className="text-foreground font-medium truncate max-w-[200px]">{title}</span>
   </nav>

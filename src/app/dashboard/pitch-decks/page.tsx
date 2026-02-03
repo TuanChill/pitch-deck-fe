@@ -1,6 +1,7 @@
 'use client';
 
 import type { PitchDeckStatus } from '@/constants/pitch-deck-status';
+import { APP_URL } from '@/constants/routes';
 import { deletePitchDeckByUuid } from '@/services/api';
 import { usePitchDeckManagementStore } from '@/stores';
 import { Plus } from 'lucide-react';
@@ -88,13 +89,13 @@ export default function PitchDecksPage() {
 
   const handleCardClick = useCallback(
     (uuid: string) => {
-      router.push(`/dashboard/pitch-decks/${uuid}`);
+      router.push(APP_URL.PITCH_DECK_DETAIL(uuid));
     },
     [router]
   );
 
   const handleCreateNew = useCallback(() => {
-    router.push('/dashboard/pitch-deck');
+    router.push(APP_URL.PITCH_DECK_UPLOAD);
   }, [router]);
 
   return (

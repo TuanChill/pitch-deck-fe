@@ -1,5 +1,6 @@
 'use client';
 
+import { APP_URL } from '@/constants/routes';
 import { ArrowLeft, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -14,7 +15,7 @@ export default function UploadPitchDeckPage() {
   };
 
   const handleCancel = () => {
-    router.push('/dashboard/pitch-decks');
+    router.push(APP_URL.PITCH_DECKS);
   };
 
   return (
@@ -22,7 +23,7 @@ export default function UploadPitchDeckPage() {
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
         <Link
-          href="/dashboard/pitch-decks"
+          href={APP_URL.PITCH_DECKS}
           className="hover:text-foreground transition-colors flex items-center gap-1"
         >
           <ArrowLeft className="w-4 h-4" />

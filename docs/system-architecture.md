@@ -1130,6 +1130,7 @@ interface PitchDeckActions {
 #### 1. List Page (`/dashboard/pitch-decks/`)
 
 **Features:**
+
 - Filter by status (all, uploading, processing, ready, error)
 - Paginated display with custom pagination
 - Delete functionality with confirmation dialog
@@ -1137,6 +1138,7 @@ interface PitchDeckActions {
 - Error handling and loading states
 
 **Implementation Pattern:**
+
 ```typescript
 export default function PitchDecksPage() {
   const { fetchPitchDecks, pitchDecks, total, limit, offset, filters } = usePitchDeckManagementStore();
@@ -1158,6 +1160,7 @@ export default function PitchDecksPage() {
 #### 2. Upload Page (`/dashboard/pitch-decks/upload/`)
 
 **Features:**
+
 - File upload with drag-and-drop support
 - Metadata form (title, description, tags)
 - Upload progress tracking
@@ -1167,6 +1170,7 @@ export default function PitchDecksPage() {
 #### 3. Detail Page (`/dashboard/pitch-decks/[uuid]/`)
 
 **Features:**
+
 - UUID validation before API call
 - Deck information display
 - Status indicators
@@ -1174,6 +1178,7 @@ export default function PitchDecksPage() {
 - Error states for invalid/missing decks
 
 **Security Implementation:**
+
 ```typescript
 const UUID_V4_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -1192,6 +1197,7 @@ function PitchDeckDetailContent() {
 ### Error Handling Strategy
 
 #### 1. Network Error Handling
+
 ```typescript
 try {
   const result = await deletePitchDeckByUuid(uuid);
@@ -1203,11 +1209,13 @@ try {
 ```
 
 #### 2. UUID Validation
+
 - Regex pattern validation for UUID v4 format
 - Graceful error state for invalid UUIDs
 - User-friendly error messages
 
 #### 3. Memory Leak Prevention
+
 - Interval cleanup in progress tracking components
 - Proper cleanup of event listeners
 - React cleanup patterns

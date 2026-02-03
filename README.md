@@ -1,6 +1,6 @@
-# Next.js Boilerplate Template
+# Pitch Deck Management System
 
-A modern, production-ready Next.js boilerplate with comprehensive development tooling, authentication setup, and services architecture. Built with best practices for scalable enterprise applications.
+A modern, production-ready pitch deck management system with comprehensive development tooling, authentication setup, and services architecture. Built with best practices for scalable enterprise applications.
 
 ## 🚀 Quick Start
 
@@ -136,6 +136,15 @@ pnpm test:ci      # Run tests in CI mode
 - Automatic token handling via interceptors
 - User session management with Zustand
 
+### Pitch Deck Management
+
+- **List Page** (`/dashboard/pitch-decks`) - View all pitch decks with filter and pagination
+- **Upload Page** (`/dashboard/pitch-decks/upload`) - Upload new decks with metadata
+- **Detail Page** (`/dashboard/pitch-decks/[uuid]`) - View deck details and actions
+- **Analysis Page** (`/dashboard/pitch-deck`) - VC framework analysis with scoring
+- Status tracking: uploading | processing | ready | error
+- Optimistic updates for better UX
+
 ### State Management
 
 - Zustand stores with persistence
@@ -157,6 +166,27 @@ pnpm test:ci      # Run tests in CI mode
 - lint-staged for staged file formatting
 - TypeScript strict mode enabled
 - Jest + Testing Library for testing
+
+## 📱 Pitch Deck Management Routes
+
+All navigation uses centralized APP_URL constants (no hardcoded paths):
+
+```typescript
+import { APP_URL } from '@/constants/routes';
+
+// Dashboard navigation
+router.push(APP_URL.DASHBOARD);
+
+// Pitch deck management routes
+router.push(APP_URL.PITCH_DECKS);        // List page
+router.push(APP_URL.PITCH_DECK_UPLOAD);  // Upload page
+router.push(APP_URL.PITCH_DECK_DETAIL(uuid));  // Detail page
+router.push(APP_URL.PITCH_DECK);         // Analysis page
+
+// Authentication routes
+router.push(APP_URL.LOGIN);
+router.push(APP_URL.LOGOUT);
+```
 
 ### Theming
 
@@ -247,5 +277,17 @@ This project is licensed under the MIT License.
 - [Zustand Documentation](https://docs.pmnd.rs/zustand/getting-started/introduction)
 
 ---
+
+## 🎉 Project Status
+
+**Phase 07 (Integration) Complete - All 7 Phases Implemented!**
+
+This pitch deck management system is now fully implemented with:
+- ✅ Authentication system
+- ✅ Pitch deck upload and management
+- ✅ VC framework analysis
+- ✅ Dashboard navigation
+- ✅ Centralized route constants
+- ✅ Production-ready codebase
 
 _Built with ❤️ by TBX/Capylabs_
