@@ -87,6 +87,30 @@ export const getAnalysisResult = async (analysisUuid: string): Promise<AnalysisR
 };
 
 /**
+ * Get analysis by pitch deck UUID
+ * GET /analysis/by-deck/:deckUuid
+ *
+ * Returns the most recent analysis for a specific pitch deck.
+ * Returns null if no analysis exists (404).
+ *
+ * @param deckUuid - UUID of the pitch deck
+ * @returns Analysis response or null if not found
+ */
+export const getAnalysisByDeck = async (deckUuid: string): Promise<AnalysisResponse | null> => {
+  try {
+    const response = await httpClient.get<AnalysisResponse>(API_URL.ANALYSIS.BY_DECK(deckUuid));
+
+    return response.data;
+  } catch (error) {
+    // Return null if analysis not found (404)
+    if (httpClient.isAxiosError(error) && error.response?.status === 404) {
+      return null;
+    }
+    throw error;
+  }
+};
+
+/**
  * List all analyses with optional filtering
  * GET /analysis
  *

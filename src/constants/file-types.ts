@@ -9,7 +9,7 @@ export const ALLOWED_PITCH_DECK_TYPES = [
   'text/plain'
 ] as const;
 
-export const MAX_PITCH_DECK_SIZE = 10 * 1024 * 1024;
+export const MAX_PITCH_DECK_SIZE = 50 * 1024 * 1024;
 
 export const FILE_TYPE_LABELS: Record<string, string> = {
   'application/pdf': 'PDF',

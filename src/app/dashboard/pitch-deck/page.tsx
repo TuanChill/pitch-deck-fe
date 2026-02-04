@@ -40,8 +40,11 @@ export default function PitchDeckPage() {
     }
   }, [uploadState, setCurrentStage]);
 
-  const handleFileSelect = useCallback(
-    async (file: File) => {
+  const handleFilesSelect = useCallback(
+    async (files: File[]) => {
+      if (files.length === 0) return;
+
+      const file = files[0]; // Use first file for quick analysis
       try {
         reset();
         setCurrentStage('uploading');
@@ -107,7 +110,7 @@ export default function PitchDeckPage() {
 
       {/* File uploader - shown when idle */}
       {uploadState === 'idle' && !currentAnalysis && (
-        <FileUploader onFileSelect={handleFileSelect} />
+        <FileUploader onFilesSelect={handleFilesSelect} />
       )}
 
       {/* Upload/Analysis progress */}

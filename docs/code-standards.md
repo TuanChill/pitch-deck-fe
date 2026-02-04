@@ -620,6 +620,188 @@ const withAuth = <P extends object>(
 
 ---
 
+## FileUploader Component Standards
+
+### Multi-File Upload Component Guidelines
+
+The FileUploader component follows specific patterns for handling multiple file uploads with validation and user experience considerations.
+
+#### Component Interface Standards
+
+```typescript
+// Always use array type for file selection
+interface FileUploaderProps {
+  onFilesSelect: (files: File[]) => void;  // Required: File array callback
+  disabled?: boolean;                      // Optional: Disable interaction
+  className?: string;                     // Optional: Additional styling
+  selectedFiles?: File[];                 // Optional: Controlled component mode
+}
+
+// Example: Basic usage
+<FileUploader onFilesSelect={handleFilesSelect} />
+
+// Example: Controlled component
+<FileUploader
+  onFilesSelect={handleFilesSelect}
+  selectedFiles={selectedFiles}
+  disabled={isUploading}
+/>
+```
+
+#### File Validation Standards
+
+1. **Type Validation**
+   ```typescript
+   // Use existing validation utility
+   import { validatePitchDeckFile } from '@/constants/file-types';
+
+   const validation = validatePitchDeckFile(file);
+   if (!validation.valid) {
+     // Handle validation error
+   }
+   ```
+
+2. **Count Validation**
+   ```typescript
+   // Maximum 10 files total
+   const totalCount = selectedFiles.length + newFiles.length;
+   if (totalCount > 10) {
+     setError('Maximum 10 files allowed');
+     return;
+   }
+   ```
+
+3. **Size Validation**
+   ```typescript
+   // Use MAX_PITCH_DECK_SIZE constant
+   import { MAX_PITCH_DECK_SIZE } from '@/constants/file-types';
+
+   if (file.size > MAX_PITCH_DECK_SIZE) {
+     setError('File exceeds maximum size');
+     return;
+   }
+   ```
+
+#### State Management Patterns
+
+```typescript
+// File state should always be an array
+const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
+// Handler must accept File[]
+const handleFilesSelect = useCallback((files: File[]) => {
+  setSelectedFiles(files);
+  // Additional logic if needed
+}, []);
+```
+
+#### UI Display Standards
+
+1. **File Count Display**
+   ```typescript
+   // Show count clearly
+   <p>Selected Files ({selectedFiles.length}/10)</p>
+
+   // Button text should reflect count
+   <Button>
+     Upload {selectedFiles.length} File{selectedFiles.length !== 1 ? 's' : ''}
+   </Button>
+   ```
+
+2. **File List Display**
+   ```typescript
+   {selectedFiles.map((file, index) => (
+     <div key={`${file.name}-${index}`} className="file-item">
+       <FileIcon />
+       <div className="file-info">
+         <span className="file-name">{file.name}</span>
+         <span className="file-size">{formatFileSize(file.size)}</span>
+       </div>
+       <Button
+         variant="ghost"
+         size="icon"
+         onClick={() => handleRemoveFile(index)}
+       >
+         <XIcon />
+       </Button>
+     </div>
+   ))}
+   ```
+
+#### Error Handling Standards
+
+```typescript
+// Always provide clear error messages
+const [error, setError] = useState<string | null>(null);
+
+const validateAndSelectFiles = (newFiles: File[]) => {
+  const errors: string[] = [];
+
+  newFiles.forEach(file => {
+    const validation = validatePitchDeckFile(file);
+    if (!validation.valid) {
+      errors.push(`${file.name}: ${validation.error}`);
+    }
+  });
+
+  if (errors.length > 0) {
+    setError(errors.join('; '));
+  }
+};
+```
+
+#### Integration Guidelines
+
+1. **With Upload Forms**
+   ```typescript
+   <UploadForm>
+     <FileUploader
+       onFilesSelect={setSelectedFiles}
+       selectedFiles={selectedFiles}
+     />
+     {/* Other form fields */}
+   </UploadForm>
+   ```
+
+2. **API Integration**
+   ```typescript
+   // Service accepts File[]
+   const uploadPitchDeck = async (data: {
+     files: File[];
+     title: string;
+     description: string;
+     tags: string[];
+   }) => {
+     // Upload implementation
+   };
+   ```
+
+#### Testing Standards
+
+```typescript
+// Test multi-file scenarios
+describe('FileUploader', () => {
+  it('handles multiple file selection', () => {
+    const mockFiles = [file1, file2, file3];
+    render(<FileUploader onFilesSelect={mockOnFilesSelect} />);
+
+    // Simulate file selection
+    const fileInput = screen.getByLabelText(/select files/i);
+    fireEvent.change(fileInput, { target: { files: mockFiles } });
+
+    expect(mockOnFilesSelect).toHaveBeenCalledWith(mockFiles);
+  });
+
+  it('validates file count limit', () => {
+    // Test beyond 10 files
+    const tooManyFiles = Array(11).fill(mockFile);
+    // Verify error is shown
+  });
+});
+```
+
+---
+
 ## State Management Standards
 
 ### Zustand Store Pattern

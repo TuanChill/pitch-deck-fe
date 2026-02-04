@@ -22,10 +22,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated detail page and upload form to use files array
   - Added pitch-deck.service.ts with mock implementations
 
+### Changed
+
+- Phase 03: Constants Update (2026-02-04)
+  - Updated MAX_PITCH_DECK_SIZE from 10MB to 50MB in file-types.ts
+  - Replaced hardcoded file size value in upload page with dynamic constant
+  - Verified backend alignment for 50MB file size limit
+  - Ensured consistent file size validation across application
+
 ### Planned
 
-- Phase 02: Pitch Deck Service Layer implementation
-- Phase 03: Analysis Service Layer implementation
 - Phase 04: Store Integration updates
 - Phase 05: Error Handling & Testing
 
@@ -100,6 +106,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added developer workflow documentation
 
 ---
+
+### 2026-02-04
+
+- **Phase 05 Complete**: Constants update and centralization
+- **File Size Update**: MAX_PITCH_DECK_SIZE increased from 10MB to 50MB
+- **UI Consistency**: Replaced hardcoded values with dynamic constants
+- **Validation**: Updated file validation to use new size limit
+- **Documentation**: Created comprehensive file-types.md constants documentation
 
 ## [0.0.1] - 2026-01-31
 

@@ -1,8 +1,10 @@
 'use client';
 
+import { MAX_PITCH_DECK_SIZE } from '@/constants/file-types';
 import { APP_URL } from '@/constants/routes';
 import { ArrowLeft, Upload } from 'lucide-react';
 import Link from 'next/link';
+
 import { useRouter } from 'next/navigation';
 
 import { UploadForm } from '@/components/pitch-deck-management/upload-form';
@@ -54,7 +56,7 @@ export default function UploadPitchDeckPage() {
         <h3 className="text-sm font-medium mb-2">Upload Guidelines</h3>
         <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
           <li>Supported formats: PDF, PPT, PPTX, DOC, DOCX, TXT</li>
-          <li>Maximum file size: 10MB</li>
+          <li>Maximum file size: {MAX_PITCH_DECK_SIZE / 1024 / 1024}MB per file</li>
           <li>Title is required (max 200 characters)</li>
           <li>Description is optional (max 1000 characters)</li>
           <li>You can add up to 10 tags for better organization</li>

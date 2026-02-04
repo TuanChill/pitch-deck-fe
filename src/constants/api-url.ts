@@ -20,12 +20,13 @@ export const API_URL = {
     DELETE: (uuid: string) => `/pitchdeck/${uuid}`
   },
 
-  // Analysis endpoints (5 total)
+  // Analysis endpoints (6 total)
   ANALYSIS: {
     START: '/analysis/start',
     STATUS: (uuid: string) => `/analysis/${uuid}/status`,
     DETAIL: (uuid: string) => `/analysis/${uuid}`,
     LIST: '/analysis',
-    DELETE: (uuid: string) => `/analysis/${uuid}`
+    DELETE: (uuid: string) => `/analysis/${uuid}`,
+    BY_DECK: (deckUuid: string) => `/analysis/by-deck/${deckUuid}`
   }
 } as const;

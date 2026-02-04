@@ -1,9 +1,7 @@
 'use client';
 
-import { APP_URL } from '@/constants/routes';
 import { cn } from '@/utils';
-import { ArrowRight, Share2, Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { ArrowRight, Loader2, Share2, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -15,7 +13,9 @@ export type PitchDeckActionsProps = {
   status: string;
   title: string;
   isDeleting?: boolean;
+  isAnalyzing?: boolean;
   onDelete?: () => void;
+  onAnalyticsClick?: () => void;
   className?: string;
 };
 
@@ -24,10 +24,11 @@ export const PitchDeckActions = ({
   status,
   title,
   isDeleting = false,
+  isAnalyzing = false,
   onDelete,
+  onAnalyticsClick,
   className
 }: PitchDeckActionsProps) => {
-  const router = useRouter();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleDeleteConfirm = () => {
@@ -56,15 +57,24 @@ export const PitchDeckActions = ({
         Share
       </Button>
 
-      {/* Analyze Button - links to analysis page if status is ready */}
+      {/* Analytics Button - triggers analytics callback if status is ready */}
       <Button
         type="button"
         variant="default"
-        onClick={() => router.push(APP_URL.PITCH_DECK)}
-        disabled={!canAnalyze}
+        onClick={onAnalyticsClick}
+        disabled={!canAnalyze || isAnalyzing}
       >
-        Analyze Deck
-        <ArrowRight className="w-4 h-4" />
+        {isAnalyzing ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            Analyzing...
+          </>
+        ) : (
+          <>
+            Analytics
+            <ArrowRight className="w-4 h-4" />
+          </>
+        )}
       </Button>
 
       {/* Delete Confirmation Dialog */}

@@ -69,7 +69,7 @@ export default function LoginPage() {
 
       toast.success('Login successful');
 
-      router.push(APP_URL.PITCH_DECK);
+      router.push(APP_URL.PITCH_DECKS);
     } catch (error: unknown) {
       toast.error(getErrorMessage(error));
     } finally {

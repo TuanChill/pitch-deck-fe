@@ -1,18 +1,27 @@
 'use client';
 
 import { APP_URL } from '@/constants/routes';
-import { deletePitchDeckByUuid } from '@/services/api';
+import {
+  deletePitchDeckByUuid,
+  getAnalysisByDeck,
+  pollAnalysisComplete,
+  startAnalysis
+} from '@/services/api';
 import { usePitchDeckManagementStore } from '@/stores';
+import type { AnalysisResponse } from '@/types/response/pitch-deck';
 import { ArrowLeft, FileX } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { AuthGuard } from '@/components/auth/auth-guard';
-import { PitchDeckDetailHeader } from '@/components/pitch-deck-management';
-import { PitchDeckInfo } from '@/components/pitch-deck-management';
-import { PitchDeckActions } from '@/components/pitch-deck-management';
+import { AnalyticsDisplay } from '@/components/pitch-deck-analytics';
+import {
+  PitchDeckActions,
+  PitchDeckDetailHeader,
+  PitchDeckInfo
+} from '@/components/pitch-deck-management';
 import { Button } from '@/components/ui/button';
 
 // Loading skeleton component
@@ -75,6 +84,10 @@ function PitchDeckDetailContent() {
   // Validate UUID format before using
   const isValidUuid = UUID_V4_REGEX.test(uuid);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [analysis, setAnalysis] = useState<AnalysisResponse | null>(null);
+  const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const analyticsSectionRef = useRef<HTMLDivElement>(null);
 
   const { currentDeck, isLoading, error, fetchPitchDeckDetail, removePitchDeck } =
     usePitchDeckManagementStore();
@@ -84,6 +97,25 @@ function PitchDeckDetailContent() {
       fetchPitchDeckDetail(uuid);
     }
   }, [uuid, isValidUuid, fetchPitchDeckDetail]);
+
+  // Fetch analysis after pitch deck data is loaded successfully
+  useEffect(() => {
+    if (currentDeck && uuid && isValidUuid) {
+      const loadAnalysis = async () => {
+        try {
+          const result = await getAnalysisByDeck(uuid);
+          setAnalysis(result);
+          setAnalysisError(null);
+        } catch (err) {
+          // Don't show error if analysis simply doesn't exist
+          if (err instanceof Error && !err.message.includes('404')) {
+            setAnalysisError(err.message);
+          }
+        }
+      };
+      loadAnalysis();
+    }
+  }, [currentDeck, uuid, isValidUuid]);
 
   const handleDelete = async () => {
     if (!uuid || !isValidUuid || !currentDeck) return;
@@ -106,6 +138,47 @@ function PitchDeckDetailContent() {
       fetchPitchDeckDetail(uuid);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleAnalyticsClick = async () => {
+    if (!uuid || !isValidUuid) return;
+
+    // If analysis exists and is completed, scroll to analytics section
+    if (analysis?.status === 'completed') {
+      analyticsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      return;
+    }
+
+    // Start new analysis with polling
+    setIsAnalysisLoading(true);
+    setAnalysisError(null);
+
+    try {
+      const startedAnalysis = await startAnalysis(uuid);
+
+      // Update state with initial analysis data
+      setAnalysis(startedAnalysis);
+
+      // Poll until complete with progress updates
+      const result = await pollAnalysisComplete(startedAnalysis.uuid, {
+        onProgress: (progress) => {
+          setAnalysis((prev) => (prev ? { ...prev, progress, status: 'processing' } : null));
+        }
+      });
+
+      setAnalysis(result);
+      toast.success('Analysis completed successfully');
+
+      // Scroll to analytics section after completion
+      analyticsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to analyze pitch deck';
+      setAnalysisError(errorMsg);
+      toast.error(errorMsg);
+    } finally {
+      setIsAnalysisLoading(false);
     }
   };
 
@@ -159,7 +232,19 @@ function PitchDeckDetailContent() {
           status={currentDeck.status}
           title={currentDeck.title}
           isDeleting={isDeleting}
+          isAnalyzing={isAnalysisLoading}
           onDelete={handleDelete}
+          onAnalyticsClick={handleAnalyticsClick}
+        />
+      </div>
+
+      {/* Analytics section */}
+      <div ref={analyticsSectionRef} className="border-t pt-6">
+        <AnalyticsDisplay
+          analysis={analysis}
+          isLoading={isAnalysisLoading}
+          error={analysisError ?? undefined}
+          onRetry={handleAnalyticsClick}
         />
       </div>
     </div>

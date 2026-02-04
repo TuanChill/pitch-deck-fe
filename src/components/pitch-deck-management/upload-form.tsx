@@ -23,7 +23,7 @@ export type UploadFormProps = {
 };
 
 type FormState = {
-  selectedFile: File | null;
+  selectedFiles: File[];
   title: string;
   description: string;
   tags: string[];
@@ -34,7 +34,7 @@ type FormState = {
 };
 
 const INITIAL_FORM_STATE: FormState = {
-  selectedFile: null,
+  selectedFiles: [],
   title: '',
   description: '',
   tags: [],
@@ -50,7 +50,7 @@ export const UploadForm = ({ onSuccess, onCancel, className }: UploadFormProps) 
   const [formState, setFormState] = useState<FormState>(INITIAL_FORM_STATE);
 
   const {
-    selectedFile,
+    selectedFiles,
     title,
     description,
     tags,
@@ -64,20 +64,12 @@ export const UploadForm = ({ onSuccess, onCancel, className }: UploadFormProps) 
   const isComplete = uploadState === 'success';
   const hasError = uploadState === 'error';
 
-  const canSubmit = selectedFile !== null && title.trim().length > 0 && !isUploading;
+  const canSubmit = selectedFiles.length > 0 && title.trim().length > 0 && !isUploading;
 
-  const handleFileSelect = useCallback((file: File) => {
+  const handleFilesSelect = useCallback((files: File[]) => {
     setFormState((prev) => ({
       ...prev,
-      selectedFile: file,
-      uploadError: null
-    }));
-  }, []);
-
-  const handleFileClear = useCallback(() => {
-    setFormState((prev) => ({
-      ...prev,
-      selectedFile: null,
+      selectedFiles: files,
       uploadError: null
     }));
   }, []);
@@ -123,7 +115,7 @@ export const UploadForm = ({ onSuccess, onCancel, className }: UploadFormProps) 
   }, []);
 
   const handleSubmit = useCallback(async () => {
-    if (!selectedFile || !title.trim()) {
+    if (selectedFiles.length === 0 || !title.trim()) {
       return;
     }
 
@@ -137,7 +129,12 @@ export const UploadForm = ({ onSuccess, onCancel, className }: UploadFormProps) 
     try {
       simulateProgress(async () => {
         try {
-          const response = await uploadPitchDeck(selectedFile);
+          const response = await uploadPitchDeck({
+            files: selectedFiles,
+            title,
+            description,
+            tags
+          });
 
           // Response is PitchDeckDetailResponse which extends PitchDeckListItem
           // No need for redundant type conversion - use response directly
@@ -168,7 +165,7 @@ export const UploadForm = ({ onSuccess, onCancel, className }: UploadFormProps) 
         uploadError: errorMessage
       }));
     }
-  }, [selectedFile, title, simulateProgress, onSuccess]);
+  }, [selectedFiles, title, description, tags, simulateProgress, onSuccess]);
 
   const handleReset = useCallback(() => {
     setFormState(INITIAL_FORM_STATE);
@@ -184,13 +181,16 @@ export const UploadForm = ({ onSuccess, onCancel, className }: UploadFormProps) 
     router.push(APP_URL.PITCH_DECKS);
   }, [router]);
 
+  // Get filenames for progress display
+  const filenames = selectedFiles.map((f) => f.name).join(', ');
+
   return (
     <div className={className}>
       {/* Upload Progress / Success / Error */}
       {isUploading || isComplete || hasError ? (
         <div className="space-y-6">
           <UploadProgressTracker
-            filename={selectedFile?.name || 'Unknown file'}
+            filename={filenames || 'Unknown files'}
             progress={uploadProgress}
             state={uploadState}
             error={uploadError ?? undefined}
@@ -224,11 +224,10 @@ export const UploadForm = ({ onSuccess, onCancel, className }: UploadFormProps) 
         <>
           {/* File Uploader */}
           <div className="space-y-2 mb-6">
-            <label className="text-sm font-medium">Pitch Deck File</label>
+            <label className="text-sm font-medium">Pitch Deck Files</label>
             <FileUploader
-              onFileSelect={handleFileSelect}
-              onFileClear={handleFileClear}
-              selectedFile={selectedFile}
+              onFilesSelect={handleFilesSelect}
+              selectedFiles={selectedFiles}
               disabled={isUploading}
             />
           </div>
@@ -253,7 +252,9 @@ export const UploadForm = ({ onSuccess, onCancel, className }: UploadFormProps) 
               </Button>
             )}
             <Button type="button" onClick={handleSubmit} disabled={!canSubmit || isUploading}>
-              {isUploading ? 'Uploading...' : 'Upload Pitch Deck'}
+              {isUploading
+                ? 'Uploading...'
+                : `Upload ${selectedFiles.length} File${selectedFiles.length !== 1 ? 's' : ''}`}
             </Button>
           </div>
         </>

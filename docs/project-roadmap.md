@@ -1,7 +1,7 @@
 # Project Roadmap
 
 **Project**: Pitch Deck Management System (Frontend)
-**Current Phase**: Phase 02 - Pitch Deck Service Layer
+**Current Phase**: Phase 04 - Store Integration
 **Last Updated**: 2026-02-04
 **Version**: v0.3.0
 
@@ -14,10 +14,12 @@
 | Phase                              | Status         | Progress | Completed  |
 | ---------------------------------- | -------------- | -------- | ---------- |
 | Phase 01: API Constants & Types    | ✅ DONE        | 100%     | 2026-02-04 |
-| Phase 02: Pitch Deck Service Layer | 🔄 In Progress | 0%       | -          |
-| Phase 03: Analysis Service Layer   | ⏳ Pending     | 0%       | -          |
-| Phase 04: Store Integration        | ⏳ Pending     | 0%       | -          |
-| Phase 05: Error Handling & Testing | ⏳ Pending     | 0%       | -          |
+| Phase 02: Pitch Deck Service Layer | ✅ DONE       | 100%     | 2026-02-04 |
+| Phase 03: Multi-File Upload UI     | ✅ DONE       | 100%     | 2026-02-04 |
+| Phase 04: File Validation         | ✅ DONE       | 100%     | 2026-02-04 |
+| Phase 05: Constants Update         | ✅ DONE       | 100%     | 2026-02-04 |
+| Phase 06: Store Integration        | ⏳ Pending     | 0%       | -          |
+| Phase 07: Error Handling & Testing | ⏳ Pending     | 0%       | -          |
 
 ---
 
@@ -45,6 +47,102 @@
 - UI updates: Components adapted for multi-file response structure
 
 **Next Phase**: Phase 02 - Pitch Deck Service Layer
+
+---
+
+### ✅ Phase 02: Pitch Deck Service Layer (100% Complete)
+
+**Status**: DONE - 2026-02-04
+
+**Completed Tasks**:
+
+- ✅ Implemented real API calls for upload, list, detail, and delete operations
+- ✅ Updated pitch-deck.service.ts with proper error handling
+- ✅ Added file validation (50MB max, 5 MIME types)
+- ✅ Fixed backward compatibility for legacy function signatures
+- ✅ Removed redundant type conversion in upload-form.tsx
+- ✅ Fixed unsafe array access in page.tsx
+- ✅ Fixed ESLint warning for unused dependencies
+
+**Key Changes Made**:
+
+- Real API integration: All pitch deck endpoints now call backend
+- File validation: Strict validation before upload
+- Error handling: User-friendly error messages
+- Code quality: Fixed linting and type issues
+
+**Next Phase**: Phase 03 - Multi-File Upload UI
+
+---
+
+### ✅ Phase 03: Multi-File Upload UI (100% Complete)
+
+**Status**: DONE - 2026-02-04
+
+**Completed Tasks**:
+
+- ✅ Updated upload form to handle multiple file selection
+- ✅ Added progress indicators for each file
+- ✅ Implemented drag-and-drop for multiple files
+- ✅ Added file list with individual remove buttons
+- ✅ Enhanced error handling for individual files
+- ✅ Optimistic UI updates for better UX
+
+**Key Changes Made**:
+
+- Multi-file support: Users can select multiple files at once
+- Progress tracking: Visual feedback for upload progress
+- Enhanced UX: Improved error messages and remove functionality
+- Performance: Optimistic updates reduce perceived wait time
+
+**Next Phase**: Phase 04 - File Validation Logic
+
+---
+
+### ✅ Phase 04: File Validation Logic (100% Complete)
+
+**Status**: DONE - 2026-02-04
+
+**Completed Tasks**:
+
+- ✅ Enhanced validation for multiple file types
+- ✅ Added file size validation per file (50MB max)
+- ✅ Implemented MIME type validation
+- ✅ Added file count validation (10 files max)
+- ✅ Created comprehensive error messages
+- ✅ Added file preview for supported types
+
+**Key Changes Made**:
+
+- Strict validation: Prevents invalid file uploads
+- User feedback: Clear error messages for validation failures
+- Security: Validates file content, not just extensions
+- Performance: Early validation reduces failed uploads
+
+**Next Phase**: Phase 05 - Constants Update
+
+---
+
+### ✅ Phase 05: Constants Update (100% Complete)
+
+**Status**: DONE - 2026-02-04
+
+**Completed Tasks**:
+
+- ✅ Updated MAX_PITCH_DECK_SIZE from 10MB to 50MB
+- ✅ Fixed hardcoded "10MB" references in UI
+- ✅ Ensured all components use dynamic constants
+- ✅ Added MAX_FILES constant (10)
+- ✅ Updated validation functions to use constants
+
+**Key Changes Made**:
+
+- Centralized constants: Single source of truth for limits
+- Dynamic UI: All references use constants instead of hardcoded values
+- Scalability: Easy to adjust limits in one place
+- Consistency: All components show the same limits
+
+**Next Phase**: Phase 06 - Store Integration
 
 ---
 
@@ -81,13 +179,16 @@ Stores
 | Phase | Duration | Dependencies | Notes                       |
 | ----- | -------- | ------------ | --------------------------- |
 | 01    | 4-5 hrs  | None         | ✅ Complete                 |
-| 02    | 3-4 hrs  | 01           | 🔄 In Progress              |
-| 03    | 2-3 hrs  | 01           | ⏳ Can start after Phase 01 |
-| 04    | 2-3 hrs  | 02, 03       | ⏳ Sequential               |
-| 05    | 1-2 hrs  | 04           | ⏳ Final verification       |
+| 02    | 3-4 hrs  | 01           | ✅ Complete                 |
+| 03    | 2-3 hrs  | 01           | ✅ Complete                 |
+| 04    | 1-2 hrs  | 01-03        | ✅ Complete                 |
+| 05    | 1-2 hrs  | 01-04        | ✅ Complete                 |
+| 06    | 2-3 hrs  | 02, 03, 05   | ⏳ Pending                 |
+| 07    | 1-2 hrs  | 06           | ⏳ Pending                 |
 
-**Total Duration**: ~12-17 hours
-**Parallel Potential**: Phases 02+3 can run simultaneously
+**Total Duration**: ~14-21 hours
+**Completed**: ~11-14 hours
+**Remaining**: Phase 06 & 07 - Store Integration & Error Handling
 
 ---
 
@@ -127,22 +228,26 @@ Phase 01 (API Types) - COMPLETE
 ## Success Metrics
 
 - [x] Phase 01 API constants and types complete
-- [ ] Phase 2 Pitch service handles all CRUD operations
-- [ ] Phase 3 Analysis service with status tracking
-- [ ] Phase 4 Store integration with proper state management
-- [ ] Phase 5 Error handling and testing complete
+- [x] Phase 2 Pitch service handles all CRUD operations
+- [x] Phase 3 Multi-file upload UI implementation
+- [x] Phase 4 File validation logic enhancement
+- [x] Phase 5 Constants update and UI consistency
+- [ ] Phase 6 Store integration with proper state management
+- [ ] Phase 7 Error handling and testing complete
 
 ---
 
 ## Next Steps
 
 1. ✅ **Complete**: Phase 01 - API Constants & Types (2026-02-04)
-2. 🔄 **In Progress**: Phase 02 - Pitch Deck Service Layer
-3. ⏳ **Next**: Phase 03 - Analysis Service Layer
-4. ⏳ **Next**: Phase 04 - Store Integration
-5. ⏳ **Next**: Phase 05 - Error Handling & Testing
+2. ✅ **Complete**: Phase 02 - Pitch Deck Service Layer (2026-02-04)
+3. ✅ **Complete**: Phase 03 - Multi-File Upload UI (2026-02-04)
+4. ✅ **Complete**: Phase 04 - File Validation Logic (2026-02-04)
+5. ✅ **Complete**: Phase 05 - Constants Update (2026-02-04)
+6. 🔄 **In Progress**: Phase 06 - Store Integration
+7. ⏳ **Next**: Phase 07 - Error Handling & Testing
 
-**Priority**: Complete Phase 02 to enable real API integration
+**Priority**: Complete Phase 06 to integrate state management
 
 ---
 
@@ -157,5 +262,25 @@ Phase 01 (API Types) - COMPLETE
 - **UI Updates**: Components adapted for multi-file structure
 - **Type Safety**: Fixed uploadId to uuid consistency issues
 - **Documentation**: Updated project roadmap and changelog
+
+- **Phase 02 Complete**: Real API integration for pitch deck operations
+- **Service Layer**: All CRUD operations implemented with real backend calls
+- **File Validation**: Added strict validation (50MB max, 5 MIME types)
+- **Error Handling**: User-friendly error messages and proper error states
+
+- **Phase 3 Complete**: Multi-file upload UI implementation
+- **File Selection**: Support for multiple file selection and drag-and-drop
+- **Progress Tracking**: Visual indicators for upload progress
+- **Enhanced UX**: File list with remove buttons and improved error handling
+
+- **Phase 4 Complete**: File validation logic enhancement
+- **Strict Validation**: Enhanced validation for multiple file types and sizes
+- **Error Messages**: Comprehensive feedback for validation failures
+- **Security**: File content validation, not just extension checking
+
+- **Phase 5 Complete**: Constants update and UI consistency
+- **Updated Limits**: MAX_PITCH_DECK_SIZE increased from 10MB to 50MB
+- **Dynamic UI**: All components use constants instead of hardcoded values
+- **Single Source**: Centralized constants for easy maintenance
 
 ---
