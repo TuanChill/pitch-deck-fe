@@ -1220,7 +1220,242 @@ try {
 - Proper cleanup of event listeners
 - React cleanup patterns
 
+## 13. Backend Architecture Updates
+
+### Phase 02: DTO Layer (Completed)
+
+The DTO layer has been successfully updated to support multi-file pitch deck architecture while maintaining clean separation of concerns.
+
+#### Key Components
+
+1. **PitchDeckFileResponseDto**
+
+   - Dedicated response type for individual files
+   - Includes file metadata: UUID, filename, MIME type, size, status
+   - Static `fromEntity()` method for entity-to-DTO conversion
+
+2. **PitchDeckResponseDto** (Updated)
+
+   - File metadata moved to `files` array
+   - Added `fileCount` property for quick reference
+   - Maintains deck-level metadata (title, description, tags)
+
+3. **UploadDeckDto** (Unchanged)
+   - Maintains backward compatibility
+   - Deck-level metadata only
+
+#### Data Flow Architecture
+
+```
+Frontend Request
+    ↓
+UploadDeckDto (unchanged)
+    ↓
+Controller (Phase 04 - Multi-file support)
+    ↓
+Service → PitchDeckEntity + PitchDeckFileEntity[] (Phase 03)
+    ↓
+DTO Conversion → PitchDeckResponseDto + PitchDeckFileResponseDto[]
+    ↓
+Frontend Response with files array
+```
+
+#### Benefits
+
+- **Scalability**: Support for multiple files per deck
+- **Type Safety**: Strong TypeScript typing throughout
+- **Performance**: Quick access to file count
+- **Maintainability**: Clear separation of concerns
+
+---
+
+## 14. Multi-File Architecture Overview
+
+### Entity Relationships
+
+```
+PitchDeck (1) ←→ (N) PitchDeckFile
+  │                    │
+  ├─ title             ├─ originalFileName
+  ├─ description        ├─ mimeType
+  ├─ tags              ├─ fileSize
+  └─ status            └─ storagePath
+```
+
+### API Contract Changes
+
+| Field         | Before                  | After                            |
+| ------------- | ----------------------- | -------------------------------- |
+| File Metadata | Deck level              | Files array                      |
+| File Access   | `deck.originalFileName` | `deck.files[0].originalFileName` |
+| File Count    | N/A                     | `deck.fileCount`                 |
+| File Status   | Deck status             | Individual file status           |
+
+### Frontend Impact
+
+**Components to Update**:
+
+- File display components
+- Detail page views
+- File list rendering
+- Status indicators
+
+**API Calls Affected**:
+
+- `/pitch-deck/{uuid}` (detail endpoint)
+- File metadata access pattern
+
+---
+
+## 15. Phase 04: Controller Layer Implementation
+
+### Controller Architecture Updates
+
+The controller layer has been successfully updated to support multi-file uploads with enhanced security and validation patterns.
+
+#### Key Implementation Changes
+
+##### 1. File Upload Interceptor Enhancement
+
+```typescript
+// Multi-file interceptor configuration
+@UseInterceptors(
+  FilesInterceptor('files', 10, {
+    storage: diskStorage({
+      destination: TEMP_UPLOAD_DIR,
+      filename: (_req, file, cb) => {
+        const uuid = uuidv4();
+        const ext = MIME_TO_EXT[file.mimetype as any] || 'bin';
+        cb(null, `${uuid}.${ext}`);
+      },
+    }),
+    limits: { fileSize: 50 * 1024 * 1024 } // 50MB per file
+  })
+)
+```
+
+**Key Features:**
+
+- Supports up to 10 files per upload
+- Individual file size limits (50MB)
+- Secure filename generation with UUID
+- Temporary storage for validation
+
+##### 2. Enhanced Validation Pipeline
+
+```typescript
+// Multi-file validation with bulk cleanup
+for (const file of files) {
+  // MIME type validation
+  if (!ALLOWED_MIMES.includes(file.mimetype as any)) {
+    await Promise.allSettled(files.map((f) => fs.unlink(f.path)));
+    throw new BadRequestException(`Invalid file type: ${basename(file.originalname)}`);
+  }
+
+  // Magic number validation
+  const fileBuffer = await fs.readFile(file.path);
+  const fileType = await fileTypeFromBuffer(fileBuffer);
+  // Additional validation logic
+}
+```
+
+**Security Enhancements:**
+
+- Bulk file cleanup on validation failure
+- Path sanitization using `basename()`
+- Magic number validation to prevent file type spoofing
+
+##### 3. Updated Handler Signatures
+
+```typescript
+// Multi-file upload handler
+async uploadDeck(
+  @UploadedFiles() files: Express.Multer.File[],
+  @Body() dto: UploadDeckDto,
+  @Request() req: { user: { sub: string } }
+): Promise<PitchDeckResponseDto>
+
+// Updated get/list handlers using getItems()
+async getDeck(@Param('uuid') uuid: string): Promise<PitchDeckResponseDto> {
+  const deck = await this.pitchDeckService.findByUuid(uuid, ownerId);
+  return PitchDeckResponseDto.fromEntity(
+    deck,
+    deck.files.getItems()  // Efficient file loading
+  );
+}
+```
+
+##### 4. Service Layer Integration
+
+```typescript
+// Passing files array to service
+const pitchDeck = await this.pitchDeckService.uploadDeck(
+  files, // Multi-file array
+  dto,
+  ownerId
+);
+```
+
+### Data Flow Architecture (Updated)
+
+```
+Frontend FormData Request
+    ↓ (Multi-file support)
+Controller: FilesInterceptor('files', 10)
+    ↓ (Validation & Security)
+Service: uploadDeck(files[], dto, ownerId)
+    ↓ (Entity Creation)
+Repository: PitchDeck + PitchDeckFile[]
+    ↓ (DTO Conversion)
+Response: PitchDeckResponseDto + PitchDeckFileResponseDto[]
+    ↓ (Frontend)
+Files Array with Metadata
+```
+
+### Frontend Compatibility
+
+**No Breaking Changes:**
+
+- Frontend upload interface remains unchanged
+- FormData API handles both single and multiple files
+- Response structure updated to include `files` array
+
+**Migration Considerations:**
+
+- Detail API responses now include `files` array
+- File metadata accessed via `response.files[0].property`
+- Added `fileCount` for quick reference
+
+### Performance Optimizations
+
+1. **Lazy Loading**: Files loaded only when needed using `getItems()`
+2. **Bulk Operations**: Promise.allSettled for parallel file cleanup
+3. **Memory Management**: Temporary files cleaned up after validation
+4. **Efficient Queries**: File relationships loaded on demand
+
+### Error Handling Patterns
+
+```typescript
+// Multi-file specific error handling
+if (!files || files.length === 0) {
+  throw new BadRequestException('No files provided');
+}
+
+// Validation with security
+if (!ALLOWED_MIMES.includes(file.mimetype as any)) {
+  throw new BadRequestException(`Invalid file type: ${basename(file.originalname)}`);
+}
+```
+
+### Security Implementation
+
+1. **File Size Validation**: 50MB limit per file
+2. **MIME Type Whitelist**: Restricted file types
+3. **Magic Number Validation**: Content-based validation
+4. **Path Sanitization**: No full path exposure in errors
+5. **Bulk Cleanup**: All temporary files removed on failure
+
 ---
 
 _Last Updated: 2026-02-03_
-_Version: 0.1.0 (Wave 3: v0.2.0)_
+_Version: 0.1.0 (Wave 3: v0.2.0) + Phase 02 DTO Layer + Phase 04 Controller Layer_

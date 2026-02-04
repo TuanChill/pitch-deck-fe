@@ -74,7 +74,7 @@ export default function PitchDeckPage() {
           if (analysisProgress >= 90) clearInterval(analysisInterval);
         }, 150);
 
-        const result = await analyzePitchDeck(uploadResult.uploadId, file.name);
+        const result = await analyzePitchDeck(uploadResult.uuid, file.name);
         clearInterval(analysisInterval);
         setProgress(100);
 

@@ -245,7 +245,7 @@ const generateCompetitiveAnalysis = (): CompetitiveAnalysis => {
 };
 
 export const generateMockAnalysis = (
-  uploadId: string,
+  deckId: string,
   filename: string
 ): PitchDeckAnalysisResponse => {
   const categoryScores = generateCategoryScores();
@@ -253,7 +253,7 @@ export const generateMockAnalysis = (
   const categories = VC_CATEGORIES as VCCategory[];
 
   return {
-    uploadId,
+    deckId,
     filename,
     overallScore,
     categoryScores,

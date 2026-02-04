@@ -124,16 +124,12 @@ function PitchDeckDetailContent() {
     return <NotFoundState error={error} />;
   }
 
-  // Build file info for display
-  const files = currentDeck
-    ? [
-        {
-          originalFileName: currentDeck.originalFileName,
-          fileSize: currentDeck.fileSize,
-          mimeType: currentDeck.mimeType
-        }
-      ]
-    : undefined;
+  // Build file info for display from files array
+  const files = currentDeck?.files?.map((file) => ({
+    originalFileName: file.originalFileName,
+    fileSize: file.fileSize,
+    mimeType: file.mimeType
+  }));
 
   return (
     <div className="container max-w-4xl mx-auto py-8 px-4 space-y-8">

@@ -178,10 +178,10 @@ import { APP_URL } from '@/constants/routes';
 router.push(APP_URL.DASHBOARD);
 
 // Pitch deck management routes
-router.push(APP_URL.PITCH_DECKS);        // List page
-router.push(APP_URL.PITCH_DECK_UPLOAD);  // Upload page
-router.push(APP_URL.PITCH_DECK_DETAIL(uuid));  // Detail page
-router.push(APP_URL.PITCH_DECK);         // Analysis page
+router.push(APP_URL.PITCH_DECKS); // List page
+router.push(APP_URL.PITCH_DECK_UPLOAD); // Upload page
+router.push(APP_URL.PITCH_DECK_DETAIL(uuid)); // Detail page
+router.push(APP_URL.PITCH_DECK); // Analysis page
 
 // Authentication routes
 router.push(APP_URL.LOGIN);
@@ -283,6 +283,7 @@ This project is licensed under the MIT License.
 **Phase 07 (Integration) Complete - All 7 Phases Implemented!**
 
 This pitch deck management system is now fully implemented with:
+
 - ✅ Authentication system
 - ✅ Pitch deck upload and management
 - ✅ VC framework analysis

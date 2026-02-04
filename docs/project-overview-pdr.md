@@ -5,7 +5,7 @@
 **Project Name:** pitch-deck-management
 **Version:** 0.1.0
 **Description:** Pitch deck management system with upload, analysis, and VC framework evaluation capabilities
-**Status:** Phase 07 (Integration) Complete - All 7 Phases Implemented
+**Status:** Frontend Complete - Multi-File Backend (Phase 04 Controller Layer) Completed
 
 ## Technology Stack
 
@@ -155,6 +155,57 @@
    - Component tests with RTL
    - Integration tests
    - Coverage reporting
+
+## Backend Implementation
+
+### Multi-File Pitch Deck Architecture
+
+The backend is being enhanced to support multiple files per pitch deck, following a 5-phase implementation approach:
+
+#### Phase 01: Database Layer (Completed)
+
+- Created `PitchDeckFile` entity for file metadata
+- Updated `PitchDeck` entity to support one-to-many relationship
+- Implemented cascade delete for data integrity
+- Added file type constants and utilities
+
+#### Phase 02: DTO Layer (Completed)
+
+- Created `PitchDeckFileResponseDto` for individual file responses
+- Updated `PitchDeckResponseDto` with `files` array structure
+- Maintained backward compatibility for upload requests
+- Added proper type safety and Swagger documentation
+
+#### Phase 03: Service Layer (In Progress)
+
+- Implement multi-file upload logic with transactions
+- Handle file processing and status updates
+- Map entities to DTOs for clean API responses
+
+#### Phase 04: Controller Layer
+
+- Update endpoints to handle multiple files
+- Implement `FilesInterceptor` for multi-file uploads
+- Add proper error handling for file operations
+
+#### Phase 05: Integration Testing
+
+- End-to-end verification of multi-file workflows
+- Performance testing with multiple files
+- Migration path for existing single-file data
+
+#### Key Architecture Decisions
+
+1. **Reference Pattern**: PitchDeck (1) → (N) PitchDeckFile
+2. **Cascade Delete**: Files auto-delete when deck deleted
+3. **Storage Path**: `/uploads/pitchdecks/{deckUuid}/{fileUuid}.{ext}`
+4. **Sequential Upload**: Process files one-by-one (MVP)
+
+#### API Contract Changes
+
+- **Breaking Change**: File fields moved from deck level to `files[]` array
+- **Frontend Impact**: Must use `response.files[0]` instead of direct file properties
+- **Upload Interface**: Unchanged (metadata stays deck-level)
 
 ## Acceptance Criteria
 
@@ -307,6 +358,7 @@
 ### ✅ All 7 Phases of Pitch Deck Management Plan Completed (February 3, 2026)
 
 #### **Phase 01: Foundation Layer** ✅
+
 - Basic Next.js setup with App Router
 - TypeScript configuration
 - Tailwind CSS integration
@@ -317,6 +369,7 @@
 - HTTP client with Axios
 
 #### **Phase 02: Service Layer Architecture** ✅
+
 - Domain-specific API services
 - JWT token interceptors
 - Error handling patterns
@@ -324,18 +377,21 @@
 - Type-safe API contracts
 
 #### **Phase 03: Pitch Deck Status System** ✅
+
 - Four status constants: uploading, processing, ready, error
 - Configurable labels and Tailwind CSS color classes
 - Utility functions for status management
 - Visual indicators (badges, progress rings)
 
 #### **Phase 04: Type System & Validation** ✅
+
 - Comprehensive API type definitions
 - Request/response types for all operations
 - Pitch deck management types
 - VC framework analysis types
 
 #### **Phase 05: UI Components - Upload & Analysis** ✅
+
 - File upload interface with drag-and-drop
 - Real-time progress tracking
 - Analysis result visualization
@@ -343,6 +399,7 @@
 - Gauge charts and competitive analysis
 
 #### **Phase 06: Pitch Deck Management Pages** ✅
+
 - List page with filtering and pagination
 - Upload page with metadata forms
 - Detail page with UUID validation
@@ -350,6 +407,7 @@
 - Responsive design with dark mode
 
 #### **Phase 07: Integration - Final Phase** ✅
+
 - **Routes centralized in constants**
 - **All navigation uses APP_URL constants (no hardcoded paths)**
 - **Dashboard navigation cards added**
@@ -361,23 +419,27 @@
 **Complete Feature Set:**
 
 1. **Authentication System**
+
    - JWT-based authentication with state persistence
    - Protected routes and guards
    - Automatic token refresh handling
 
 2. **Pitch Deck Management**
+
    - File upload with chunked transfer support
    - Real-time status tracking
    - VC framework analysis with 7 categories
    - Retry mechanism for transient failures
 
 3. **Dashboard & Navigation**
+
    - Centralized route constants
    - Consistent navigation using APP_URL constants
    - Dashboard navigation cards
    - Breadcrumb navigation
 
 4. **UI Components**
+
    - 11 pitch deck management components
    - Upload progress visualization
    - Status-based filtering
@@ -386,6 +448,7 @@
    - Action buttons and cards
 
 5. **State Management**
+
    - Zustand stores with localStorage persistence
    - Real-time updates
    - Pagination and filter state management
@@ -402,6 +465,31 @@ All core functionality is implemented and ready for production deployment. The s
 
 ---
 
+## Multi-File Backend Status
+
+### Completed Phases
+
+- ✅ **Phase 01**: Database Layer (Entities and relationships)
+- ✅ **Phase 02**: DTO Layer (API contracts for multi-file)
+- ✅ **Phase 03**: Service Layer (Multi-file upload logic)
+- ✅ **Phase 04**: Controller Layer (Multi-file endpoint updates)
+
+### In Progress Phases
+
+- 🔲 **Phase 05**: Integration Testing (E2E verification)
+
+### Current Focus
+
+Phase 04 Controller layer has been completed with enhanced features:
+
+- Multi-file upload support with FilesInterceptor
+- Enhanced validation with bulk cleanup
+- Security improvements with path sanitization
+- Updated response mapping using deck.files.getItems()
+- Frontend compatible API (no breaking changes)
+
+---
+
 _Last Updated: 2026-02-03_
-_Version: 0.2.0_
-_Status: All 7 Phases Complete - Production Ready_
+_Version: 0.2.2_
+_Status: Frontend Complete - Backend Phase 04 Complete_

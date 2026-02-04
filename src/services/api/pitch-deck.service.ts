@@ -10,7 +10,7 @@ export const uploadPitchDeck = async (file: File): Promise<UploadPitchDeckRespon
 
   // TODO: Replace with actual API call when ready
   // const response = await httpClient.post<UploadPitchDeckResponse>(
-  //   API_URL.UPLOAD_PITCH_DECK,
+  //   API_URL.PITCH_DECK.UPLOAD,
   //   formData,
   //   { headers: { 'Content-Type': 'multipart/form-data' } }
   // );
@@ -19,7 +19,7 @@ export const uploadPitchDeck = async (file: File): Promise<UploadPitchDeckRespon
   await new Promise((resolve) => setTimeout(resolve, 1500));
 
   return {
-    uploadId: `upload_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+    uuid: `deck_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
     filename: file.name,
     fileSize: file.size,
     fileType: file.type,
@@ -28,19 +28,19 @@ export const uploadPitchDeck = async (file: File): Promise<UploadPitchDeckRespon
 };
 
 export const analyzePitchDeck = async (
-  uploadId: string,
+  deckId: string,
   filename?: string
 ): Promise<PitchDeckAnalysisResponse> => {
   // TODO: Replace with actual API call when ready
   // const response = await httpClient.post<PitchDeckAnalysisResponse>(
-  //   API_URL.ANALYZE_PITCH_DECK,
-  //   { uploadId }
+  //   API_URL.ANALYSIS.START,
+  //   { deckId }
   // );
   // return response.data;
 
   await new Promise((resolve) => setTimeout(resolve, 3000));
 
-  return generateMockAnalysis(uploadId, filename || 'pitch-deck.pdf');
+  return generateMockAnalysis(deckId, filename || 'pitch-deck.pdf');
 };
 
 export const deletePitchDeck = async (_uploadId: string): Promise<void> => {

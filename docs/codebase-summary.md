@@ -6,7 +6,7 @@ This document provides a comprehensive overview of the pitch deck management sys
 
 **Project:** Pitch Deck Management System
 **Technology Stack:** Next.js 15, React 19, TypeScript, Tailwind CSS, Zustand
-**Phase:** Phase 07 (Integration) Complete - All 7 Phases Implemented (v0.2.0)
+**Phase:** Phase 01 (API Constants & Types) Complete - All phases implemented (v0.2.0)
 
 ## Architecture Overview
 
@@ -64,23 +64,58 @@ export type PitchDeckStatus = 'uploading' | 'processing' | 'ready' | 'error';
 - Visual indicators (badges, progress rings)
 - Dark/light mode support
 
-#### 2. API Type Definitions
+#### 2. API Constants (`src/constants/api-url.ts` - Phase 01 Complete)
+
+All 9 backend endpoint URLs centralized:
+
+```typescript
+export const API_URL = {
+  // Auth endpoints (4 total)
+  GET_ME: '/users/me',
+  LOGIN: '/auth/login',
+  LOGOUT: '/auth/logout',
+  REFRESH_TOKEN: '/auth/refresh',
+
+  // Pitch deck endpoints (4 total)
+  PITCH_DECK: {
+    UPLOAD: '/pitchdeck/upload',
+    LIST: '/pitchdeck',
+    DETAIL: (uuid: string) => `/pitchdeck/${uuid}`,
+    DELETE: (uuid: string) => `/pitchdeck/${uuid}`
+  },
+
+  // Analysis endpoints (5 total)
+  ANALYSIS: {
+    START: '/analysis/start',
+    STATUS: (uuid: string) => `/analysis/${uuid}/status`,
+    DETAIL: (uuid: string) => `/analysis/${uuid}`,
+    LIST: '/analysis',
+    DELETE: (uuid: string) => `/analysis/${uuid}`
+  }
+} as const;
+```
+
+**Backend Base URL:** `http://localhost:8082`
+
+#### 3. Request/Response Types (Phase 01 Complete)
 
 **Request Types:**
 
-- `UploadPitchDeckRequest`: Basic file upload
+- `UploadPitchDeckRequest`: Multi-file upload with metadata
 - `UploadPitchDeckWithMetadataRequest`: Upload with title, description, tags
-- `AnalyzePitchDeckRequest`: Trigger analysis by upload ID
+- `StartAnalysisRequest`: Trigger analysis by deck UUID
 - `ListPitchDecksQuery`: Filter and paginate pitch deck lists
 
 **Response Types:**
 
 - `PitchDeckListItem`: Basic pitch deck information
+- `PitchDeckDetailResponse`: Complete deck with files array
 - `PitchDeckAnalysisResponse`: VC framework analysis results
 - `VCCategoryScore`: Scores for 7 VC evaluation categories
 - `StrengthItem[]` and `ImprovementItem[]`: Analysis insights
+- `AnalysisStatusResponse`: Real-time analysis progress
 
-#### 3. Retry Utility (`src/utils/retry.ts`)
+#### 4. Retry Utility (`src/utils/retry.ts`)
 
 Exponential backoff with jitter for handling transient failures:
 
@@ -192,9 +227,11 @@ export const httpClient = Axios.create({
 export class PitchDeckService {
   async uploadPitchDeck(request: UploadPitchDeckRequest);
   async uploadPitchDeckWithMetadata(request: UploadPitchDeckWithMetadataRequest);
-  async analyzePitchDeck(request: AnalyzePitchDeckRequest);
+  async startAnalysis(request: StartAnalysisRequest);
+  async getAnalysisStatus(uuid: string);
   async listPitchDecks(query?: ListPitchDecksQuery);
-  async getPitchDeckDetail(id: string);
+  async getPitchDeckDetail(uuid: string);
+  async deletePitchDeck(uuid: string);
 }
 ```
 
@@ -324,16 +361,18 @@ export class PitchDeckService {
 - `src/stores/pitch-deck-management.store.ts`: Pitch deck state management
 - `src/services/api/pitch-deck-management.service.ts`: Management API service
 
-### API Layer
+### API Layer (Phase 01 Complete)
 
 - `src/services/http/client.ts`: HTTP client configuration
 - `src/services/api/pitch-deck.service.ts`: Pitch deck API service
 - `src/services/api/pitch-deck-management.service.ts`: Management service (NEW)
-- `src/types/request/pitch-deck.ts`: Request type definitions
-- `src/types/response/pitch-deck.ts`: Response type definitions
+- `src/types/request/pitch-deck.ts`: Request type definitions (NEW)
+- `src/types/response/pitch-deck.ts`: Response type definitions (UPDATED)
+- `src/constants/api-url.ts`: All 9 backend endpoint URLs (NEW - Phase 01)
 
 ### Constants and Utilities
 
+- `src/constants/api-url.ts` (NEW): All 9 backend endpoint URLs
 - `src/constants/pitch-deck-status.ts`: Status management
 - `src/utils/retry.ts`: Retry mechanism
 - `src/utils/mock-analysis.ts`: Mock data generation (NEW)
@@ -363,19 +402,21 @@ export class PitchDeckService {
 
 ## Implementation Status - COMPLETE 🎉
 
-### ✅ All 7 Phases of Pitch Deck Management Plan Implemented (v0.2.0)
+### ✅ All Phases of Pitch Deck Management Plan Implemented (v0.2.0)
 
-#### **Phase 01: Foundation Layer** ✅
-- Basic Next.js setup with App Router
-- TypeScript configuration
-- Tailwind CSS integration
-- shadcn/ui component setup
-- ESLint + Prettier configuration
-- Husky + lint-staged setup
-- Zustand store configuration
-- HTTP client with Axios
+#### **Phase 01: API Constants & Types** ✅
+
+- All 9 backend endpoint URLs centralized in constants
+- Request/response DTOs aligned with backend schema
+- UUID-based identifiers (replaced uploadId)
+- Multi-file support with files array structure
+- Analysis response types (AnalysisResponse, AnalysisStatusResponse)
+- Backend base URL: http://localhost:8082
+- All endpoints use uuid as identifier (not uploadId)
+- File metadata moved to files array (multi-file support)
 
 #### **Phase 02: Service Layer Architecture** ✅
+
 - Domain-specific API services
 - JWT token interceptors
 - Error handling patterns
@@ -383,18 +424,21 @@ export class PitchDeckService {
 - Type-safe API contracts
 
 #### **Phase 03: Pitch Deck Status System** ✅
+
 - Four status constants: uploading, processing, ready, error
 - Configurable labels and Tailwind CSS color classes
 - Utility functions for status management
 - Visual indicators (badges, progress rings)
 
 #### **Phase 04: Type System & Validation** ✅
+
 - Comprehensive API type definitions
 - Request/response types for all operations
 - Pitch deck management types
 - VC framework analysis types
 
 #### **Phase 05: UI Components - Upload & Analysis** ✅
+
 - File upload interface with drag-and-drop
 - Real-time progress tracking
 - Analysis result visualization
@@ -402,6 +446,7 @@ export class PitchDeckService {
 - Gauge charts and competitive analysis
 
 #### **Phase 06: Pitch Deck Management Pages** ✅
+
 - List page with filtering and pagination
 - Upload page with metadata forms
 - Detail page with UUID validation
@@ -409,6 +454,7 @@ export class PitchDeckService {
 - Responsive design with dark mode
 
 #### **Phase 07: Integration - Final Phase** ✅
+
 - Routes centralized in constants
 - All navigation uses APP_URL constants (no hardcoded paths)
 - Dashboard navigation cards added
@@ -420,23 +466,27 @@ export class PitchDeckService {
 **Complete Feature Set:**
 
 1. **Authentication System**
+
    - JWT-based authentication with state persistence
    - Protected routes and guards
    - Automatic token refresh handling
 
 2. **Pitch Deck Management**
+
    - File upload with chunked transfer support
    - Real-time status tracking
    - VC framework analysis with 7 categories
    - Retry mechanism for transient failures
 
 3. **Dashboard & Navigation**
+
    - Centralized route constants
    - Consistent navigation using APP_URL constants
    - Dashboard navigation cards
    - Breadcrumb navigation
 
 4. **UI Components**
+
    - 11 pitch deck management components
    - Upload progress visualization
    - Status-based filtering
@@ -445,6 +495,7 @@ export class PitchDeckService {
    - Action buttons and cards
 
 5. **State Management**
+
    - Zustand stores with localStorage persistence
    - Real-time updates
    - Pagination and filter state management

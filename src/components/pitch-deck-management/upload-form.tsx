@@ -39,7 +39,7 @@ const INITIAL_FORM_STATE: FormState = {
   description: '',
   tags: [],
   uploadProgress: 0,
-  uploadState: 'uploading',
+  uploadState: 'idle',
   uploadError: null,
   uploadedDeck: null
 };
@@ -70,6 +70,14 @@ export const UploadForm = ({ onSuccess, onCancel, className }: UploadFormProps) 
     setFormState((prev) => ({
       ...prev,
       selectedFile: file,
+      uploadError: null
+    }));
+  }, []);
+
+  const handleFileClear = useCallback(() => {
+    setFormState((prev) => ({
+      ...prev,
+      selectedFile: null,
       uploadError: null
     }));
   }, []);
@@ -132,17 +140,27 @@ export const UploadForm = ({ onSuccess, onCancel, className }: UploadFormProps) 
           const response = await uploadPitchDeck(selectedFile);
 
           const mockDeck: PitchDeckListItem = {
-            id: response.uploadId,
-            uuid: response.uploadId,
+            id: response.uuid,
+            uuid: response.uuid,
             title: title.trim(),
             description: description.trim() || null,
-            originalFileName: response.filename,
-            mimeType: response.fileType,
-            fileSize: response.fileSize,
             status: 'processing',
             chunkCount: 0,
+            fileCount: 1,
             errorMessage: null,
             tags: tags.length > 0 ? tags : null,
+            files: [
+              {
+                uuid: response.uuid,
+                originalFileName: response.filename,
+                mimeType: response.fileType,
+                fileSize: response.fileSize,
+                status: 'processing',
+                storagePath: '',
+                createdAt: response.uploadedAt,
+                updatedAt: response.uploadedAt
+              }
+            ],
             createdAt: response.uploadedAt,
             updatedAt: response.uploadedAt,
             lastAccessedAt: response.uploadedAt
@@ -232,7 +250,12 @@ export const UploadForm = ({ onSuccess, onCancel, className }: UploadFormProps) 
           {/* File Uploader */}
           <div className="space-y-2 mb-6">
             <label className="text-sm font-medium">Pitch Deck File</label>
-            <FileUploader onFileSelect={handleFileSelect} disabled={isUploading} />
+            <FileUploader
+              onFileSelect={handleFileSelect}
+              onFileClear={handleFileClear}
+              selectedFile={selectedFile}
+              disabled={isUploading}
+            />
           </div>
 
           {/* Metadata Inputs */}

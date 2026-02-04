@@ -3,7 +3,7 @@
 import { cn } from '@/utils';
 import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 
-export type UploadState = 'uploading' | 'processing' | 'success' | 'error';
+export type UploadState = 'idle' | 'uploading' | 'processing' | 'success' | 'error';
 
 export type UploadProgressTrackerProps = {
   filename: string;
@@ -14,6 +14,13 @@ export type UploadProgressTrackerProps = {
 };
 
 const STATE_CONFIG = {
+  idle: {
+    icon: CheckCircle2,
+    iconClass: 'text-muted-foreground',
+    bgClass: 'bg-muted',
+    progressClass: 'bg-muted',
+    getText: () => ''
+  },
   uploading: {
     icon: Loader2,
     iconClass: 'animate-spin text-primary',

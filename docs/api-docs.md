@@ -9,8 +9,40 @@ This document provides comprehensive API documentation for the Pitch Deck Manage
 ### Base API URL
 
 ```typescript
-// Base URL configured in src/services/http/client.ts
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+// Base URL: http://localhost:8082 (development)
+// Configured in src/services/http/client.ts
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8082';
+```
+
+### API Endpoint Constants
+
+All endpoint URLs are centralized in `src/constants/api-url.ts`:
+
+```typescript
+export const API_URL = {
+  // Auth endpoints
+  GET_ME: '/users/me',
+  LOGIN: '/auth/login',
+  LOGOUT: '/auth/logout',
+  REFRESH_TOKEN: '/auth/refresh',
+
+  // Pitch deck endpoints (4 total)
+  PITCH_DECK: {
+    UPLOAD: '/pitchdeck/upload',
+    LIST: '/pitchdeck',
+    DETAIL: (uuid: string) => `/pitchdeck/${uuid}`,
+    DELETE: (uuid: string) => `/pitchdeck/${uuid}`
+  },
+
+  // Analysis endpoints (5 total)
+  ANALYSIS: {
+    START: '/analysis/start',
+    STATUS: (uuid: string) => `/analysis/${uuid}/status`,
+    DETAIL: (uuid: string) => `/analysis/${uuid}`,
+    LIST: '/analysis',
+    DELETE: (uuid: string) => `/analysis/${uuid}`
+  }
+} as const;
 ```
 
 ### Authentication
@@ -106,7 +138,11 @@ export type UploadPitchDeckWithMetadataRequest = {
 
 ```typescript
 export type AnalyzePitchDeckRequest = {
-  uploadId: string;
+  uploadId: string; // DEPRECATED: Use deckId instead
+};
+
+export type StartAnalysisRequest = {
+  deckId: string; // UUID of the pitch deck to analyze
 };
 ```
 
@@ -128,11 +164,27 @@ export type ListPitchDecksQuery = {
 
 ```typescript
 export type UploadPitchDeckResponse = {
-  uploadId: string;
+  uploadId: string; // DEPRECATED: Use uuid instead
   filename: string;
   fileSize: number;
   fileType: string;
   uploadedAt: string;
+};
+
+export type PitchDeckDetailResponse = {
+  id: string;
+  uuid: string;
+  title: string;
+  description?: string;
+  status: PitchDeckStatus;
+  chunkCount: number;
+  fileCount: number;
+  errorMessage?: string;
+  tags?: string[];
+  files: PitchDeckFile[];
+  createdAt: string;
+  updatedAt: string;
+  lastAccessedAt: string;
 };
 ```
 
@@ -166,7 +218,38 @@ export type ListPitchDecksResponse = PitchDeckListItem[];
 ### Pitch Deck Detail Response
 
 ```typescript
-export type PitchDeckDetailResponse = PitchDeckListItem;
+export type PitchDeckDetailResponse = {
+  id: string;
+  uuid: string;
+  title: string;
+  description?: string;
+  status: PitchDeckStatus;
+  chunkCount: number;
+  fileCount: number;
+  errorMessage?: string;
+  tags?: string[];
+  files: PitchDeckFile[];
+  createdAt: string;
+  updatedAt: string;
+  lastAccessedAt: string;
+};
+
+export type PitchDeckFile = {
+  id: string;
+  uuid: string;
+  originalFileName: string;
+  mimeType: string;
+  fileSize: number;
+  status: FileStatus;
+  errorMessage?: string;
+  createdAt: string;
+};
+```
+
+#### File Status Types
+
+```typescript
+export type FileStatus = 'uploading' | 'processing' | 'ready' | 'error';
 ```
 
 ### Pitch Deck Analysis Response
@@ -221,7 +304,7 @@ export type CompetitiveAnalysis = {
 };
 
 export type PitchDeckAnalysisResponse = {
-  uploadId: string;
+  uploadId: string; // DEPRECATED: Use deckId instead
   filename: string;
   overallScore: number;
   categoryScores: VCCategoryScore;
@@ -229,6 +312,22 @@ export type PitchDeckAnalysisResponse = {
   improvements: ImprovementItem[];
   competitiveAnalysis?: CompetitiveAnalysis;
   analyzedAt: string;
+};
+
+export type AnalysisStatusResponse = {
+  uuid: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  progress: number; // 0-100
+  message?: string;
+  estimatedTime?: number; // seconds remaining
+};
+
+export type AnalysisResponse = {
+  deckId: string; // UUID of the analyzed pitch deck
+  status: 'completed' | 'failed';
+  result?: PitchDeckAnalysisResponse;
+  error?: string;
+  completedAt?: string;
 };
 ```
 
@@ -333,8 +432,11 @@ export class PitchDeckService {
     request: UploadPitchDeckWithMetadataRequest
   ): Promise<UploadPitchDeckResponse>;
   async analyzePitchDeck(request: AnalyzePitchDeckRequest): Promise<PitchDeckAnalysisResponse>;
+  async startAnalysis(request: StartAnalysisRequest): Promise<AnalysisResponse>;
+  async getAnalysisStatus(uuid: string): Promise<AnalysisStatusResponse>;
   async listPitchDecks(query?: ListPitchDecksQuery): Promise<ListPitchDecksResponse>;
-  async getPitchDeckDetail(id: string): Promise<PitchDeckDetailResponse>;
+  async getPitchDeckDetail(uuid: string): Promise<PitchDeckDetailResponse>;
+  async deletePitchDeck(uuid: string): Promise<void>;
 }
 ```
 
@@ -365,8 +467,11 @@ const pitchDecks = await pitchDeckService.listPitchDecks({
 
 // Analyze pitch deck
 const analysis = await withRetry(() =>
-  pitchDeckService.analyzePitchDeck({ uploadId: uploadResult.uploadId })
+  pitchDeckService.startAnalysis({ deckId: uploadResult.uuid })
 );
+
+// Check analysis status
+const status = await pitchDeckService.getAnalysisStatus(uploadResult.uuid);
 ```
 
 ---
@@ -509,18 +614,381 @@ export type CategoryScores = {
 
 ---
 
-## 10. Version History
+## 12. Phase 04: Controller Layer Implementation
 
-| Version | Date       | Changes                             |
-| ------- | ---------- | ----------------------------------- |
-| 1.0.0   | 2026-02-03 | Initial API documentation           |
-| 1.1.0   | 2026-02-03 | Added VC framework types            |
-| 1.2.0   | 2026-02-03 | Added retry utility documentation   |
-| 1.3.0   | 2026-02-03 | Wave 3: Pitch deck management pages |
+The controller layer has been updated to support multi-file uploads with enhanced security and validation.
+
+### Key Changes Made
+
+#### 1. Updated File Upload Interceptor
+
+**From Single File to Multiple Files:**
+
+```typescript
+// BEFORE: Single file interceptor
+@UseInterceptors(FileInterceptor('deck'))
+
+// AFTER: Multiple files interceptor
+@UseInterceptors(
+  FilesInterceptor('files', 10, {
+    storage: diskStorage({...}),
+    limits: { fileSize: 50 * 1024 * 1024 } // 50MB per file
+  })
+)
+```
+
+#### 2. Updated Handler Signature
+
+**From Single File to Files Array:**
+
+```typescript
+// BEFORE
+async uploadDeck(
+  @UploadedFile() file: Express.Multer.File,
+  @Body() dto: UploadDeckDto
+): Promise<PitchDeckResponseDto>
+
+// AFTER
+async uploadDeck(
+  @UploadedFiles() files: Express.Multer.File[],
+  @Body() dto: UploadDeckDto,
+  @Request() req: { user: { sub: string } }
+): Promise<PitchDeckResponseDto>
+```
+
+#### 3. Enhanced Multi-File Validation
+
+**Individual File Validation with Bulk Cleanup:**
+
+```typescript
+// Validate each file
+for (const file of files) {
+  // Validate MIME type
+  if (!ALLOWED_MIMES.includes(file.mimetype as any)) {
+    // Clean up ALL files on any validation failure
+    await Promise.allSettled(files.map((f) => fs.unlink(f.path)));
+    throw new BadRequestException(
+      `Invalid file type: ${basename(file.originalname)}. Allowed: PDF, PPT, PPTX, DOC, DOCX`
+    );
+  }
+
+  // Validate magic numbers (file content)
+  const fileBuffer = await fs.readFile(file.path);
+  const fileType = await fileTypeFromBuffer(fileBuffer);
+  // ... validation logic
+}
+```
+
+#### 4. Enhanced Security
+
+**Using basename() for Error Messages:**
+
+```typescript
+// Security enhancement: don't expose full file paths
+throw new BadRequestException(`Invalid file type: ${basename(file.originalname)}.`);
+
+// Instead of:
+// throw new BadRequestException(`Invalid file type: ${file.originalname}`);
+```
+
+#### 5. Updated Service Call
+
+**Passing Files Array to Service:**
+
+```typescript
+const pitchDeck = await this.pitchDeckService.uploadDeck(
+  files, // ← Files array instead of single file
+  dto,
+  ownerId
+);
+```
+
+#### 6. Updated Response Mapping
+
+**Using deck.files.loadItems() for Files:**
+
+```typescript
+// Load all files for the deck
+return PitchDeckResponseDto.fromEntity(pitchDeck, await pitchDeck.files.loadItems());
+```
+
+### Get/List Endpoint Updates
+
+#### Get Endpoint
+
+```typescript
+async getDeck(@Param('uuid') uuid: string): Promise<PitchDeckResponseDto> {
+  // ...
+  return PitchDeckResponseDto.fromEntity(
+    deck,
+    deck.files.getItems()  // ← Use getItems() for loaded files
+  );
+}
+```
+
+#### List Endpoint
+
+```typescript
+async listDecks(): Promise<PitchDeckResponseDto[]> {
+  const decks = await this.pitchDeckService.findByOwner(ownerId, {...});
+
+  return decks.map((deck) =>
+    PitchDeckResponseDto.fromEntity(
+      deck,
+      deck.files.getItems()  // ← Use getItems() for each deck's files
+    )
+  );
+}
+```
+
+### Frontend Migration Notes
+
+#### File Upload Changes
+
+**No Breaking Changes for Frontend:**
+
+The frontend upload interface remains the same since it uses `FormData`:
+
+```typescript
+// Frontend upload (unchanged)
+const formData = new FormData();
+formData.append('deck', file); // Still works for single file
+formData.append('title', title);
+formData.append('description', description);
+formData.append('tags', JSON.stringify(tags));
+
+// Multiple files support (future enhancement)
+formData.append('files', file1); // New field for multiple files
+formData.append('files', file2); // Multiple 'files' fields
+```
+
+#### Response Handling Changes
+
+**Detail API Response Structure:**
+
+```typescript
+// Frontend now receives files array
+const response = await api.getPitchDeckDetail(uuid);
+
+// File metadata is now in an array
+const files = response.files; // Array of files
+const fileCount = response.fileCount; // Total count
+const firstFileName = files[0]?.originalFileName; // Access individual files
+```
+
+### Security Improvements
+
+1. **Bulk File Cleanup**: All temporary files are cleaned up if any file fails validation
+2. **Path Sanitization**: Error messages use `basename()` to prevent path exposure
+3. **File Size Limits**: 50MB limit per file with proper validation
+4. **Magic Number Validation**: Validates actual file content against MIME type
+
+### Performance Considerations
+
+1. **Parallel Validation**: Files are validated in sequence but cleaned up in parallel
+2. **Lazy Loading**: Files are loaded only when needed using `getItems()`
+3. **Memory Management**: Temporary files are cleaned up after validation
+
+### Error Handling Patterns
+
+```typescript
+// Multi-file specific error handling
+if (!files || files.length === 0) {
+  throw new BadRequestException('No files provided');
+}
+
+// Validation errors with file names
+if (!ALLOWED_MIMES.includes(file.mimetype as any)) {
+  throw new BadRequestException(`Invalid file type: ${basename(file.originalname)}`);
+}
+```
 
 ---
 
-## 11. Wave 3 Implementation Notes
+## 13. Version History
+
+| Version | Date       | Changes                                                  |
+| ------- | ---------- | -------------------------------------------------------- |
+| 1.0.0   | 2026-02-03 | Initial API documentation                                |
+| 1.1.0   | 2026-02-03 | Added VC framework types                                 |
+| 1.2.0   | 2026-02-03 | Added retry utility documentation                        |
+| 1.3.0   | 2026-02-03 | Wave 3: Pitch deck management pages                      |
+| 1.4.0   | 2026-02-03 | Backend database layer (Phase 01) completed              |
+| 1.5.0   | 2026-02-03 | Multi-file support - DTO layer (Phase 02)                |
+| 1.6.0   | 2026-02-03 | Controller layer updates (Phase 04) - Multi-file support |
+| 1.7.0   | 2026-02-03 | Frontend API constants & types (Phase 01) - UUID identifiers, multi-file support |
+
+---
+
+## 10. Migration Guide: Multi-File Support
+
+### Breaking Changes (Phase 02)
+
+The backend has been updated to support multiple files per pitch deck. This introduces a breaking change in the API response structure.
+
+#### Response Structure Changes
+
+**Before (Single File)**:
+
+```typescript
+// OLD: File metadata at deck level
+export type PitchDeckDetailResponse = {
+  id: string;
+  uuid: string;
+  title: string;
+  originalFileName: string; // ← At deck level
+  mimeType: string; // ← At deck level
+  fileSize: number; // ← At deck level
+  status: PitchDeckStatus;
+  // ... other fields
+};
+```
+
+**After (Multi-File)**:
+
+```typescript
+// NEW: File metadata in files array
+export type PitchDeckDetailResponse = {
+  id: string;
+  uuid: string;
+  title: string;
+  status: PitchDeckStatus;
+  fileCount: number; // ← Total number of files
+  files: PitchDeckFile[]; // ← New files array
+  // ... other deck-level fields
+};
+
+export type PitchDeckFile = {
+  id: string;
+  uuid: string;
+  originalFileName: string; // ← Moved from deck level
+  mimeType: string; // ← Moved from deck level
+  fileSize: number; // ← Moved from deck level
+  status: FileStatus; // ← Individual file status
+  // ... file-specific fields
+};
+```
+
+#### Frontend Migration Steps
+
+1. **Update File Access Pattern**
+
+   ```typescript
+   // OLD WAY
+   const fileName = response.originalFileName;
+   const fileSize = response.fileSize;
+   const fileType = response.mimeType;
+
+   // NEW WAY
+   const files = response.files;
+   const fileName = files[0]?.originalFileName;
+   const fileSize = files[0]?.fileSize;
+   const fileType = files[0]?.mimeType;
+   ```
+
+2. **Update File Display Components**
+
+   ```typescript
+   // OLD: Single file display
+   <div>
+     <h3>{deck.originalFileName}</h3>
+     <p>Size: {deck.fileSize} bytes</p>
+   </div>
+
+   // NEW: Multi-file display
+   <div>
+     <h3>Uploaded Files ({deck.fileCount})</h3>
+     {deck.files.map((file) => (
+       <div key={file.uuid}>
+         <h4>{file.originalFileName}</h4>
+         <p>Size: {file.fileSize} bytes</p>
+         <p>Status: {file.status}</p>
+       </div>
+     ))}
+   </div>
+   ```
+
+3. **Upload Request (Unchanged)**
+
+   The upload request interface remains the same:
+
+   ```typescript
+   // No changes needed
+   uploadPitchDeckWithMetadata({
+     deck: file,
+     title: 'My Pitch Deck',
+     description: 'Description',
+     tags: ['tag1', 'tag2']
+   });
+   ```
+
+### Backward Compatibility
+
+- ✅ **Upload Requests**: No changes required
+- ✅ **List API**: No changes required (still returns array of decks)
+- ❌ **Detail API**: Breaking change - must use `files` array
+- ⚠️ **File Metadata**: Now accessed via `files[0]` instead of direct properties
+
+### Timeline
+
+- **Phase 02 Completed**: DTO layer updated (backend)
+- **Phase 03 Completed**: Service layer implementation
+- **Phase 04 Completed**: Controller layer updates (multi-file support)
+- **Phase 05 Upcoming**: Integration testing
+
+---
+
+## 11. Backend Architecture Updates
+
+### Phase 02: DTO Layer (Completed)
+
+The backend DTO layer has been updated to support the multi-file architecture while maintaining clean separation of concerns.
+
+#### Key Changes Made
+
+1. **Created `PitchDeckFileResponseDto`**
+
+   - Dedicated DTO for individual file metadata
+   - Includes file-specific fields (UUID, filename, MIME type, size, status)
+   - Static `fromEntity()` method for proper mapping
+
+2. **Updated `PitchDeckResponseDto`**
+
+   - Moved file fields to `files` array
+   - Added `fileCount` property for quick reference
+   - Updated mapping logic to handle entity relationships
+
+3. **Maintained Upload Interface**
+   - `UploadDeckDto` unchanged (metadata stays deck-level)
+   - Clean barrel exports for all DTOs
+
+#### Data Flow Transformation
+
+```typescript
+// Backend Entity Mapping
+PitchDeckEntity + PitchDeckFileEntity[]
+    ↓ (DTO Conversion)
+PitchDeckResponseDto + PitchDeckFileResponseDto[]
+    ↓ (API Response)
+Frontend Response with files array
+```
+
+#### Benefits
+
+- **Scalability**: Support for multiple files per deck
+- **Type Safety**: Strong typing throughout the conversion process
+- **Performance**: Quick access to file count via separate property
+- **Maintainability**: Clear separation between deck and file metadata
+
+#### Next Steps
+
+1. ✅ **Phase 03**: Update service layer to populate files array
+2. ✅ **Phase 04**: Update controller to use new DTO structure
+3. **Phase 05**: Integration testing with multi-file scenarios
+
+---
+
+## 12. Wave 3 Implementation Notes
 
 ### Current Status
 
@@ -659,5 +1127,57 @@ The Wave 3 implementation includes all UI components needed for:
 
 ---
 
+## 12. Backend Architecture Updates
+
+### Phase 01: Database Layer (Completed)
+
+The backend has been enhanced with a multi-file entity structure to support more flexible pitch deck management.
+
+#### New Entity Relationships
+
+```typescript
+// Multi-file approach (NEW)
+PitchDeck
+└── files: Collection<PitchDeckFile>
+
+PitchDeckFile
+├── deck: ManyToOne(PitchDeck)
+├── originalFileName: string
+├── mimeType: MimeType
+├── fileSize: number
+└── storagePath: string
+```
+
+#### Key Improvements
+
+1. **Scalability**: Support for multiple files per pitch deck
+2. **Data Integrity**: Proper MikroORM relationships with cascade delete
+3. **Performance**: Indexed foreign key queries
+4. **Maintainability**: Clear separation of concerns
+
+#### Frontend Compatibility
+
+- ✅ All existing API contracts remain valid
+- ✅ No breaking changes to frontend types
+- ✅ Enhanced capabilities for future multi-file support
+
+#### DRY Compliance
+
+The backend now follows DRY principles with centralized file type constants:
+
+```typescript
+// src/api/pitchdeck/constants/file-types.ts
+export type MimeType = /* ... */;
+export const MIME_TO_EXT = /* ... */;
+```
+
+#### Migration Strategy
+
+- Current: Single-file decks still supported
+- Phase 05: Database migration for existing data
+- Future: Multi-file upload capabilities
+
+---
+
 _Last Updated: 2026-02-03_
-_API Version: 1.3.0_
+_API Version: 1.7.0_

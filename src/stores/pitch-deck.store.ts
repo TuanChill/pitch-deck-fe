@@ -26,7 +26,7 @@ type Actions = {
   setError: (error: string | null) => void;
   addToHistory: (analysis: PitchDeckAnalysisResponse) => void;
   clearHistory: () => void;
-  removeFromHistory: (uploadId: string) => void;
+  removeFromHistory: (deckId: string) => void;
   reset: () => void;
 };
 
@@ -61,14 +61,14 @@ export const usePitchDeckStore = create<State & Actions>()(
 
       addToHistory: (analysis) => {
         const history = get().history;
-        const filtered = history.filter((a) => a.uploadId !== analysis.uploadId);
+        const filtered = history.filter((a) => a.deckId !== analysis.deckId);
         set({ history: [analysis, ...filtered].slice(0, 10) });
       },
 
       clearHistory: () => set({ history: [] }),
 
-      removeFromHistory: (uploadId) => {
-        const history = get().history.filter((a) => a.uploadId !== uploadId);
+      removeFromHistory: (deckId) => {
+        const history = get().history.filter((a) => a.deckId !== deckId);
         set({ history });
       },
 
