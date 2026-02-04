@@ -6,7 +6,7 @@ This document provides a comprehensive overview of the pitch deck management sys
 
 **Project:** Pitch Deck Management System
 **Technology Stack:** Next.js 15, React 19, TypeScript, Tailwind CSS, Zustand
-**Phase:** Phase 02 (Service Layer) Complete - All phases implemented (v0.2.0)
+**Phase:** Phase 03 (Analysis Service Layer) Complete - All phases implemented (v0.2.0)
 
 ## Architecture Overview
 
@@ -95,7 +95,7 @@ export const API_URL = {
 } as const;
 ```
 
-**Backend Base URL:** `http://localhost:8082`
+**Backend Base URL:** `http://localhost:8082` (configurable via NEXT_PUBLIC_API_BASE)
 
 #### 3. Request/Response Types (Phase 01 Complete)
 
@@ -110,7 +110,7 @@ export const API_URL = {
 
 - `PitchDeckListItem`: Basic pitch deck information
 - `PitchDeckDetailResponse`: Complete deck with files array
-- `PitchDeckAnalysisResponse`: VC framework analysis results
+- `AnalysisResponse`: VC framework analysis results (nested structure)
 - `VCCategoryScore`: Scores for 7 VC evaluation categories
 - `StrengthItem[]` and `ImprovementItem[]`: Analysis insights
 - `AnalysisStatusResponse`: Real-time analysis progress
@@ -224,14 +224,26 @@ export const httpClient = Axios.create({
 ### 2. Service Layer
 
 ```typescript
+// Pitch Deck Service
 export class PitchDeckService {
   async uploadPitchDeck(request: UploadPitchDeckRequest);
   async uploadPitchDeckWithMetadata(request: UploadPitchDeckWithMetadataRequest);
-  async startAnalysis(request: StartAnalysisRequest);
-  async getAnalysisStatus(uuid: string);
   async listPitchDecks(query?: ListPitchDecksQuery);
   async getPitchDeckDetail(uuid: string);
   async deletePitchDeck(uuid: string);
+}
+
+// Analysis Service (Phase 03 Complete)
+export class AnalysisService {
+  async startAnalysis(deckUuid: string);
+  async getAnalysisStatus(uuid: string);
+  async getAnalysisResult(uuid: string);
+  async listAnalyses(query?: ListAnalysesQuery);
+  async deleteAnalysis(uuid: string);
+  async startAnalysisAndWait(
+    deckUuid: string,
+    progressCallback?: (status: AnalysisStatusResponse) => void
+  );
 }
 ```
 
@@ -365,6 +377,7 @@ export class PitchDeckService {
 
 - `src/services/http/client.ts`: HTTP client configuration
 - `src/services/api/pitch-deck.service.ts`: Pitch deck API service
+- `src/services/api/analysis.service.ts`: Analysis API service with polling (Phase 03 Complete)
 - `src/services/api/pitch-deck-management.service.ts`: Management service (NEW)
 - `src/types/request/pitch-deck.ts`: Request type definitions (NEW)
 - `src/types/response/pitch-deck.ts`: Response type definitions (UPDATED)
@@ -513,6 +526,7 @@ All core functionality is implemented and ready for production deployment. The s
 ### **Phase 02 Completion Summary** (2026-02-04)
 
 #### **Service Layer Implementation** ✅
+
 - Real API integration with backend at `http://localhost:8082`
 - File validation system (50MB limit, PDF/PPT/PPTX/DOC/DOCX)
 - Progress tracking for uploads with real-time callbacks
@@ -520,6 +534,7 @@ All core functionality is implemented and ready for production deployment. The s
 - Enhanced error handling with retry mechanism
 
 #### **Key Implementation Details**
+
 - **File Upload**: Comprehensive validation before upload
 - **Progress Tracking**: Real-time progress visualization for large files
 - **Multi-file Support**: Architecture supports up to 10 files per upload
@@ -527,6 +542,7 @@ All core functionality is implemented and ready for production deployment. The s
 - **Security**: JWT authentication and file validation
 
 #### **Files Modified**
+
 1. `src/services/api/pitch-deck.service.ts` - Real API implementation
 2. `src/services/api/pitch-deck-management.service.ts` - Updated imports
 3. `src/stores/pitch-deck.store.ts` - Updated to `PitchDeckDetailResponse`
@@ -534,6 +550,7 @@ All core functionality is implemented and ready for production deployment. The s
 5. `src/components/pitch-deck-management/upload-form.tsx` - Removed redundant conversion
 
 ### **Phase 03 Implementation Plan**
+
 - Real analysis API endpoints
 - WebSocket integration for real-time updates
 - Advanced file processing features

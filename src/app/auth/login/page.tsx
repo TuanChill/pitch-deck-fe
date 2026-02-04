@@ -65,7 +65,7 @@ export default function LoginPage() {
     try {
       const response = await login({ username: trimmedUsername, password });
 
-      setAuth(response.user, response.token);
+      setAuth(response.user, response.accessToken);
 
       toast.success('Login successful');
 

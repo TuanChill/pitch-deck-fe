@@ -1,3 +1,17 @@
+/**
+ * Pitch Deck Management Store
+ *
+ * Manages pitch deck collection state (list, detail, delete operations).
+ * Phase 04: Integrated real API services, removed dynamic imports.
+ *
+ * @module stores/pitch-deck-management
+ */
+
+import {
+  deletePitchDeck,
+  getPitchDeckDetail,
+  listPitchDecks
+} from '@/services/api/pitch-deck.service';
 import type { ListPitchDecksQuery } from '@/types/request/pitch-deck';
 import type { PitchDeckListItem, PitchDeckDetailResponse } from '@/types/response/pitch-deck';
 import { create } from 'zustand';
@@ -38,8 +52,8 @@ type ManagementActions = {
   addPitchDeck: (deck: PitchDeckListItem) => void;
   /** Update deck in collection (optimistic) */
   updatePitchDeck: (uuid: string, updates: Partial<PitchDeckListItem>) => void;
-  /** Remove deck from collection (optimistic) */
-  removePitchDeck: (uuid: string) => void;
+  /** Remove deck from collection (optimistic + API call) */
+  removePitchDeck: (uuid: string) => Promise<void>;
   /** Set current deck */
   setCurrentDeck: (deck: PitchDeckDetailResponse | null) => void;
   /** Update filters */
@@ -85,12 +99,7 @@ const initialState: ManagementState = {
  * }, []);
  *
  * const handleDelete = async (uuid: string) => {
- *   removePitchDeck(uuid);
- *   try {
- *     await deletePitchDeck(uuid);
- *   } catch {
- *     fetchPitchDecks(); // Re-fetch on error
- *   }
+ *   await removePitchDeck(uuid); // Optimistic + API
  * };
  * ```
  */
@@ -101,8 +110,6 @@ export const usePitchDeckManagementStore = create<ManagementState & ManagementAc
     fetchPitchDecks: async (query) => {
       set({ isLoading: true, error: null });
       try {
-        // Dynamic import to avoid circular dependency with Phase 02
-        const { listPitchDecks } = await import('@/services/api');
         const decks = await listPitchDecks({
           status: query?.status || get().filters.status,
           limit: query?.limit || get().limit,
@@ -125,8 +132,6 @@ export const usePitchDeckManagementStore = create<ManagementState & ManagementAc
     fetchPitchDeckDetail: async (uuid) => {
       set({ isLoading: true, error: null });
       try {
-        // Dynamic import to avoid circular dependency
-        const { getPitchDeckDetail } = await import('@/services/api');
         const deck = await getPitchDeckDetail(uuid);
         set({ currentDeck: deck, isLoading: false });
       } catch (err) {
@@ -150,11 +155,28 @@ export const usePitchDeckManagementStore = create<ManagementState & ManagementAc
       }));
     },
 
-    removePitchDeck: (uuid) => {
+    removePitchDeck: async (uuid) => {
+      // Optimistic update - remove immediately
+      const previousDecks = get().pitchDecks;
+      const previousTotal = get().total;
+
       set((state) => ({
         pitchDecks: state.pitchDecks.filter((d) => d.uuid !== uuid),
         total: state.total - 1
       }));
+
+      try {
+        // Call real API
+        await deletePitchDeck(uuid);
+      } catch (err) {
+        // Rollback on error
+        set({
+          pitchDecks: previousDecks,
+          total: previousTotal,
+          error: err instanceof Error ? err.message : 'Failed to delete pitch deck'
+        });
+        throw err;
+      }
     },
 
     setCurrentDeck: (deck) => set({ currentDeck: deck }),

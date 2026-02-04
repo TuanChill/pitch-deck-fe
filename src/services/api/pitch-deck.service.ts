@@ -3,6 +3,7 @@
  *
  * Implements all pitch deck CRUD operations using real backend API.
  * Phase 02: Replaces mock implementations with actual API calls.
+ * Phase 03: Removed analyzePitchDeck - now in analysis.service.ts
  *
  * Backend: http://localhost:8082
  * Auth: JWT handled by httpClient interceptor
@@ -10,15 +11,10 @@
 
 import { API_URL } from '@/constants/api-url';
 import { httpClient } from '@/services/http/client';
-import type {
-  ListPitchDecksQuery,
-  StartAnalysisRequest,
-  UploadPitchDeckRequest
-} from '@/types/request/pitch-deck';
+import type { ListPitchDecksQuery, UploadPitchDeckRequest } from '@/types/request/pitch-deck';
 import type {
   DeleteSuccessResponse,
   ListPitchDecksResponse,
-  PitchDeckAnalysisResponse,
   PitchDeckDetailResponse
 } from '@/types/response/pitch-deck';
 
@@ -197,37 +193,6 @@ export const getPitchDeckDetail = async (uuid: string): Promise<PitchDeckDetailR
  */
 export const deletePitchDeck = async (uuid: string): Promise<DeleteSuccessResponse> => {
   const response = await httpClient.delete<DeleteSuccessResponse>(API_URL.PITCH_DECK.DELETE(uuid));
-
-  return response.data;
-};
-
-/**
- * Start VC analysis for a pitch deck
- * POST /analysis/start
- *
- * TODO: Phase 03 - Replace with real API implementation
- * This is a temporary mock for backward compatibility.
- *
- * Overload 1: Legacy signature - deckId and filename
- * Overload 2: New signature - StartAnalysisRequest object
- *
- * @param deckIdOrRequest - Either deckId (string) or StartAnalysisRequest
- * @param filename - Optional filename (for legacy signature)
- * @returns Analysis response
- */
-export const analyzePitchDeck = async (
-  deckIdOrRequest: string | StartAnalysisRequest,
-  _filename?: string
-): Promise<PitchDeckAnalysisResponse> => {
-  // Handle legacy signature
-  const request: StartAnalysisRequest =
-    typeof deckIdOrRequest === 'string' ? { deckId: deckIdOrRequest } : deckIdOrRequest;
-
-  // Mock implementation - will be replaced in Phase 03
-  const response = await httpClient.post<PitchDeckAnalysisResponse>(
-    API_URL.ANALYSIS.START,
-    request
-  );
 
   return response.data;
 };

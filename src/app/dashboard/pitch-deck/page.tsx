@@ -1,6 +1,6 @@
 'use client';
 
-import { uploadPitchDeck, analyzePitchDeck } from '@/services/api';
+import { startAnalysisAndWait, uploadPitchDeck } from '@/services/api';
 import { usePitchDeckStore, AnalysisStage } from '@/stores';
 import { useCallback, useState, useEffect } from 'react';
 import { toast } from 'sonner';
@@ -61,23 +61,19 @@ export default function PitchDeckPage() {
 
         usePitchDeckStore.getState().setCurrentUpload(uploadResult);
 
-        // Start analysis
+        // Start analysis and poll until complete
         setCurrentStage('analyzing');
         usePitchDeckStore.getState().setUploadState('analyzing');
         setProgress(0);
 
-        // Analysis progress simulation
-        let analysisProgress = 0;
-        const analysisInterval = setInterval(() => {
-          analysisProgress += 5;
-          setProgress(Math.min(analysisProgress, 90));
-          if (analysisProgress >= 90) clearInterval(analysisInterval);
-        }, 150);
+        // Use startAnalysisAndWait which handles polling with progress callback
+        const result = await startAnalysisAndWait(uploadResult.uuid, {
+          onProgress: (progress) => {
+            setProgress(progress);
+          }
+        });
 
-        const result = await analyzePitchDeck(uploadResult.uuid, file.name);
-        clearInterval(analysisInterval);
         setProgress(100);
-
         usePitchDeckStore.getState().setCurrentAnalysis(result);
         toast.success('Analysis complete!');
       } catch (err) {
@@ -137,7 +133,7 @@ export default function PitchDeckPage() {
       )}
 
       {/* Analysis result */}
-      {uploadState === 'completed' && currentAnalysis && (
+      {uploadState === 'completed' && currentAnalysis?.results && (
         <>
           <AnalysisResult analysis={currentAnalysis} />
 

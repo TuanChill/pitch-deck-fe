@@ -1,7 +1,14 @@
-import type {
-  PitchDeckDetailResponse,
-  PitchDeckAnalysisResponse
-} from '@/types/response/pitch-deck';
+/**
+ * Pitch Deck Store
+ *
+ * Manages pitch deck upload and analysis flow state.
+ * Phase 04: Integrated real API services for analysis operations.
+ *
+ * @module stores/pitch-deck
+ */
+
+import { pollAnalysisComplete, startAnalysis } from '@/services/api/analysis.service';
+import type { AnalysisResponse, PitchDeckDetailResponse } from '@/types/response/pitch-deck';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -13,21 +20,34 @@ type State = {
   uploadState: UploadState;
   currentStage: AnalysisStage;
   currentUpload: PitchDeckDetailResponse | null;
-  currentAnalysis: PitchDeckAnalysisResponse | null;
+  currentAnalysis: AnalysisResponse | null;
   error: string | null;
-  history: PitchDeckAnalysisResponse[];
+  history: AnalysisResponse[];
+  isAnalyzing: boolean;
+  analysisProgress: number;
 };
 
 type Actions = {
   setUploadState: (state: UploadState) => void;
   setCurrentStage: (stage: AnalysisStage) => void;
   setCurrentUpload: (upload: PitchDeckDetailResponse | null) => void;
-  setCurrentAnalysis: (analysis: PitchDeckAnalysisResponse | null) => void;
+  setCurrentAnalysis: (analysis: AnalysisResponse | null) => void;
   setError: (error: string | null) => void;
-  addToHistory: (analysis: PitchDeckAnalysisResponse) => void;
+  addToHistory: (analysis: AnalysisResponse) => void;
   clearHistory: () => void;
   removeFromHistory: (deckId: string) => void;
   reset: () => void;
+  /** Start VC analysis for a pitch deck */
+  startPitchDeckAnalysis: (
+    pitchDeckUuid: string,
+    onProgress?: (progress: number) => void
+  ) => Promise<void>;
+  /** Check analysis status by UUID */
+  checkAnalysisStatus: (analysisUuid: string) => Promise<AnalysisResponse>;
+  /** Clear analysis error state */
+  clearAnalysisError: () => void;
+  /** Set analysis progress */
+  setAnalysisProgress: (progress: number) => void;
 };
 
 const defaultState: State = {
@@ -36,7 +56,9 @@ const defaultState: State = {
   currentUpload: null,
   currentAnalysis: null,
   error: null,
-  history: []
+  history: [],
+  isAnalyzing: false,
+  analysisProgress: 0
 };
 
 export const usePitchDeckStore = create<State & Actions>()(
@@ -51,13 +73,21 @@ export const usePitchDeckStore = create<State & Actions>()(
       setCurrentUpload: (currentUpload) => set({ currentUpload }),
 
       setCurrentAnalysis: (currentAnalysis) => {
-        set({ currentAnalysis, uploadState: 'completed', currentStage: 'completed' });
+        set({
+          currentAnalysis,
+          uploadState: 'completed',
+          currentStage: 'completed',
+          isAnalyzing: false
+        });
         if (currentAnalysis) {
           get().addToHistory(currentAnalysis);
         }
       },
 
-      setError: (error) => set({ error, uploadState: 'error', currentStage: 'error' }),
+      setError: (error) =>
+        set({ error, uploadState: 'error', currentStage: 'error', isAnalyzing: false }),
+
+      setAnalysisProgress: (progress) => set({ analysisProgress: progress }),
 
       addToHistory: (analysis) => {
         const history = get().history;
@@ -70,6 +100,40 @@ export const usePitchDeckStore = create<State & Actions>()(
       removeFromHistory: (deckId) => {
         const history = get().history.filter((a) => a.deckId !== deckId);
         set({ history });
+      },
+
+      clearAnalysisError: () => set({ error: null, currentStage: 'idle' }),
+
+      startPitchDeckAnalysis: async (pitchDeckUuid, onProgress) => {
+        set({ currentStage: 'analyzing', isAnalyzing: true, error: null, analysisProgress: 0 });
+        try {
+          // Start analysis and poll for completion
+          const result = await startAnalysis(pitchDeckUuid);
+          const analysis = await pollAnalysisComplete(result.uuid, {
+            onProgress: (progress) => {
+              set({ analysisProgress: progress });
+              onProgress?.(progress);
+            }
+          });
+          get().setCurrentAnalysis(analysis);
+        } catch (err) {
+          const errorMsg = err instanceof Error ? err.message : 'Analysis failed';
+          set({ error: errorMsg, currentStage: 'error', isAnalyzing: false });
+          throw err;
+        }
+      },
+
+      checkAnalysisStatus: async (analysisUuid) => {
+        try {
+          const result = await pollAnalysisComplete(analysisUuid);
+          get().setCurrentAnalysis(result);
+
+          return result;
+        } catch (err) {
+          const errorMsg = err instanceof Error ? err.message : 'Failed to check analysis status';
+          set({ error: errorMsg, currentStage: 'error', isAnalyzing: false });
+          throw err;
+        }
       },
 
       reset: () => set(defaultState)
@@ -87,7 +151,9 @@ export const selectUploadState = (state: State) => ({
   uploadState: state.uploadState,
   currentStage: state.currentStage,
   currentUpload: state.currentUpload,
-  error: state.error
+  error: state.error,
+  isAnalyzing: state.isAnalyzing,
+  analysisProgress: state.analysisProgress
 });
 
 export const selectAnalysis = (state: State) => state.currentAnalysis;

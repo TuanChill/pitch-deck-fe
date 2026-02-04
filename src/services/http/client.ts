@@ -2,7 +2,8 @@ import { env } from '@/config/env';
 import { useUserStore } from '@/stores';
 import Axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
-const baseUrl = env.NEXT_PUBLIC_API_BASE || 'http://localhost:3001/api/v1/';
+// Backend API base URL (from Phase 01 API integration)
+const baseUrl = env.NEXT_PUBLIC_API_BASE || 'http://localhost:8082';
 
 const axiosOptions = {
   baseURL: baseUrl,

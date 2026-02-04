@@ -329,6 +329,12 @@ export type AnalysisResponse = {
   error?: string;
   completedAt?: string;
 };
+
+export type ListAnalysesQuery = {
+  status?: 'pending' | 'processing' | 'completed' | 'failed';
+  limit?: number;
+  offset?: number;
+};
 ```
 
 ---
@@ -431,12 +437,27 @@ export class PitchDeckService {
   async uploadPitchDeckWithMetadata(
     request: UploadPitchDeckWithMetadataRequest
   ): Promise<UploadPitchDeckResponse>;
-  async analyzePitchDeck(request: AnalyzePitchDeckRequest): Promise<PitchDeckAnalysisResponse>;
-  async startAnalysis(request: StartAnalysisRequest): Promise<AnalysisResponse>;
-  async getAnalysisStatus(uuid: string): Promise<AnalysisStatusResponse>;
   async listPitchDecks(query?: ListPitchDecksQuery): Promise<ListPitchDecksResponse>;
   async getPitchDeckDetail(uuid: string): Promise<PitchDeckDetailResponse>;
   async deletePitchDeck(uuid: string): Promise<void>;
+}
+
+// src/services/api/analysis.service.ts (Phase 03 Complete)
+export class AnalysisService {
+  async startAnalysis(deckUuid: string): Promise<{ uuid: string }>;
+  async getAnalysisStatus(uuid: string): Promise<AnalysisStatusResponse>;
+  async getAnalysisResult(uuid: string): Promise<AnalysisResponse>;
+  async listAnalyses(query?: ListAnalysesQuery): Promise<AnalysisResponse[]>;
+  async deleteAnalysis(uuid: string): Promise<void>;
+  async startAnalysisAndWait(
+    deckUuid: string,
+    progressCallback?: (status: AnalysisStatusResponse) => void,
+    options?: {
+      interval?: number;
+      maxAttempts?: number;
+      timeout?: number;
+    }
+  ): Promise<AnalysisResponse>;
 }
 ```
 
@@ -471,12 +492,200 @@ const analysis = await withRetry(() =>
 );
 
 // Check analysis status
-const status = await pitchDeckService.getAnalysisStatus(uploadResult.uuid);
+const status = await pitchDeckService.getAnalysisStatus(analysis.uuid);
+
+// Poll for analysis completion
+const analysisService = new AnalysisService();
+const result = await analysisService.startAnalysisAndWait(uploadResult.uuid, (status) => {
+  console.log(`Analysis progress: ${status.progress}%`);
+});
 ```
 
 ---
 
-## 6. Error Handling
+## 6. Analysis Service Polling Mechanism
+
+### Overview
+
+The Analysis Service provides a sophisticated polling mechanism with exponential backoff to handle long-running analysis operations efficiently.
+
+### Polling Options
+
+```typescript
+export type PollingOptions = {
+  interval?: number; // Initial polling interval (default: 1000ms)
+  maxInterval?: number; // Maximum polling interval (default: 30000ms)
+  maxAttempts?: number; // Maximum polling attempts (default: 300)
+  timeout?: number; // Total timeout in milliseconds (default: 300000)
+  jitter?: number; // Random jitter in milliseconds (default: 1000)
+};
+```
+
+### startAnalysisAndWait Implementation
+
+The `startAnalysisAndWait` method combines starting an analysis with intelligent polling:
+
+```typescript
+async startAnalysisAndWait(
+  deckUuid: string,
+  progressCallback?: (status: AnalysisStatusResponse) => void,
+  options: PollingOptions = {}
+): Promise<AnalysisResponse> {
+  // Start the analysis
+  const startResponse = await this.startAnalysis(deckUuid);
+  const analysisUuid = startResponse.uuid;
+
+  // Initialize polling state
+  let attempt = 0;
+  let currentInterval = options.interval || 1000;
+  const maxAttempts = options.maxAttempts || 300;
+  const maxInterval = options.maxInterval || 30000;
+  const jitter = options.jitter || 1000;
+
+  // Poll until completion or timeout
+  while (attempt < maxAttempts) {
+    attempt++;
+
+    // Check if timeout exceeded
+    if (options.timeout && attempt * currentInterval > options.timeout) {
+      throw new Error('Analysis polling timeout');
+    }
+
+    // Fetch analysis status
+    const status = await this.getAnalysisStatus(analysisUuid);
+
+    // Call progress callback if provided
+    if (progressCallback) {
+      progressCallback(status);
+    }
+
+    // Check for completion
+    if (status.status === 'completed') {
+      return await this.getAnalysisResult(analysisUuid);
+    }
+
+    if (status.status === 'failed') {
+      throw new Error(`Analysis failed: ${status.message}`);
+    }
+
+    // Calculate next interval with exponential backoff and jitter
+    currentInterval = Math.min(currentInterval * 2, maxInterval);
+    const delay = currentInterval + Math.random() * jitter;
+
+    // Wait before next poll
+    await new Promise(resolve => setTimeout(resolve, delay));
+  }
+
+  throw new Error('Analysis polling exceeded maximum attempts');
+}
+```
+
+### Polling Strategy
+
+1. **Exponential Backoff**:
+
+   - Starts at 1 second
+   - Doubles each attempt (1s → 2s → 4s → 8s → ...)
+   - Capped at 30 seconds
+
+2. **Random Jitter**:
+
+   - Adds random delay (0-1s) to prevent thundering herd
+   - Prevents multiple clients from polling simultaneously
+
+3. **Progress Tracking**:
+
+   - Calls progress callback with each status update
+   - Allows UI to display real-time progress
+
+4. **Timeout Protection**:
+   - Hard timeout at 5 minutes (300 seconds)
+   - Maximum attempts to prevent infinite loops
+
+### Usage Examples
+
+#### Basic Polling
+
+```typescript
+const analysisService = new AnalysisService();
+
+const result = await analysisService.startAnalysisAndWait(deckUuid, (status) => {
+  console.log(`Progress: ${status.progress}% - ${status.status}`);
+});
+
+console.log('Analysis completed:', result);
+```
+
+#### Custom Polling Options
+
+```typescript
+const result = await analysisService.startAnalysisAndWait(
+  deckUuid,
+  (status) => {
+    updateProgressBar(status.progress);
+  },
+  {
+    interval: 2000, // Start with 2-second intervals
+    maxInterval: 60000, // Max 60 seconds between polls
+    maxAttempts: 200, // Maximum 200 attempts
+    timeout: 300000, // 5-minute timeout
+    jitter: 2000 // Up to 2 seconds of jitter
+  }
+);
+```
+
+#### React Hook Integration
+
+```typescript
+function useAnalysisPolling(deckUuid: string) {
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState('pending');
+  const [result, setResult] = useState<AnalysisResponse | null>(null);
+
+  useEffect(() => {
+    const analysisService = new AnalysisService();
+
+    const pollAnalysis = async () => {
+      try {
+        const result = await analysisService.startAnalysisAndWait(deckUuid, (status) => {
+          setProgress(status.progress);
+          setStatus(status.status);
+        });
+
+        setResult(result);
+      } catch (error) {
+        console.error('Analysis failed:', error);
+        setStatus('failed');
+      }
+    };
+
+    if (deckUuid) {
+      pollAnalysis();
+    }
+  }, [deckUuid]);
+
+  return { progress, status, result };
+}
+```
+
+### Best Practices
+
+1. **Progress Feedback**: Always provide progress updates to users
+2. **Error Handling**: Handle analysis failures gracefully
+3. **Timeout Configuration**: Set appropriate timeouts based on expected duration
+4. **Cancel Option**: Consider adding a cancel mechanism for long operations
+5. **Memory Cleanup**: Clean up intervals when component unmounts
+
+### Common Issues
+
+1. **Network Timeouts**: Handle network interruptions gracefully
+2. **Server Overload**: Use jitter to prevent server overload
+3. **Progress Stuck**: Implement maximum timeout to prevent hanging
+4. **Memory Leaks**: Proper cleanup of polling intervals
+
+---
+
+## 7. Error Handling
 
 ### Common Error Scenarios
 
@@ -817,7 +1026,8 @@ if (!ALLOWED_MIMES.includes(file.mimetype as any)) {
 | 1.5.0   | 2026-02-03 | Multi-file support - DTO layer (Phase 02)                                        |
 | 1.6.0   | 2026-02-03 | Controller layer updates (Phase 04) - Multi-file support                         |
 | 1.7.0   | 2026-02-03 | Frontend API constants & types (Phase 01) - UUID identifiers, multi-file support |
-| 1.8.0   | 2026-02-04 | Phase 02 - Pitch Deck Service Layer - Real API implementation with validation |
+| 1.8.0   | 2026-02-04 | Phase 02 - Pitch Deck Service Layer - Real API implementation with validation    |
+| 1.9.0   | 2026-02-04 | Phase 03 - Analysis Service Layer - Polling mechanism with exponential backoff   |
 
 ---
 
@@ -1183,11 +1393,13 @@ export const MIME_TO_EXT = /* ... */;
 ## 14. Phase 02: Pitch Deck Service Layer Implementation
 
 ### Overview
+
 Phase 02 completed the service layer implementation, replacing mock services with real API integration to the backend at `http://localhost:8082`.
 
 ### Key Features Implemented
 
 #### 1. Real API Integration
+
 ```typescript
 // src/services/api/pitch-deck.service.ts - Real implementation
 export const uploadPitchDeck = async (
@@ -1200,7 +1412,11 @@ export const uploadPitchDeck = async (
     formData,
     {
       headers: { 'Content-Type': 'multipart/form-data' },
-      onUploadProgress: onProgress ? (progressEvent) => { /* ... */ } : undefined
+      onUploadProgress: onProgress
+        ? (progressEvent) => {
+            /* ... */
+          }
+        : undefined
     }
   );
   return response.data;
@@ -1208,22 +1424,26 @@ export const uploadPitchDeck = async (
 ```
 
 #### 2. File Validation
+
 - **Size Validation**: 50MB maximum file size
 - **Type Validation**: PDF, PPT, PPTX, DOC, DOCX formats
 - **Multi-file Support**: Up to 10 files per upload
 - **Error Handling**: Clear error messages for invalid files
 
 #### 3. Backward Compatibility
+
 - Maintained legacy function signatures for transition
 - Support for both single file and multi-file uploads
 - Graceful handling of deprecated parameters
 
 #### 4. Progress Tracking
+
 - Real-time upload progress callbacks
 - Integration with UI components for progress visualization
 - Exposed progress events for React components
 
 #### 5. API Service Methods
+
 ```typescript
 // Core CRUD operations
 - uploadPitchDeck(): Upload with metadata and validation
@@ -1238,18 +1458,21 @@ export const uploadPitchDeck = async (
 ### Integration Points
 
 #### HTTP Client Integration
+
 - JWT tokens automatically attached via interceptors
 - Global error handling (401 redirect to login)
 - Request/response validation
 - Timeout protection (5-minute uploads)
 
 #### Type Safety
+
 - Full TypeScript type coverage
 - Request/response type alignment with backend
 - Generic error handling patterns
 - Strongly typed API contracts
 
 #### Store Integration
+
 - Zustand stores updated to use new response types
 - Pitch deck store uses `PitchDeckDetailResponse`
 - Error state management with user-friendly messages
@@ -1257,6 +1480,7 @@ export const uploadPitchDeck = async (
 ### File Updates
 
 #### Modified Files
+
 1. **src/services/api/pitch-deck.service.ts** - Real API implementation
 2. **src/services/api/pitch-deck-management.service.ts** - Updated imports
 3. **src/stores/pitch-deck.store.ts** - Updated to `PitchDeckDetailResponse`
@@ -1264,6 +1488,7 @@ export const uploadPitchDeck = async (
 5. **src/components/pitch-deck-management/upload-form.tsx** - Removed redundant conversion
 
 #### New Features
+
 - File validation before upload
 - Progress tracking for large files
 - Error handling with retry mechanism
@@ -1273,12 +1498,14 @@ export const uploadPitchDeck = async (
 ### Testing Strategy
 
 #### Unit Tests
+
 - File validation logic testing
 - Upload progress callback verification
 - Error handling scenarios
 - Type safety validation
 
 #### Integration Tests
+
 - API endpoint connectivity
 - Authentication flow testing
 - File upload simulation
@@ -1287,12 +1514,14 @@ export const uploadPitchDeck = async (
 ### Performance Considerations
 
 #### Optimization
+
 - Chunked file uploads for large files
 - Progress tracking for user feedback
 - Caching of frequently accessed data
 - Efficient pagination implementation
 
 #### Memory Management
+
 - Proper cleanup of file references
 - Prevention of memory leaks
 - Efficient state management
@@ -1301,12 +1530,14 @@ export const uploadPitchDeck = async (
 ### Security Enhancements
 
 #### File Upload Security
+
 - File type validation with MIME checking
 - File size limits to prevent abuse
 - Secure temporary file handling
 - Path sanitization for error messages
 
 #### API Security
+
 - JWT token protection
 - Request/response validation
 - Error message sanitization
@@ -1315,12 +1546,14 @@ export const uploadPitchDeck = async (
 ### Future Enhancements
 
 #### Phase 03 (Upcoming)
+
 - Real analysis API implementation
 - WebSocket integration for real-time updates
 - Advanced file processing features
 - Enhanced error recovery mechanisms
 
 #### Phase 04 (Completed)
+
 - Multi-file support architecture
 - Bulk file validation
 - Enhanced security measures
@@ -1329,12 +1562,14 @@ export const uploadPitchDeck = async (
 ### Migration Guide
 
 #### Breaking Changes
+
 - Response structure now includes `files` array
 - File metadata moved from deck level to files array
 - UUID-based identifiers replaced uploadId
 - Progress callback interface updated
 
 #### Migration Steps
+
 1. Update response handling to use `files` array
 2. Implement file validation in UI components
 3. Add progress tracking for uploads
@@ -1342,6 +1577,7 @@ export const uploadPitchDeck = async (
 5. Test with real API endpoints
 
 #### Backward Compatibility
+
 - Upload requests remain unchanged
 - Legacy function signatures still supported
 - Existing UI components continue to work
@@ -1350,4 +1586,4 @@ export const uploadPitchDeck = async (
 ---
 
 _Last Updated: 2026-02-04_
-_API Version: 1.8.0_
+_API Version: 1.9.0_

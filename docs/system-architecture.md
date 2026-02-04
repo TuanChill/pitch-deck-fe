@@ -135,10 +135,18 @@ This document provides a comprehensive overview of the Next.js boilerplate syste
 
 ```typescript
 // src/services/api/
-├── auth.service.ts   # Authentication API calls
-├── user.service.ts   # User API calls
-└── index.ts         # API service exports
+├── auth.service.ts      # Authentication API calls
+├── user.service.ts      # User API calls
+├── pitch-deck.service.ts # Pitch deck CRUD operations
+├── analysis.service.ts  # Analysis with polling (Phase 03)
+├── vc-analysis.service.ts # VC analysis & management
+├── file.service.ts      # File upload & management
+└── index.ts            # API service exports
 ```
+
+└── index.ts # API service exports
+
+````
 
 ---
 
@@ -165,7 +173,7 @@ sequenceDiagram
     UserStore->>AuthProvider: Updates auth state
     AuthProvider->>UI: Shows success
     UI->>User: Redirects to dashboard
-```
+````
 
 ### Authentication Implementation Pattern
 
