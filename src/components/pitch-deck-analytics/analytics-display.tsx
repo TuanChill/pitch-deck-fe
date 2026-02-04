@@ -1,11 +1,14 @@
 'use client';
 
+import { useReportStore } from '@/stores/report-store';
 import type { AnalysisResponse } from '@/types/response/pitch-deck';
 import { cn } from '@/utils';
 import { motion } from 'framer-motion';
 import { AlertCircle, FileX, RefreshCw, Upload } from 'lucide-react';
+import { useEffect } from 'react';
 
 import { AnalysisResult } from '@/components/pitch-deck/analysis-result';
+import { GenerateReportButton, ReportDisplay } from '@/components/reports';
 import { Button } from '@/components/ui/button';
 
 type AnalyticsDisplayProps = {
@@ -25,6 +28,16 @@ export const AnalyticsDisplay = ({
   onUpload,
   className
 }: AnalyticsDisplayProps) => {
+  const { loadReports, reports } = useReportStore();
+
+  // Load existing reports when analysis changes
+  useEffect(() => {
+    if (analysis?.uuid && analysis.status === 'completed') {
+      loadReports(analysis.uuid);
+    }
+  }, [analysis?.uuid, analysis?.status, loadReports]);
+
+  const hasReports = analysis?.uuid && (reports[analysis.uuid]?.length ?? 0) > 0;
   // Loading state
   if (isLoading) {
     const progress = analysis?.progress ?? 0;
@@ -154,9 +167,18 @@ export const AnalyticsDisplay = ({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className={className}
+        className={cn('space-y-8', className)}
       >
         <AnalysisResult analysis={analysis} />
+
+        {/* Report Section */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Analytics Report</h3>
+            <GenerateReportButton analysisUuid={analysis.uuid} />
+          </div>
+          {hasReports && <ReportDisplay analysisUuid={analysis.uuid} />}
+        </div>
       </motion.div>
     );
   }

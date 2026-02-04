@@ -3,6 +3,7 @@ export * from './analysis.service';
 export * from './auth.service';
 export * from './pitch-deck.service';
 export * from './pitch-deck-management.service';
+export * from './report.service';
 
 // Response types
 export type {

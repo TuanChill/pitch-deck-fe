@@ -23,6 +23,7 @@
   "packageManager": "pnpm@9.1.1+sha256.9551e803dcb7a1839fdf5416153a844060c7bce013218ce823410532504ac10b",
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.3",
     "@t3-oss/env-nextjs": "0.12.0",
@@ -36,6 +37,8 @@
     "next-themes": "^0.4.6",
     "react": "19.0.0-rc-65a56d0e-20241020",
     "react-dom": "19.0.0-rc-65a56d0e-20241020",
+    "react-markdown": "^10.1.0",
+    "rehype-sanitize": "^6.0.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "3.0.1",
     "tailwindcss-animate": "^1.0.7",

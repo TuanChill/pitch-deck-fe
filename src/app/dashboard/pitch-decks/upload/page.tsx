@@ -4,7 +4,6 @@ import { MAX_PITCH_DECK_SIZE } from '@/constants/file-types';
 import { APP_URL } from '@/constants/routes';
 import { ArrowLeft, Upload } from 'lucide-react';
 import Link from 'next/link';
-
 import { useRouter } from 'next/navigation';
 
 import { UploadForm } from '@/components/pitch-deck-management/upload-form';

@@ -651,6 +651,7 @@ interface FileUploaderProps {
 #### File Validation Standards
 
 1. **Type Validation**
+
    ```typescript
    // Use existing validation utility
    import { validatePitchDeckFile } from '@/constants/file-types';
@@ -662,6 +663,7 @@ interface FileUploaderProps {
    ```
 
 2. **Count Validation**
+
    ```typescript
    // Maximum 10 files total
    const totalCount = selectedFiles.length + newFiles.length;
@@ -672,6 +674,7 @@ interface FileUploaderProps {
    ```
 
 3. **Size Validation**
+
    ```typescript
    // Use MAX_PITCH_DECK_SIZE constant
    import { MAX_PITCH_DECK_SIZE } from '@/constants/file-types';
@@ -698,6 +701,7 @@ const handleFilesSelect = useCallback((files: File[]) => {
 #### UI Display Standards
 
 1. **File Count Display**
+
    ```typescript
    // Show count clearly
    <p>Selected Files ({selectedFiles.length}/10)</p>
@@ -737,7 +741,7 @@ const [error, setError] = useState<string | null>(null);
 const validateAndSelectFiles = (newFiles: File[]) => {
   const errors: string[] = [];
 
-  newFiles.forEach(file => {
+  newFiles.forEach((file) => {
     const validation = validatePitchDeckFile(file);
     if (!validation.valid) {
       errors.push(`${file.name}: ${validation.error}`);
@@ -753,6 +757,7 @@ const validateAndSelectFiles = (newFiles: File[]) => {
 #### Integration Guidelines
 
 1. **With Upload Forms**
+
    ```typescript
    <UploadForm>
      <FileUploader

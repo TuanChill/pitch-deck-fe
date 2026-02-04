@@ -1326,34 +1326,37 @@ The FileUploader component is the primary interface for file selection and manag
 ```typescript
 // src/components/pitch-deck/file-uploader.tsx
 interface FileUploaderProps {
-  onFilesSelect: (files: File[]) => void;      // Callback for file selection
-  disabled?: boolean;                          // Disable interaction
-  className?: string;                         // Additional styling
-  selectedFiles?: File[];                     // Controlled component support
+  onFilesSelect: (files: File[]) => void; // Callback for file selection
+  disabled?: boolean; // Disable interaction
+  className?: string; // Additional styling
+  selectedFiles?: File[]; // Controlled component support
 }
 
 // Internal state
 interface FileUploaderState {
-  isDragging: boolean;    // Drag-and-drop visual state
-  error: string | null;  // Validation errors
+  isDragging: boolean; // Drag-and-drop visual state
+  error: string | null; // Validation errors
 }
 ```
 
 #### Key Features
 
 1. **Multi-File Support**
+
    - Select up to 10 files per upload
    - Drag-and-drop with visual feedback
    - File type validation (PDF, PPT, PPTX, DOC, DOCX, TXT)
    - Individual file size limits (10MB per file)
 
 2. **File Management**
+
    - Display selected files with metadata
    - Individual remove buttons for each file
    - File count indicator (X/10)
    - File size formatting (B, KB, MB)
 
 3. **Validation**
+
    - File type checking against ALLOWED_PITCH_DECK_TYPES
    - Size validation per file (MAX_PITCH_DECK_SIZE)
    - Count validation (10 files maximum)
@@ -1384,11 +1387,13 @@ UI Update (File List, Count, Button Text)
 #### Integration Patterns
 
 **1. Standalone Usage**
+
 ```typescript
 <FileUploader onFilesSelect={handleFilesSelect} />
 ```
 
 **2. Controlled Component**
+
 ```typescript
 <FileUploader
   onFilesSelect={handleFilesSelect}
@@ -1398,6 +1403,7 @@ UI Update (File List, Count, Button Text)
 ```
 
 **3. Within Upload Form**
+
 ```typescript
 <UploadForm>
   <FileUploader
@@ -1423,7 +1429,7 @@ The FileUploader integrates seamlessly with the multi-file backend architecture:
 // Upload service accepts File[]
 const handleSubmit = async () => {
   const response = await uploadPitchDeck({
-    files: selectedFiles,  // File[] instead of File
+    files: selectedFiles, // File[] instead of File
     title,
     description,
     tags

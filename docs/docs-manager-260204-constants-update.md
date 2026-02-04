@@ -39,11 +39,13 @@ export const MAX_PITCH_DECK_SIZE = 50 * 1024 * 1024;
 ```
 
 **Import added:**
+
 ```typescript
 import { MAX_PITCH_DECK_SIZE } from '@/constants/file-types';
 ```
 
 **Benefits:**
+
 - Eliminated magic numbers in the UI
 - Ensured single source of truth for file size limits
 - Simplified future updates to file size requirements
@@ -54,6 +56,7 @@ import { MAX_PITCH_DECK_SIZE } from '@/constants/file-types';
 
 **File:** `/docs/constants/file-types.md` (to be created)
 **Content needed:**
+
 - Document all constants in the file-types.ts module
 - Include usage examples and validation logic
 - Explain the purpose of each constant
@@ -63,6 +66,7 @@ import { MAX_PITCH_DECK_SIZE } from '@/constants/file-types';
 
 **File:** `/docs/api-docs.md`
 **Updates needed:**
+
 - Confirm API endpoint documentation reflects the 50MB limit
 - Update any references to file size limitations in API documentation
 - Ensure consistency between frontend and backend documentation
@@ -71,6 +75,7 @@ import { MAX_PITCH_DECK_SIZE } from '@/constants/file-types';
 
 **File:** `/docs/system-architecture.md`
 **Updates needed:**
+
 - Document the file upload constraints in the architecture overview
 - Explain the validation flow for file uploads
 - Reference the constants module as part of the system's configuration layer
@@ -79,6 +84,7 @@ import { MAX_PITCH_DECK_SIZE } from '@/constants/file-types';
 
 **File:** `/docs/code-standards.md`
 **Updates needed:**
+
 - Highlight the use of constants over magic numbers as a best practice
 - Provide the file-types.ts module as an example of proper constant organization
 - Emphasize the importance of centralized configuration management
@@ -103,6 +109,7 @@ This ensures consistent validation across all file upload points in the applicat
 ### Backend Alignment
 
 The 50MB limit was confirmed to match the backend API constraints, ensuring:
+
 - No upload failures due to size mismatches
 - Consistent user experience between frontend and backend
 - Proper error messaging that reflects actual server limits
@@ -147,6 +154,7 @@ The documentation should be updated to reflect these changes, particularly empha
 ---
 
 **Next Steps:**
+
 1. Create `/docs/constants/file-types.md` with comprehensive documentation
 2. Update existing documentation references to 50MB limit
 3. Verify all documentation matches the updated implementation

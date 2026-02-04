@@ -28,5 +28,13 @@ export const API_URL = {
     LIST: '/analysis',
     DELETE: (uuid: string) => `/analysis/${uuid}`,
     BY_DECK: (deckUuid: string) => `/analysis/by-deck/${deckUuid}`
+  },
+
+  // Report endpoints
+  REPORT: {
+    GENERATE: (analysisUuid: string) => `/analysis/${analysisUuid}/reports`,
+    LIST: (analysisUuid: string) => `/analysis/${analysisUuid}/reports`,
+    DETAIL: (analysisUuid: string, reportUuid: string) =>
+      `/analysis/${analysisUuid}/reports/${reportUuid}`
   }
 } as const;

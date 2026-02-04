@@ -24,6 +24,7 @@ import type {
   DeleteSuccessResponse,
   ListAnalysesResponse
 } from '@/types/response/pitch-deck';
+import Axios from 'axios';
 
 // ==================== Constants ====================
 
@@ -103,7 +104,7 @@ export const getAnalysisByDeck = async (deckUuid: string): Promise<AnalysisRespo
     return response.data;
   } catch (error) {
     // Return null if analysis not found (404)
-    if (httpClient.isAxiosError(error) && error.response?.status === 404) {
+    if (Axios.isAxiosError(error) && error.response?.status === 404) {
       return null;
     }
     throw error;

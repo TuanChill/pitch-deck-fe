@@ -68,19 +68,23 @@ export const validatePitchDeckFile = (file: File): { valid: boolean; error?: str
 ```
 
 **Parameters:**
+
 - `file` (`File`): The file to validate
 
 **Returns:**
+
 - `valid` (`boolean`): Whether the file is valid
 - `error` (`string?`): Error message if invalid
 
 **Validation Rules:**
+
 1. Checks file type against `ALLOWED_PITCH_DECK_TYPES`
 2. Validates file extension as fallback
 3. Enforces `MAX_PITCH_DECK_SIZE` limit
 4. Ensures file is not empty
 
 **Example:**
+
 ```typescript
 const result = validatePitchDeckFile(file);
 if (!result.valid) {
@@ -98,9 +102,11 @@ export const formatFileSize = (bytes: number): string => {
 ```
 
 **Parameters:**
+
 - `bytes` (`number`): File size in bytes
 
 **Returns:**
+
 - `string`: Formatted file size (e.g., "2.5 MB", "1.2 KB")
 
 **Purpose:** Converts byte counts to human-readable format for display.
@@ -114,9 +120,11 @@ export const getFileTypeLabel = (file: File): string => {
 ```
 
 **Parameters:**
+
 - `file` (`File`): The file to get label for
 
 **Returns:**
+
 - `string`: Human-readable file type label or filename extension
 
 **Purpose:** Provides consistent file type naming throughout the application.
@@ -244,12 +252,14 @@ import { MAX_PITCH_DECK_SIZE } from '@/constants/file-types';
 ### When Updating Constants
 
 1. **MAX_PITCH_DECK_SIZE Updates:**
+
    - Verify backend alignment before changing
    - Update all documentation references
    - Test with boundary conditions
    - Communicate changes to users if necessary
 
 2. **ALLOWED_PITCH_DECK_TYPES Updates:**
+
    - Consider security implications of adding new types
    - Test with actual files of new types
    - Update error messages if needed
@@ -268,6 +278,7 @@ import { MAX_PITCH_DECK_SIZE } from '@/constants/file-types';
 ---
 
 **Related Documentation:**
+
 - [API Documentation](../api-docs.md) - Upload endpoints
 - [System Architecture](../system-architecture.md) - File upload flow
 - [Code Standards](../code-standards.md) - Constants management
