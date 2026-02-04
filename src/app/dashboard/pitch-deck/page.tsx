@@ -117,8 +117,8 @@ export default function PitchDeckPage() {
       {/* Upload/Analysis progress */}
       {(uploadState === 'uploading' || uploadState === 'analyzing') && currentUpload && (
         <UploadProgress
-          filename={currentUpload.filename}
-          fileType={currentUpload.fileType}
+          filename={currentUpload.files?.[0]?.originalFileName ?? currentUpload.title}
+          fileType={currentUpload.files?.[0]?.mimeType ?? 'application/pdf'}
           progress={progress}
           state={currentStage}
           onCancel={handleCancel}

@@ -1,5 +1,5 @@
 import type {
-  UploadPitchDeckResponse,
+  PitchDeckDetailResponse,
   PitchDeckAnalysisResponse
 } from '@/types/response/pitch-deck';
 import { create } from 'zustand';
@@ -12,7 +12,7 @@ type UploadState = AnalysisStage;
 type State = {
   uploadState: UploadState;
   currentStage: AnalysisStage;
-  currentUpload: UploadPitchDeckResponse | null;
+  currentUpload: PitchDeckDetailResponse | null;
   currentAnalysis: PitchDeckAnalysisResponse | null;
   error: string | null;
   history: PitchDeckAnalysisResponse[];
@@ -21,7 +21,7 @@ type State = {
 type Actions = {
   setUploadState: (state: UploadState) => void;
   setCurrentStage: (stage: AnalysisStage) => void;
-  setCurrentUpload: (upload: UploadPitchDeckResponse | null) => void;
+  setCurrentUpload: (upload: PitchDeckDetailResponse | null) => void;
   setCurrentAnalysis: (analysis: PitchDeckAnalysisResponse | null) => void;
   setError: (error: string | null) => void;
   addToHistory: (analysis: PitchDeckAnalysisResponse) => void;

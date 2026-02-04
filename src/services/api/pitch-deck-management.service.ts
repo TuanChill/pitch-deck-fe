@@ -1,101 +1,56 @@
-// Pitch deck management API service
-// CRUD operations for pitch deck management pages
-
-import { httpClient } from '@/services/http/client';
-import type {
-  ListPitchDecksQuery,
-  UploadPitchDeckWithMetadataRequest
-} from '@/types/request/pitch-deck';
-import type { ListPitchDecksResponse, PitchDeckDetailResponse } from '@/types/response/pitch-deck';
-import { withRetry } from '@/utils/retry';
-
 /**
- * Get paginated list of pitch decks with optional status filtering
- * @param query - Query parameters for filtering and pagination
- * @returns Array of pitch deck list items
+ * Pitch Deck Management API Service
+ *
+ * Convenience wrapper for pitch deck CRUD operations used by management pages.
+ * Uses Phase 02 pitch-deck.service under the hood.
+ *
+ * This file maintains backward compatibility with existing management components.
  */
-export const listPitchDecks = async (
-  query: ListPitchDecksQuery
-): Promise<ListPitchDecksResponse> => {
-  const params = new URLSearchParams();
 
-  if (query.status) {
-    params.append('status', query.status);
-  }
-  if (query.limit !== undefined) {
-    params.append('limit', query.limit.toString());
-  }
-  if (query.offset !== undefined) {
-    params.append('offset', query.offset.toString());
-  }
+import { deletePitchDeck, uploadPitchDeck } from '@/services/api/pitch-deck.service';
+import type { UploadPitchDeckWithMetadataRequest } from '@/types/request/pitch-deck';
+import type { PitchDeckDetailResponse } from '@/types/response/pitch-deck';
 
-  return withRetry(async () => {
-    const response = await httpClient.get<ListPitchDecksResponse>(
-      `/pitchdeck${params.toString() ? `?${params.toString()}` : ''}`
-    );
-
-    return response.data;
-  });
-};
+// Re-export core functions from pitch-deck.service
+// These are now implemented with real API calls
+export {
+  uploadPitchDeck,
+  listPitchDecks,
+  getPitchDeckDetail,
+  deletePitchDeck
+} from '@/services/api/pitch-deck.service';
 
 /**
- * Get detailed information for a single pitch deck by UUID
- * @param uuid - Unique identifier of the pitch deck
- * @returns Detailed pitch deck information
- */
-export const getPitchDeckDetail = async (uuid: string): Promise<PitchDeckDetailResponse> => {
-  return withRetry(async () => {
-    const response = await httpClient.get<PitchDeckDetailResponse>(`/pitchdeck/${uuid}`);
-
-    return response.data;
-  });
-};
-
-/**
- * Upload a pitch deck file with associated metadata (title, description, tags)
- * @param request - Upload request containing file and metadata
- * @param onProgress - Optional callback for upload progress (0-100)
- * @returns Created pitch deck detail response
+ * Upload pitch deck with metadata (alias for upload form compatibility)
+ * Wraps uploadPitchDeck with the legacy UploadPitchDeckWithMetadataRequest format
+ *
+ * @param request - Upload request with single file and metadata
+ * @param onProgress - Optional progress callback
+ * @returns Created pitch deck detail
  */
 export const uploadPitchDeckWithMetadata = async (
   request: UploadPitchDeckWithMetadataRequest,
   onProgress?: (progress: number) => void
 ): Promise<PitchDeckDetailResponse> => {
-  const formData = new FormData();
-  formData.append('file', request.deck);
-
-  const metadata = {
-    title: request.title,
-    description: request.description || '',
-    tags: request.tags || []
-  };
-  formData.append('metadata', JSON.stringify(metadata));
-
-  return withRetry(async () => {
-    const response = await httpClient.post<PitchDeckDetailResponse>('/pitchdeck/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
-      onUploadProgress: onProgress
-        ? (progressEvent) => {
-            if (progressEvent.total) {
-              const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-              onProgress(progress);
-            }
-          }
-        : undefined
-    });
-
-    return response.data;
-  });
+  // Convert legacy format to new format
+  return uploadPitchDeck(
+    {
+      files: [request.deck],
+      title: request.title,
+      description: request.description,
+      tags: request.tags
+    },
+    onProgress
+  );
 };
 
 /**
- * Delete a pitch deck by UUID
- * @param uuid - Unique identifier of the pitch deck to delete
+ * Delete pitch deck by UUID (alias for consistency)
+ *
+ * @param uuid - Unique identifier of the pitch deck
+ * @returns Success confirmation
  */
 export const deletePitchDeckByUuid = async (uuid: string): Promise<void> => {
-  return withRetry(async () => {
-    await httpClient.delete(`/pitchdeck/${uuid}`);
-  });
+  // Re-use the main delete function
+  await deletePitchDeck(uuid);
 };

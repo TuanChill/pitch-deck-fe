@@ -81,6 +81,7 @@ export type StartAnalysisRequest = {
 ### 4. Service Layer Updates
 
 **Files:**
+
 - `/src/services/api/index.ts` - Export new types
 - `/src/services/api/pitch-deck.service.ts` - Fixed uuid alignment
 
@@ -91,6 +92,7 @@ export type StartAnalysisRequest = {
 ### 5. Application-Wide UUID Alignment
 
 **Files Updated:**
+
 - `src/app/dashboard/pitch-deck/page.tsx` - Fixed uuid usage
 - `src/app/dashboard/pitch-decks/[uuid]/page.tsx` - Fixed files array usage
 - `src/components/pitch-deck-management/upload-form.tsx` - Fixed uuid usage
@@ -104,6 +106,7 @@ export type StartAnalysisRequest = {
 **Decision:** Replace all uploadId references with UUID
 
 **Rationale:**
+
 - UUID provides better global uniqueness
 - Consistent with backend entity design
 - Better suited for distributed systems
@@ -114,6 +117,7 @@ export type StartAnalysisRequest = {
 **Decision:** File metadata moved to `files` array
 
 **Benefits:**
+
 - Scalable for future multi-file uploads
 - Clear separation between deck and file metadata
 - Better performance with fileCount property
@@ -124,6 +128,7 @@ export type StartAnalysisRequest = {
 **Decision:** All endpoints defined in single constants file
 
 **Benefits:**
+
 - Easy endpoint management and updates
 - Type-safe URL construction
 - Consistent API usage throughout app
@@ -195,13 +200,13 @@ export type StartAnalysisRequest = {
 
 ## Quality Metrics
 
-| Metric | Status | Value |
-|--------|--------|-------|
-| Type Safety | ✅ | 100% |
-| Test Coverage | ✅ | N/A (No tests required) |
-| Documentation | ✅ | Updated |
-| Breaking Changes | ⚠️ | 3 (Low impact) |
-| Performance Impact | ✅ | Minimal |
+| Metric             | Status | Value                   |
+| ------------------ | ------ | ----------------------- |
+| Type Safety        | ✅     | 100%                    |
+| Test Coverage      | ✅     | N/A (No tests required) |
+| Documentation      | ✅     | Updated                 |
+| Breaking Changes   | ⚠️     | 3 (Low impact)          |
+| Performance Impact | ✅     | Minimal                 |
 
 ## Summary
 

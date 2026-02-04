@@ -139,41 +139,16 @@ export const UploadForm = ({ onSuccess, onCancel, className }: UploadFormProps) 
         try {
           const response = await uploadPitchDeck(selectedFile);
 
-          const mockDeck: PitchDeckListItem = {
-            id: response.uuid,
-            uuid: response.uuid,
-            title: title.trim(),
-            description: description.trim() || null,
-            status: 'processing',
-            chunkCount: 0,
-            fileCount: 1,
-            errorMessage: null,
-            tags: tags.length > 0 ? tags : null,
-            files: [
-              {
-                uuid: response.uuid,
-                originalFileName: response.filename,
-                mimeType: response.fileType,
-                fileSize: response.fileSize,
-                status: 'processing',
-                storagePath: '',
-                createdAt: response.uploadedAt,
-                updatedAt: response.uploadedAt
-              }
-            ],
-            createdAt: response.uploadedAt,
-            updatedAt: response.uploadedAt,
-            lastAccessedAt: response.uploadedAt
-          };
-
+          // Response is PitchDeckDetailResponse which extends PitchDeckListItem
+          // No need for redundant type conversion - use response directly
           setFormState((prev) => ({
             ...prev,
             uploadProgress: 100,
             uploadState: 'success',
-            uploadedDeck: mockDeck
+            uploadedDeck: response
           }));
 
-          onSuccess?.(mockDeck.uuid);
+          onSuccess?.(response.uuid);
         } catch (error) {
           const errorMessage =
             error instanceof Error ? error.message : 'Upload failed. Please try again.';
@@ -193,7 +168,7 @@ export const UploadForm = ({ onSuccess, onCancel, className }: UploadFormProps) 
         uploadError: errorMessage
       }));
     }
-  }, [selectedFile, title, description, tags, simulateProgress, onSuccess]);
+  }, [selectedFile, title, simulateProgress, onSuccess]);
 
   const handleReset = useCallback(() => {
     setFormState(INITIAL_FORM_STATE);

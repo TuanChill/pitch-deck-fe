@@ -807,16 +807,17 @@ if (!ALLOWED_MIMES.includes(file.mimetype as any)) {
 
 ## 13. Version History
 
-| Version | Date       | Changes                                                  |
-| ------- | ---------- | -------------------------------------------------------- |
-| 1.0.0   | 2026-02-03 | Initial API documentation                                |
-| 1.1.0   | 2026-02-03 | Added VC framework types                                 |
-| 1.2.0   | 2026-02-03 | Added retry utility documentation                        |
-| 1.3.0   | 2026-02-03 | Wave 3: Pitch deck management pages                      |
-| 1.4.0   | 2026-02-03 | Backend database layer (Phase 01) completed              |
-| 1.5.0   | 2026-02-03 | Multi-file support - DTO layer (Phase 02)                |
-| 1.6.0   | 2026-02-03 | Controller layer updates (Phase 04) - Multi-file support |
+| Version | Date       | Changes                                                                          |
+| ------- | ---------- | -------------------------------------------------------------------------------- |
+| 1.0.0   | 2026-02-03 | Initial API documentation                                                        |
+| 1.1.0   | 2026-02-03 | Added VC framework types                                                         |
+| 1.2.0   | 2026-02-03 | Added retry utility documentation                                                |
+| 1.3.0   | 2026-02-03 | Wave 3: Pitch deck management pages                                              |
+| 1.4.0   | 2026-02-03 | Backend database layer (Phase 01) completed                                      |
+| 1.5.0   | 2026-02-03 | Multi-file support - DTO layer (Phase 02)                                        |
+| 1.6.0   | 2026-02-03 | Controller layer updates (Phase 04) - Multi-file support                         |
 | 1.7.0   | 2026-02-03 | Frontend API constants & types (Phase 01) - UUID identifiers, multi-file support |
+| 1.8.0   | 2026-02-04 | Phase 02 - Pitch Deck Service Layer - Real API implementation with validation |
 
 ---
 
@@ -1179,5 +1180,174 @@ export const MIME_TO_EXT = /* ... */;
 
 ---
 
-_Last Updated: 2026-02-03_
-_API Version: 1.7.0_
+## 14. Phase 02: Pitch Deck Service Layer Implementation
+
+### Overview
+Phase 02 completed the service layer implementation, replacing mock services with real API integration to the backend at `http://localhost:8082`.
+
+### Key Features Implemented
+
+#### 1. Real API Integration
+```typescript
+// src/services/api/pitch-deck.service.ts - Real implementation
+export const uploadPitchDeck = async (
+  fileOrRequest: File | UploadPitchDeckRequest,
+  onProgress?: (progress: number) => void
+): Promise<PitchDeckDetailResponse> => {
+  // Real upload logic with validation and progress tracking
+  const response = await httpClient.post<PitchDeckDetailResponse>(
+    API_URL.PITCH_DECK.UPLOAD,
+    formData,
+    {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: onProgress ? (progressEvent) => { /* ... */ } : undefined
+    }
+  );
+  return response.data;
+};
+```
+
+#### 2. File Validation
+- **Size Validation**: 50MB maximum file size
+- **Type Validation**: PDF, PPT, PPTX, DOC, DOCX formats
+- **Multi-file Support**: Up to 10 files per upload
+- **Error Handling**: Clear error messages for invalid files
+
+#### 3. Backward Compatibility
+- Maintained legacy function signatures for transition
+- Support for both single file and multi-file uploads
+- Graceful handling of deprecated parameters
+
+#### 4. Progress Tracking
+- Real-time upload progress callbacks
+- Integration with UI components for progress visualization
+- Exposed progress events for React components
+
+#### 5. API Service Methods
+```typescript
+// Core CRUD operations
+- uploadPitchDeck(): Upload with metadata and validation
+- listPitchDecks(): Filtered pitch deck listings
+- getPitchDeckDetail(): Retrieve full deck details
+- deletePitchDeck(): Safe deletion with confirmation
+
+// Analysis methods
+- analyzePitchDeck(): VC analysis trigger (mock for now)
+```
+
+### Integration Points
+
+#### HTTP Client Integration
+- JWT tokens automatically attached via interceptors
+- Global error handling (401 redirect to login)
+- Request/response validation
+- Timeout protection (5-minute uploads)
+
+#### Type Safety
+- Full TypeScript type coverage
+- Request/response type alignment with backend
+- Generic error handling patterns
+- Strongly typed API contracts
+
+#### Store Integration
+- Zustand stores updated to use new response types
+- Pitch deck store uses `PitchDeckDetailResponse`
+- Error state management with user-friendly messages
+
+### File Updates
+
+#### Modified Files
+1. **src/services/api/pitch-deck.service.ts** - Real API implementation
+2. **src/services/api/pitch-deck-management.service.ts** - Updated imports
+3. **src/stores/pitch-deck.store.ts** - Updated to `PitchDeckDetailResponse`
+4. **src/app/dashboard/pitch-deck/page.tsx** - Fixed array access
+5. **src/components/pitch-deck-management/upload-form.tsx** - Removed redundant conversion
+
+#### New Features
+- File validation before upload
+- Progress tracking for large files
+- Error handling with retry mechanism
+- Multi-file support architecture
+- UUID-based identifier system
+
+### Testing Strategy
+
+#### Unit Tests
+- File validation logic testing
+- Upload progress callback verification
+- Error handling scenarios
+- Type safety validation
+
+#### Integration Tests
+- API endpoint connectivity
+- Authentication flow testing
+- File upload simulation
+- Response format validation
+
+### Performance Considerations
+
+#### Optimization
+- Chunked file uploads for large files
+- Progress tracking for user feedback
+- Caching of frequently accessed data
+- Efficient pagination implementation
+
+#### Memory Management
+- Proper cleanup of file references
+- Prevention of memory leaks
+- Efficient state management
+- Optimized rendering with React.memo
+
+### Security Enhancements
+
+#### File Upload Security
+- File type validation with MIME checking
+- File size limits to prevent abuse
+- Secure temporary file handling
+- Path sanitization for error messages
+
+#### API Security
+- JWT token protection
+- Request/response validation
+- Error message sanitization
+- Rate limiting considerations
+
+### Future Enhancements
+
+#### Phase 03 (Upcoming)
+- Real analysis API implementation
+- WebSocket integration for real-time updates
+- Advanced file processing features
+- Enhanced error recovery mechanisms
+
+#### Phase 04 (Completed)
+- Multi-file support architecture
+- Bulk file validation
+- Enhanced security measures
+- Performance optimizations
+
+### Migration Guide
+
+#### Breaking Changes
+- Response structure now includes `files` array
+- File metadata moved from deck level to files array
+- UUID-based identifiers replaced uploadId
+- Progress callback interface updated
+
+#### Migration Steps
+1. Update response handling to use `files` array
+2. Implement file validation in UI components
+3. Add progress tracking for uploads
+4. Update error handling for new validation rules
+5. Test with real API endpoints
+
+#### Backward Compatibility
+- Upload requests remain unchanged
+- Legacy function signatures still supported
+- Existing UI components continue to work
+- Gradual migration path provided
+
+---
+
+_Last Updated: 2026-02-04_
+_API Version: 1.8.0_
