@@ -3,7 +3,7 @@
 import { getScoreBand } from '@/constants/score-bands';
 import { VC_CATEGORY_CONFIG } from '@/constants/vc-framework';
 import type { VCCategory } from '@/types/response/pitch-deck';
-import { cn } from '@/utils';
+import { cn, formatPercentage, formatScore } from '@/utils';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 
@@ -29,7 +29,7 @@ export const CategoryCard = ({
   const config = VC_CATEGORY_CONFIG[category];
   const Icon = config.icon;
   const band = getScoreBand(score);
-  const weightPercent = Math.round(weight * 100);
+  const weightPercent = formatPercentage(weight);
 
   return (
     <motion.div
@@ -69,7 +69,9 @@ export const CategoryCard = ({
 
           {/* Score */}
           <div className="text-right shrink-0">
-            <p className={cn('text-2xl font-bold tabular-nums', band.textColor)}>{score}</p>
+            <p className={cn('text-2xl font-bold tabular-nums', band.textColor)}>
+              {formatScore(score)}
+            </p>
             <p className="text-xs text-muted-foreground">{band.label}</p>
           </div>
 

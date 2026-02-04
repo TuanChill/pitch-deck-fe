@@ -1,7 +1,7 @@
 'use client';
 
 import { SCORE_BANDS } from '@/constants/score-bands';
-import { cn } from '@/utils';
+import { cn, formatScore, roundScore } from '@/utils';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
@@ -35,7 +35,7 @@ export const GaugeChart = ({
         setAnimatedScore(score);
         clearInterval(timer);
       } else {
-        setAnimatedScore(Math.round(current));
+        setAnimatedScore(roundScore(current));
       }
     }, duration / steps);
 
@@ -104,7 +104,7 @@ export const GaugeChart = ({
           animate={{ scale: 1, opacity: 1 }}
           className="text-5xl font-bold tabular-nums"
         >
-          {animatedScore}
+          {formatScore(animatedScore)}
         </motion.span>
         {showLabel && (
           <span className={cn('text-sm font-medium mt-1', band.textColor)}>{band.label}</span>

@@ -1,7 +1,7 @@
 'use client';
 
 import { getScoreColor } from '@/constants/score-bands';
-import { cn } from '@/utils';
+import { cn, formatScore } from '@/utils';
 import { getScoreGrade } from '@/utils/mock-analysis';
 
 type ScoreCardProps = {
@@ -38,7 +38,7 @@ export const ScoreCard = ({
               : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950'
         )}
       >
-        {score}
+        {formatScore(score)}
       </div>
       <p className="text-sm font-medium mt-2">{label}</p>
       {showGrade && (

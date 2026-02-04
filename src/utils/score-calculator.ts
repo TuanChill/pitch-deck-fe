@@ -9,7 +9,7 @@ export const calculateWeightedScore = (categoryScores: VCCategoryScore): number 
     totalWeightedScore += score * weight;
   });
 
-  return Math.round(totalWeightedScore);
+  return totalWeightedScore;
 };
 
 export const normalizeScore = (value: number, _min = 0, _max = 100): number => {

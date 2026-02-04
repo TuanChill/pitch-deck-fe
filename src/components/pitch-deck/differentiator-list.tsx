@@ -1,7 +1,7 @@
 'use client';
 
 import { Differentiator } from '@/types/response/pitch-deck';
-import { cn } from '@/utils';
+import { cn, formatScore } from '@/utils';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
@@ -50,7 +50,7 @@ export const DifferentiatorList = ({ differentiators, className }: Differentiato
                     )}
                   >
                     {isPositive ? '+' : ''}
-                    {delta}
+                    {formatScore(delta)}
                   </span>
                 </div>
               </div>
@@ -62,7 +62,7 @@ export const DifferentiatorList = ({ differentiators, className }: Differentiato
                 <div>
                   <div className="flex justify-between text-xs mb-1">
                     <span className="text-muted-foreground">You</span>
-                    <span className="font-medium">{diff.userScore}</span>
+                    <span className="font-medium">{formatScore(diff.userScore)}</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <motion.div
@@ -76,7 +76,7 @@ export const DifferentiatorList = ({ differentiators, className }: Differentiato
                 <div>
                   <div className="flex justify-between text-xs mb-1">
                     <span className="text-muted-foreground">Competitor Avg</span>
-                    <span className="font-medium">{diff.competitorAvg}</span>
+                    <span className="font-medium">{formatScore(diff.competitorAvg)}</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <motion.div
