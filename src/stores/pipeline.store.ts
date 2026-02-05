@@ -67,7 +67,23 @@ export const usePipelineStore = create<PipelineStore>()(
       setError: (error) => set({ error }),
 
       // Reset
-      reset: () => set(initialState)
+      reset: () => set(initialState),
+
+      // Mock completed state for development/demo
+      mockCompleted: () =>
+        set((state) => ({
+          overallStatus: 'completed',
+          overallProgress: 100,
+          stages: Object.fromEntries(
+            Object.keys(state.stages).map((key) => [
+              key,
+              { ...state.stages[key], status: 'completed', progress: 100 }
+            ])
+          ),
+          currentStage: null,
+          isPolling: false,
+          error: null
+        }))
     }),
     {
       name: 'pipeline-storage',

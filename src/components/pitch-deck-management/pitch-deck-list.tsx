@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { PitchDeckCard } from './pitch-deck-card';
 
 interface PitchDeckListProps {
-  decks: PitchDeckListItem[];
+  decks: PitchDeckListItem[] | undefined;
   isLoading: boolean;
   onDelete: (uuid: string) => void;
   onClick?: (uuid: string) => void;
@@ -67,14 +67,14 @@ export const PitchDeckList = ({
     );
   }
 
-  if (decks.length === 0) {
+  if (!decks || decks.length === 0) {
     return <EmptyState onCreateNew={onCreateNew} />;
   }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {decks.map((deck) => (
-        <PitchDeckCard key={deck.uuid} deck={deck} onDelete={onDelete} onClick={onClick} />
+        <PitchDeckCard key={deck.id} deck={deck} onDelete={onDelete} onClick={onClick} />
       ))}
     </div>
   );

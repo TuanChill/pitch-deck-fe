@@ -1,0 +1,97 @@
+import { PIPELINE_STAGE_ORDER } from '@/constants/pipeline-stages';
+import { usePipelineStore } from '@/stores/pipeline.store';
+import { AlertCircle, CheckCircle2, ChevronRight, Clock, Loader2 } from 'lucide-react';
+
+import { cn } from '@/lib/utils';
+
+const STATUS_ICONS = {
+  pending: Clock,
+  running: Loader2,
+  completed: CheckCircle2,
+  failed: AlertCircle
+} as const;
+
+const STATUS_COLORS = {
+  pending: 'bg-gray-50 text-gray-600 border-gray-300',
+  running: 'bg-blue-50 text-blue-600 border-blue-400',
+  completed: 'bg-green-50 text-green-600 border-green-400',
+  failed: 'bg-red-50 text-red-600 border-red-400'
+} as const;
+
+const LINE_COLORS = {
+  pending: 'bg-gray-300',
+  running: 'bg-blue-400',
+  completed: 'bg-green-400'
+} as const;
+
+export function PipelineCards() {
+  const stages = usePipelineStore((s) => s.stages);
+
+  return (
+    <div className="flex items-center gap-2 overflow-x-auto pb-4 min-w-max">
+      {PIPELINE_STAGE_ORDER.map((stageId, index) => {
+        const stage = stages[stageId];
+        const StatusIcon = STATUS_ICONS[stage.status];
+        const isLast = index === PIPELINE_STAGE_ORDER.length - 1;
+
+        // Determine line color based on whether this stage is completed
+        const nextStage = stages[PIPELINE_STAGE_ORDER[index + 1]];
+        const nextLineColor =
+          nextStage?.status === 'running' || nextStage?.status === 'completed'
+            ? LINE_COLORS.completed
+            : LINE_COLORS.pending;
+
+        return (
+          <div key={stageId} className="flex items-center flex-shrink-0">
+            {/* Stage Card */}
+            <div
+              className={cn(
+                'min-w-[160px] rounded-lg border-2 p-3 transition-all',
+                STATUS_COLORS[stage.status]
+              )}
+            >
+              {/* Icon and name */}
+              <div className="flex items-center gap-2 mb-2">
+                <StatusIcon
+                  className={cn(
+                    'w-4 h-4 flex-shrink-0',
+                    stage.status === 'running' && 'animate-spin'
+                  )}
+                />
+                <span className="font-semibold text-xs truncate">{stage.name}</span>
+              </div>
+
+              {/* Progress bar */}
+              {stage.status === 'running' && (
+                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                  <div
+                    className="bg-blue-500 h-1.5 rounded-full transition-all duration-100"
+                    style={{ width: `${stage.progress}%` }}
+                  />
+                </div>
+              )}
+
+              {/* Status text */}
+              <div className="text-xs font-medium mt-1">
+                {stage.status === 'pending' && 'Waiting'}
+                {stage.status === 'running' && `${stage.progress}%`}
+                {stage.status === 'completed' && 'Done'}
+                {stage.status === 'failed' && 'Failed'}
+              </div>
+            </div>
+
+            {/* Connecting Line/Arrow */}
+            {!isLast && (
+              <div className="flex items-center px-1">
+                <div
+                  className={cn('h-0.5 w-8 rounded transition-colors duration-300', nextLineColor)}
+                />
+                <ChevronRight className={cn('w-4 h-4', nextLineColor.replace('bg-', 'text-'))} />
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}

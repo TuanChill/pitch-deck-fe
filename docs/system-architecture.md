@@ -11,9 +11,10 @@ This document provides a comprehensive overview of the Next.js boilerplate syste
 5. [Provider Setup](#provider-setup)
 6. [State Management Architecture](#state-management-architecture)
 7. [Component Architecture](#component-architecture)
-8. [API Integration Pattern](#api-integration-pattern)
-9. [Error Handling Strategy](#error-handling-strategy)
-10. [Performance Architecture](#performance-architecture)
+8. [Pipeline Visualization Architecture](#pipeline-visualization-component-architecture)
+9. [API Integration Pattern](#api-integration-pattern)
+10. [Error Handling Strategy](#error-handling-strategy)
+11. [Performance Architecture](#performance-architecture)
 
 ---
 
@@ -106,6 +107,7 @@ This document provides a comprehensive overview of the Next.js boilerplate syste
 ├── useAuth.ts          # Authentication logic
 ├── useTheme.ts         # Theme management
 ├── useApi.ts          # API data fetching
+├── use-pipeline-auto-start.ts # Pipeline auto-start with intelligent polling
 └── index.ts          # Hook exports
 ```
 
@@ -776,6 +778,60 @@ describe('UserProfile', () => {
 
 ---
 
+## Type System Architecture
+
+### Domain Type System
+
+The application implements a comprehensive domain type system to ensure type safety and consistency across all layers.
+
+#### Type Categories
+
+```typescript
+// src/types/domain/
+├── evaluation.types.ts    # Evaluation framework types
+├── metrics.types.ts       # Startup metrics & market data
+├── ui-state.types.ts      # UI component states
+└── index.ts              # Barrel exports
+```
+
+#### Type Safety Flow
+
+```
+Domain Types → API Types → Component Props → State
+    ↑              ↑              ↑          ↑
+Strongly       Type-safe      Prop       Runtime
+Typed          Contracts      Validation  Validation
+```
+
+#### Integration Patterns
+
+1. **Domain-First Design**: Start with domain types, derive API types
+2. **Barrel Exports**: Clean imports from `@/types/domain`
+3. **Validation Layers**: Compile-time + runtime validation
+4. **Mock Data Conformance**: Mock data implements domain types
+
+#### Usage Examples
+
+```typescript
+// Import from barrel export
+import type { CategoryEvaluation, StartupMetrics, EnhancedSWOTItem } from '@/types/domain';
+
+// Component props use domain types
+interface PitchDeckDetailProps {
+  evaluation: CategoryEvaluation[];
+  metrics: StartupMetrics;
+  swotItems: EnhancedSWOTItem[];
+}
+
+// API responses extend domain types
+interface AnalysisResponse extends EvaluationResult {
+  processingTime: number;
+  confidence: number;
+}
+```
+
+---
+
 ## API Integration Pattern
 
 ### Service Layer Architecture
@@ -1109,6 +1165,52 @@ The pitch deck management system implements 11 specialized components:
 
 ### State Management Architecture
 
+#### Pipeline Store
+
+```typescript
+// src/stores/pipeline.store.ts
+interface PipelineState {
+  // Analysis UUID
+  analysisUuid: string | null;
+
+  // Overall status
+  overallStatus: 'pending' | 'processing' | 'completed' | 'failed' | null;
+  overallProgress: number;
+
+  // Stage tracking
+  stages: Record<string, PipelineStage>;
+  currentStage: string | null;
+
+  // Polling state
+  isPolling: boolean;
+  pollCount: number;
+
+  // Error state
+  error: string | null;
+}
+```
+
+**Features:**
+- Real-time pipeline progress tracking
+- Stage-by-stage status updates
+- Polling mechanism with count tracking
+- localStorage persistence for critical state
+- Atomic updates for race condition prevention
+
+**Key Actions:**
+```typescript
+// Stage management
+updateStage(stageId: string, updates: Partial<PipelineStage>)
+setStages(stages: Record<string, PipelineStage>)
+
+// Polling control
+setPolling(isPolling: boolean)
+incrementPollCount()
+
+// Error handling
+setError(error: string | null)
+```
+
 #### Pitch Deck Store
 
 ```typescript
@@ -1315,7 +1417,204 @@ PitchDeck (1) ←→ (N) PitchDeckFile
 
 ---
 
-## 14.1 FileUploader Component Architecture
+## 14.1 Pipeline Auto-Start Hook Architecture
+
+### Hook Design
+
+The `usePipelineAutoStart` hook provides intelligent pipeline management for pitch deck analysis. It automatically detects existing analysis, resumes polling, and can restart failed analysis operations.
+
+#### Hook Structure
+
+```typescript
+interface UsePipelineAutoStartOptions {
+  autoStart?: boolean;        // Enable auto-restart of failed analysis
+  onProgress?: (progress: number) => void;    // Progress callback
+  onComplete?: (analysisUuid: string) => void; // Completion callback
+  onError?: (error: string) => void;        // Error callback
+}
+
+export const usePipelineAutoStart = (
+  deckUuid: string,
+  options: UsePipelineAutoStartOptions = {}
+) => {
+  // Returns pipeline state and polling status
+};
+```
+
+#### Key Features
+
+1. **Intelligent Pipeline Detection**
+   - Checks for existing analysis on component mount
+   - Resumes polling from where it left off
+   - Handles all analysis states (pending, processing, completed, failed)
+
+2. **Auto-Restart Capability**
+   - Automatically restarts failed analysis when `autoStart=true`
+   - Clears previous state and initiates new analysis
+   - Graceful error handling with user feedback
+
+3. **Agent-Stage Mapping**
+   - Maps backend agents to frontend pipeline stages
+   - Updates stage status based on agent execution
+   - Provides real-time progress tracking
+
+4. **Memory Management**
+   - Cleanup on component unmount
+   - Prevention of memory leaks with polling intervals
+   - Efficient state updates with Zustand integration
+
+#### Data Flow
+
+```
+Component Mount
+    ↓
+Check Existing Analysis (getAnalysisByDeck)
+    ↓
+┌─────────────────────────────────────────────┐
+│ Analysis Status                           │
+│  ├─ Already completed → Call onComplete   │
+│  ├─ Failed with autoStart → Restart     │
+│  ├─ Processing/Pending → Resume polling  │
+│  └─ No analysis → Start new if autoStart  │
+└─────────────────────────────────────────────┘
+    ↓
+Poll with Exponential Backoff (pollAnalysisComplete)
+    ↓
+Update Pipeline Store & Call Callbacks
+```
+
+#### Integration Patterns
+
+**1. Basic Usage**
+
+```typescript
+const { isPolling, overallProgress, stages } = usePipelineAutoStart(
+  deckUuid,
+  {
+    autoStart: true,
+    onProgress: (progress) => console.log('Progress:', progress),
+    onComplete: (uuid) => console.log('Complete:', uuid)
+  }
+);
+```
+
+**2. Conditional Auto-Start**
+
+```typescript
+const { isPolling, error } = usePipelineAutoStart(
+  deckUuid,
+  {
+    autoStart: userPreference,
+    onError: (error) => toast.error(error)
+  }
+);
+```
+
+**3. With UI Components**
+
+```typescript
+function PitchDeckDetail() {
+  const { isPolling, overallProgress, stages, currentStage } = usePipelineAutoStart(deckUuid);
+
+  return (
+    <div>
+      <PipelineProgress
+        isPolling={isPolling}
+        progress={overallProgress}
+        stages={stages}
+        currentStage={currentStage}
+      />
+    </div>
+  );
+}
+```
+
+### 14.2 Pipeline Visualization Component Architecture
+
+### Component Design
+
+The Pipeline Visualization Component is a ReactFlow-based system for displaying AI analysis pipeline progress with real-time updates and interactive visual elements.
+
+#### Component Structure
+
+```typescript
+// src/components/pipeline-visualization/
+├── pipeline-flow.tsx      # Main ReactFlow component
+├── pipeline-node.tsx      # Custom node component
+└── index.ts             # Barrel exports
+```
+
+#### Core Components
+
+**PipelineFlow Component**
+- Manages ReactFlow instance and node positioning
+- Creates animated edges between stages
+- Handles real-time status updates
+- Provides SSR compatibility with wrapper
+
+**PipelineNode Component**
+- Custom ReactFlow node with status indicators
+- Displays stage name, status, and progress
+- Shows appropriate icons and colors
+- Handles connection points for linking
+
+**PipelineVisualization Wrapper**
+- SSR-compatible provider wrapper
+- Ensures proper hydration on client-side
+- Manages ReactFlow context
+
+#### State Integration
+
+```typescript
+// Pipeline store integration
+const stages = usePipelineStore((state) => state.stages);
+
+// Node creation from stages
+const nodes = PIPELINE_STAGE_ORDER.map((stageId, index) => ({
+  id: stageId,
+  type: 'pipeline',
+  position: { x: index * 250, y: 0 },
+  data: stages[stageId]
+}));
+```
+
+#### Visual Features
+
+- **Status-Based Styling**: Different colors for pending, running, completed, failed
+- **Progress Indicators**: Animated progress bars for running stages
+- **Connection Animation**: Animated edges to show active processing
+- **Responsive Design**: Adapts to different screen sizes
+- **Interactive Controls**: Zoom, pan, and view controls
+
+#### Technical Implementation
+
+```typescript
+// ReactFlow configuration
+<ReactFlow
+  nodes={nodes}
+  edges={edges}
+  nodeTypes={nodeTypes}
+  onNodeClick={onNodeClick}
+  fitView
+  preventScrolling={false}
+  panOnDrag={false}
+  zoomOnScroll={false}
+  zoomOnPinch={false}
+  panOnScroll={false}
+>
+  <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
+  <Controls showInteractive={false} />
+</ReactFlow>
+```
+
+#### Performance Optimizations
+
+- **Memoization**: Node and edge arrays are memoized
+- **Limited Interactions**: Reduced controls for better performance
+- **Efficient Updates**: Zustand selectors prevent unnecessary re-renders
+- **Lazy Loading**: Component loads only when needed
+
+### 14.3 FileUploader Component Architecture
 
 ### Component Design
 
@@ -1589,5 +1888,5 @@ if (!ALLOWED_MIMES.includes(file.mimetype as any)) {
 
 ---
 
-_Last Updated: 2026-02-03_
-_Version: 0.1.0 (Wave 3: v0.2.0) + Phase 02 DTO Layer + Phase 04 Controller Layer_
+_Last Updated: 2026-02-06_
+_Version: 0.1.0 (Wave 3: v0.2.0) + Phase 02 DTO Layer + Phase 04 Controller Layer + Phase 02 Auto-Start Hook_

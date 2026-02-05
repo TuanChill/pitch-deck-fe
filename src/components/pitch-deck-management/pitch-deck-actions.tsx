@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { DeleteConfirmationDialog } from './delete-confirmation-dialog';
 
 export type PitchDeckActionsProps = {
-  uuid: string;
+  id: string;
   status: string;
   title: string;
   isDeleting?: boolean;
@@ -20,7 +20,7 @@ export type PitchDeckActionsProps = {
 };
 
 export const PitchDeckActions = ({
-  uuid: _uuid,
+  id: _id,
   status,
   title,
   isDeleting = false,

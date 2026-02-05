@@ -58,10 +58,10 @@ export default function PitchDecksPage() {
   );
 
   const handleDeleteClick = useCallback(
-    (uuid: string) => {
-      const deck = pitchDecks.find((d) => d.uuid === uuid);
+    (id: string) => {
+      const deck = pitchDecks?.find((d) => d.id === id);
       if (deck) {
-        setDeckToDelete({ uuid: deck.uuid, title: deck.title });
+        setDeckToDelete({ uuid: deck.id, title: deck.title });
         setDeleteDialogOpen(true);
       }
     },
@@ -88,8 +88,8 @@ export default function PitchDecksPage() {
   }, [deckToDelete, removePitchDeck, fetchPitchDecks]);
 
   const handleCardClick = useCallback(
-    (uuid: string) => {
-      router.push(APP_URL.PITCH_DECK_DETAIL(uuid));
+    (id: string) => {
+      router.push(APP_URL.PITCH_DECK_DETAIL(id));
     },
     [router]
   );
@@ -138,7 +138,7 @@ export default function PitchDecksPage() {
       />
 
       {/* Pagination */}
-      {!isLoading && pitchDecks.length > 0 && (
+      {!isLoading && pitchDecks && pitchDecks.length > 0 && (
         <div className="mt-8">
           <PitchDeckPagination
             total={total}

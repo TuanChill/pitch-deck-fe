@@ -17,3 +17,6 @@ export * from './score-bands';
 
 // Pitch Deck Status Constants
 export * from './pitch-deck-status';
+
+// VC Evaluation Constants
+export * from './vc-evaluation';

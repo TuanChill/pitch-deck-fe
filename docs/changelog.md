@@ -9,6 +9,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 03: Pipeline Visualization Component (2026-02-06)
+  - ReactFlow v11.11.4 integration for AI pipeline visualization
+  - PipelineFlow component with real-time stage tracking
+  - Custom PipelineNode component with status indicators
+  - Pipeline domain types and state management
+  - Comprehensive pipeline store with polling support
+  - Animated edges and progress indicators
+  - SSR-compatible wrapper for Next.js
+  - Status-based styling (pending, running, completed, failed)
+  - Real-time progress updates with atomic state management
+  - Pipeline stage constants and backend agent mappings
+
+### Changed
+
+- Phase 03: Codebase Update (2026-02-06)
+  - Added ReactFlow dependency to package.json
+  - Updated codebase-summary.md with pipeline visualization
+  - Created comprehensive component documentation
+  - Enhanced system architecture documentation
+  - Updated project PDR with Phase 03 completion
+
+### Planned
+
+- Phase 04: UI Integration and Enhancement
+  - Interactive node details modal
+  - WebSocket support for real-time updates
+  - Export pipeline visualization as image
+  - Historical pipeline tracking
+  - Custom themes for visualization
+
+### Added
+
 - Phase 01: API Constants & Types (2026-02-04)
   - All 9 backend endpoint URLs in api-url.ts
   - Request DTOs for pitch deck operations

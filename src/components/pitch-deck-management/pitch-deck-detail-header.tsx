@@ -1,19 +1,31 @@
 'use client';
 
-import type { PitchDeckStatus } from '@/constants/pitch-deck-status';
 import { getStatusColor, getStatusLabel } from '@/constants/pitch-deck-status';
+import type { PitchDeckStatus } from '@/constants/pitch-deck-status';
+import type { Long } from '@/types/response/pitch-deck';
 import { cn } from '@/utils';
 
 export type PitchDeckDetailHeaderProps = {
   title: string;
   status: PitchDeckStatus;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | Long;
+  updatedAt: string | Long;
   className?: string;
 };
 
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
+const longToDate = (value: string | Long): Date => {
+  if (typeof value === 'string') {
+    return new Date(value);
+  }
+
+  // Convert MongoDB Long to number (high * 2^32 + low) for milliseconds
+  const timestamp = (value.high * 2 ** 32 + value.low) * 1000;
+
+  return new Date(timestamp);
+};
+
+const formatDate = (dateValue: string | Long): string => {
+  const date = longToDate(dateValue);
   if (isNaN(date.getTime())) {
     return 'Invalid date';
   }

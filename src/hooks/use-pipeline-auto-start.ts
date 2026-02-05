@@ -11,6 +11,7 @@ import { useEffect, useRef } from 'react';
 
 interface UsePipelineAutoStartOptions {
   autoStart?: boolean;
+  mock?: boolean; // Mock mode for development/demo - skips API calls
   onProgress?: (progress: number) => void;
   onComplete?: (analysisUuid: string) => void;
   onError?: (error: string) => void;
@@ -20,7 +21,7 @@ export const usePipelineAutoStart = (
   deckUuid: string,
   options: UsePipelineAutoStartOptions = {}
 ) => {
-  const { autoStart = true, onProgress, onComplete, onError } = options;
+  const { autoStart = true, mock = false, onProgress, onComplete, onError } = options;
 
   const hasChecked = useRef(false);
   const isPollingRef = useRef(false);
@@ -71,6 +72,62 @@ export const usePipelineAutoStart = (
   useEffect(() => {
     if (!deckUuid || hasChecked.current) return;
     hasChecked.current = true;
+
+    // Mock mode - sequential stage completion for demo
+    if (mock) {
+      // Reset state first to clear any persisted completed state
+      clearAnalysis();
+
+      const mockUuid = 'mock-uuid-' + deckUuid;
+      setAnalysisUuid(mockUuid);
+
+      // Run stages sequentially with delays
+      const stages = ['extract', 'summary', 'analytics', 'swot', 'pestle', 'recommendation'];
+      let currentStageIndex = 0;
+
+      const runNextStage = async () => {
+        if (currentStageIndex >= stages.length) {
+          // All stages complete
+          setOverallStatus('completed');
+          onProgress?.(100);
+          onComplete?.(mockUuid);
+          setPolling(false);
+
+          return;
+        }
+
+        const stageId = stages[currentStageIndex];
+        let progress = 0;
+
+        // Set stage to running at 0%
+        updateStage(stageId, { status: 'running', progress: 0 });
+        setCurrentStage(stageId);
+
+        // Animate progress from 0% to 100% over 2 seconds
+        const progressInterval = setInterval(() => {
+          progress += 5; // Increment by 5% every 100ms
+          updateStage(stageId, { progress });
+
+          const overallProgress = Math.round((currentStageIndex * 100 + progress) / stages.length);
+          onProgress?.(overallProgress);
+
+          if (progress >= 100) {
+            clearInterval(progressInterval);
+            // Mark as completed
+            updateStage(stageId, { status: 'completed', progress: 100 });
+            setCurrentStage(null);
+            currentStageIndex++;
+            // Small delay before next stage
+            setTimeout(runNextStage, 500);
+          }
+        }, 100); // Update every 100ms
+      };
+
+      setPolling(true);
+      runNextStage();
+
+      return;
+    }
 
     const checkAndStartPipeline = async () => {
       try {

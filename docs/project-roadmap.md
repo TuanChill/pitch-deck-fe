@@ -1,9 +1,9 @@
 # Project Roadmap
 
 **Project**: Pitch Deck Management System (Frontend)
-**Current Phase**: Phase 04 - Store Integration
-**Last Updated**: 2026-02-04
-**Version**: v0.3.0
+**Current Phase**: Phase 02 - Auto-Start Hook Implementation Complete
+**Last Updated**: 2026-02-05
+**Version**: v0.3.1
 
 ---
 
@@ -20,6 +20,19 @@
 | Phase 05: Constants Update         | ✅ DONE    | 100%     | 2026-02-04 |
 | Phase 06: Store Integration        | ⏳ Pending | 0%       | -          |
 | Phase 07: Error Handling & Testing | ⏳ Pending | 0%       | -          |
+
+### Pitch Deck Detail Tabs Enhancement 🔄
+
+| Phase                              | Status         | Progress | Completed  |
+| ---------------------------------- | -------------- | -------- | ---------- |
+| Phase 01: Type System Foundation   | ✅ DONE        | 100%     | 2026-02-05 |
+| Phase 02: Auto-Start Hook          | ✅ DONE        | 100%     | 2026-02-06 |
+| Phase 03: Pipeline Visualization   | ✅ DONE        | 100%     | 2026-02-06 |
+| Phase 04: Summary Tab Enhancement  | ⏳ Pending     | 0%       | -          |
+| Phase 05: Evaluation Tab Full Impl | ⏳ Pending     | 0%       | -          |
+| Phase 06: SWOT Tab Enhancement     | ⏳ Pending     | 0%       | -          |
+| Phase 07: PESTLE Tab Enhancement   | ⏳ Pending     | 0%       | -          |
+| Phase 08: Recommendation Enhance   | ⏳ Pending     | 0%       | -          |
 
 ---
 
@@ -146,6 +159,87 @@
 
 ---
 
+### ✅ Phase 01: Type System Foundation - Pitch Deck Detail Tabs (100% Complete)
+
+**Status**: DONE - 2026-02-05
+
+**Completed Tasks**:
+
+- ✅ Extended evaluation.types.ts with 7 new types
+- ✅ Created metrics.types.ts with 7 types
+- ✅ Created ui-state.types.ts with 17 types
+- ✅ Created domain/index.ts barrel export
+- ✅ Fixed type collisions (DecisionType → SummaryDecision, TeamMember → TeamMemberProfile)
+- ✅ All tests pass, code reviewed, build successful
+
+**Key Changes Made**:
+
+- Enhanced Type System: Comprehensive types for evaluation metrics and UI state management
+- Foundation Layer: Ready support for complex data structures in detail tabs
+- Type Safety: Fixed naming conflicts and ensured consistency across domains
+- Barrel Exports: Clean imports pattern for all domain types
+
+**Next Phase**: Phase 02 - Auto-Start Hook
+
+---
+
+### ✅ Phase 02: Auto-Start Hook (100% Complete)
+
+**Status**: DONE - 2026-02-06
+
+**Completed Tasks**:
+
+- ✅ Implemented `usePipelineAutoStart` hook for intelligent pipeline management
+- ✅ Added automatic detection of existing analysis operations
+- ✅ Implemented auto-restart capability for failed analysis
+- ✅ Created agent-to-stage mapping for real-time progress tracking
+- ✅ Enhanced error handling with user-friendly callbacks
+- ✅ Added memory leak prevention with proper cleanup
+- ✅ Integrated with Zustand pipeline store for state management
+
+**Key Changes Made**:
+
+- **Pipeline Auto-Start Hook**: Automatically resumes or starts analysis operations
+- **Agent-Stage Mapping**: Maps backend agents to frontend pipeline stages
+- **Intelligent Polling**: Resumes polling from where it left off
+- **Auto-Restart**: Can automatically restart failed analysis when enabled
+- **Callback System**: Provides progress, completion, and error callbacks
+- **State Management**: Updates pipeline store with real-time status
+- **Memory Management**: Proper cleanup to prevent memory leaks
+
+**Next Phase**: Phase 03 - Pipeline Visualization
+
+---
+
+### ✅ Phase 03: Pipeline Visualization (100% Complete)
+
+**Status**: DONE - 2026-02-06
+
+**Completed Tasks**:
+
+- ✅ Implemented `usePipelineAutoStart` hook for intelligent pipeline management
+- ✅ Added automatic detection of existing analysis operations
+- ✅ Implemented auto-restart capability for failed analysis
+- ✅ Created agent-to-stage mapping for real-time progress tracking
+- ✅ Enhanced error handling with user-friendly callbacks
+- ✅ Added memory leak prevention with proper cleanup
+- ✅ Integrated with Zustand pipeline store for state management
+
+**Key Changes Made**:
+
+- **Pipeline Visualization**: Complete workflow visualization for analysis pipeline
+- **Auto-Start Hook**: Automatically resumes or starts analysis operations
+- **Agent Mapping**: Backend agents mapped to frontend pipeline stages
+- **Intelligent Polling**: Resumes polling from where it left off
+- **Auto-Restart**: Can automatically restart failed analysis when enabled
+- **Callback System**: Provides progress, completion, and error callbacks
+- **State Management**: Updates pipeline store with real-time status
+- **Memory Management**: Proper cleanup to prevent memory leaks
+
+**Next Phase**: Phase 04 - Summary Tab Enhancement
+
+---
+
 ## Architecture Overview
 
 ### Service Layer Pattern
@@ -186,9 +280,20 @@ Stores
 | 06    | 2-3 hrs  | 02, 03, 05   | ⏳ Pending  |
 | 07    | 1-2 hrs  | 06           | ⏳ Pending  |
 
-**Total Duration**: ~14-21 hours
-**Completed**: ~11-14 hours
-**Remaining**: Phase 06 & 07 - Store Integration & Error Handling
+**Pitch Deck Detail Tabs Enhancement Timeline**:
+| Phase | Duration | Dependencies | Notes |
+| ----- | -------- | ------------ | ----------- |
+| Phase 01 | 3-4 hrs | None | ✅ Complete |
+| Phase 02 | 4-6 hrs | 01 | 🔄 Current |
+| Phase 03 | 6-8 hrs | 01, 02 | ⏳ Pending |
+| Phase 04 | 6-8 hrs | 01, 02 | ⏳ Pending |
+| Phase 05 | 5-7 hrs | 01, 02 | ⏳ Pending |
+| Phase 06 | 5-7 hrs | 01, 02 | ⏳ Pending |
+| Phase 07 | 5-7 hrs | 01, 02 | ⏳ Pending |
+
+**Total Duration**: ~14-21 hours (API Integration) + ~30-50 hours (Detail Tabs)
+**Completed**: ~11-14 hours (API) + ~3-4 hours (Type Foundation)
+**Remaining**: Store Integration & Error Handling + Detail Tabs Enhancement (Phase 02-07)
 
 ---
 
@@ -227,6 +332,8 @@ Phase 01 (API Types) - COMPLETE
 
 ## Success Metrics
 
+### API Integration Success Metrics
+
 - [x] Phase 01 API constants and types complete
 - [x] Phase 2 Pitch service handles all CRUD operations
 - [x] Phase 3 Multi-file upload UI implementation
@@ -235,9 +342,22 @@ Phase 01 (API Types) - COMPLETE
 - [ ] Phase 6 Store integration with proper state management
 - [ ] Phase 7 Error handling and testing complete
 
+### Pitch Deck Detail Tabs Enhancement Success Metrics
+
+- [x] Phase 01 Type system foundation complete
+- [x] Phase 02 Auto-Start Hook implemented
+- [x] Phase 03 Pipeline visualization complete
+- [ ] Phase 4 Summary tab enhancement complete
+- [ ] Phase 5 Evaluation tab full implementation complete
+- [ ] Phase 6 SWOT tab enhancement complete
+- [ ] Phase 7 PESTLE tab enhancement complete
+- [ ] Phase 8 Recommendation enhancement complete
+
 ---
 
 ## Next Steps
+
+### API Integration
 
 1. ✅ **Complete**: Phase 01 - API Constants & Types (2026-02-04)
 2. ✅ **Complete**: Phase 02 - Pitch Deck Service Layer (2026-02-04)
@@ -249,9 +369,43 @@ Phase 01 (API Types) - COMPLETE
 
 **Priority**: Complete Phase 06 to integrate state management
 
+### Pitch Deck Detail Tabs Enhancement
+
+1. ✅ **Complete**: Phase 01 - Type System Foundation (2026-02-05)
+2. ✅ **Complete**: Phase 02 - Auto-Start Hook (2026-02-06)
+3. ✅ **Complete**: Phase 03 - Pipeline Visualization (2026-02-06)
+4. 🔄 **Current**: Phase 04 - Summary Tab Enhancement
+5. ⏳ **Next**: Phase 05 - Evaluation Tab Full Implementation
+6. ⏳ **Next**: Phase 06 - SWOT Tab Enhancement
+7. ⏳ **Next**: Phase 07 - PESTLE Tab Enhancement
+8. ⏳ **Next**: Phase 08 - Recommendation Enhancement
+
+**Priority**: Implement Phase 04 shared UI components for summary tab display with enhanced visualizations
+
 ---
 
 ## Changelog
+
+### 2026-02-05
+
+- **Pitch Deck Detail Tabs Enhancement - Phase 01 Complete**: Type system foundation implementation
+- **Enhanced Types**: Extended evaluation.types.ts with 7 new types for detailed scoring framework
+- **New Type Files**: Created metrics.types.ts (7 types) and ui-state.types.ts (17 types)
+- **Domain Organization**: Created domain/index.ts barrel export for clean imports
+- **Type Safety**: Fixed naming conflicts (DecisionType → SummaryDecision, TeamMember → TeamMemberProfile)
+- **Build Success**: All tests pass, code reviewed, build successful
+- **Next Phase**: Ready for Phase 02 - Auto-Start Hook implementation
+
+### 2026-02-06
+
+- **Phase 02 Complete**: Auto-Start Hook implementation
+- **New Hook**: `usePipelineAutoStart` for intelligent pipeline management
+- **Auto-Restart**: Capability to automatically restart failed analysis
+- **Agent Mapping**: Backend agents mapped to frontend pipeline stages
+- **Progress Tracking**: Real-time updates with callback system
+- **State Integration**: Seamless integration with Zustand pipeline store
+- **Memory Management**: Proper cleanup and leak prevention
+- **Next Phase**: Phase 03 - Pipeline Visualization
 
 ### 2026-02-04
 

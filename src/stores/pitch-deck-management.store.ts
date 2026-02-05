@@ -110,15 +110,15 @@ export const usePitchDeckManagementStore = create<ManagementState & ManagementAc
     fetchPitchDecks: async (query) => {
       set({ isLoading: true, error: null });
       try {
-        const decks = await listPitchDecks({
+        const response = await listPitchDecks({
           status: query?.status || get().filters.status,
           limit: query?.limit || get().limit,
           offset: query?.offset || get().offset
         });
 
         set({
-          pitchDecks: decks,
-          total: decks.length,
+          pitchDecks: response.pitchDecks,
+          total: response.total,
           isLoading: false
         });
       } catch (err) {
@@ -151,7 +151,7 @@ export const usePitchDeckManagementStore = create<ManagementState & ManagementAc
 
     updatePitchDeck: (uuid, updates) => {
       set((state) => ({
-        pitchDecks: state.pitchDecks.map((d) => (d.uuid === uuid ? { ...d, ...updates } : d))
+        pitchDecks: state.pitchDecks.map((d) => (d.id === uuid ? { ...d, ...updates } : d))
       }));
     },
 
@@ -161,7 +161,7 @@ export const usePitchDeckManagementStore = create<ManagementState & ManagementAc
       const previousTotal = get().total;
 
       set((state) => ({
-        pitchDecks: state.pitchDecks.filter((d) => d.uuid !== uuid),
+        pitchDecks: state.pitchDecks.filter((d) => d.id !== uuid),
         total: state.total - 1
       }));
 

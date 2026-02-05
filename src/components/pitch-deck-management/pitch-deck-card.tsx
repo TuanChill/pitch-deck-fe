@@ -1,15 +1,27 @@
 import { PITCH_DECK_STATUS } from '@/constants/pitch-deck-status';
-import type { PitchDeckListItem } from '@/types/response/pitch-deck';
+import type { Long, PitchDeckListItem } from '@/types/response/pitch-deck';
 import { cn } from '@/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
+/** Convert Long type or string to Date */
+const longToDate = (value: string | Long): Date => {
+  if (typeof value === 'string') {
+    return new Date(value);
+  }
+
+  // Convert MongoDB Long to number (high * 2^32 + low) for milliseconds
+  const timestamp = (value.high * 2 ** 32 + value.low) * 1000;
+
+  return new Date(timestamp);
+};
+
 interface PitchDeckCardProps {
   deck: PitchDeckListItem;
-  onDelete: (uuid: string) => void;
-  onClick?: (uuid: string) => void;
+  onDelete: (id: string) => void;
+  onClick?: (id: string) => void;
 }
 
 const STATUS_COLORS = {
@@ -22,18 +34,18 @@ const STATUS_COLORS = {
 export const PitchDeckCard = ({ deck, onDelete, onClick }: PitchDeckCardProps) => {
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onDelete(deck.uuid);
+    onDelete(deck.id);
   };
 
   const handleCardClick = () => {
     if (onClick) {
-      onClick(deck.uuid);
+      onClick(deck.id);
     }
   };
 
   const statusColor = STATUS_COLORS[deck.status] || STATUS_COLORS.ready;
   const statusLabel = PITCH_DECK_STATUS[deck.status]?.label || deck.status;
-  const createdDate = new Date(deck.createdAt);
+  const createdDate = longToDate(deck.createdAt);
   const timeAgo = isNaN(createdDate.getTime())
     ? 'Invalid date'
     : formatDistanceToNow(createdDate, { addSuffix: true });

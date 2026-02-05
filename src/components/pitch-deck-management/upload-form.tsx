@@ -145,7 +145,7 @@ export const UploadForm = ({ onSuccess, onCancel, className }: UploadFormProps) 
             uploadedDeck: response
           }));
 
-          onSuccess?.(response.uuid);
+          onSuccess?.(response.id);
         } catch (error) {
           const errorMessage =
             error instanceof Error ? error.message : 'Upload failed. Please try again.';
@@ -173,7 +173,7 @@ export const UploadForm = ({ onSuccess, onCancel, className }: UploadFormProps) 
 
   const handleViewDeck = useCallback(() => {
     if (uploadedDeck) {
-      router.push(APP_URL.PITCH_DECK_DETAIL(uploadedDeck.uuid));
+      router.push(APP_URL.PITCH_DECK_DETAIL(uploadedDeck.id));
     }
   }, [uploadedDeck, router]);
 

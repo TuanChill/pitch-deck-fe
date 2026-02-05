@@ -138,7 +138,14 @@ export const uploadPitchDeck = async (
     }
   );
 
-  return response.data;
+  // Backend wraps response: { success, data, statusCode }
+  const backendResponse = response.data as unknown as {
+    success: boolean;
+    data: PitchDeckDetailResponse;
+    statusCode: number;
+  };
+
+  return backendResponse.data;
 };
 
 /**
@@ -168,7 +175,14 @@ export const listPitchDecks = async (
 
   const response = await httpClient.get<ListPitchDecksResponse>(url);
 
-  return response.data;
+  // Backend wraps response: { success, data, statusCode }
+  const backendResponse = response.data as unknown as {
+    success: boolean;
+    data: ListPitchDecksResponse;
+    statusCode: number;
+  };
+
+  return backendResponse.data;
 };
 
 /**
@@ -181,7 +195,14 @@ export const listPitchDecks = async (
 export const getPitchDeckDetail = async (uuid: string): Promise<PitchDeckDetailResponse> => {
   const response = await httpClient.get<PitchDeckDetailResponse>(API_URL.PITCH_DECK.DETAIL(uuid));
 
-  return response.data;
+  // Backend wraps response: { success, data, statusCode }
+  const backendResponse = response.data as unknown as {
+    success: boolean;
+    data: PitchDeckDetailResponse;
+    statusCode: number;
+  };
+
+  return backendResponse.data;
 };
 
 /**
@@ -194,5 +215,12 @@ export const getPitchDeckDetail = async (uuid: string): Promise<PitchDeckDetailR
 export const deletePitchDeck = async (uuid: string): Promise<DeleteSuccessResponse> => {
   const response = await httpClient.delete<DeleteSuccessResponse>(API_URL.PITCH_DECK.DELETE(uuid));
 
-  return response.data;
+  // Backend wraps response: { success, data, statusCode }
+  const backendResponse = response.data as unknown as {
+    success: boolean;
+    data: DeleteSuccessResponse;
+    statusCode: number;
+  };
+
+  return backendResponse.data;
 };

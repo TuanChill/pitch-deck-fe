@@ -14,6 +14,7 @@ This document outlines the coding standards and best practices for the Next.js b
 8. [Component Patterns](#component-patterns)
 9. [State Management Standards](#state-management-standards)
 10. [API Layer Standards](#api-layer-standards)
+11. [Domain Type System Standards](#domain-type-system-standards)
 
 ---
 
@@ -1150,6 +1151,226 @@ export const handleApiError = (error: unknown): never => {
 
   throw new ApiError('Unknown error occurred', 500);
 };
+```
+
+---
+
+## Domain Type System Standards
+
+### Type Organization
+
+Domain types are organized into three main categories:
+
+```
+/src/types/domain/
+├── evaluation.types.ts    # Evaluation framework types
+├── metrics.types.ts       # Startup metrics & market data
+├── ui-state.types.ts      # UI component states
+└── index.ts              # Barrel exports
+```
+
+### Evaluation Types
+
+#### Core Types
+
+```typescript
+// Category evaluation with detailed breakdown
+interface CategoryEvaluation {
+  category: EvaluationCategory;
+  score: number; // 0-100
+  weight: number; // From EVALUATION_CATEGORIES
+  subScores: SubCriterionScore[];
+  evidence: EvidenceQuote[];
+  strengths: string[];
+  weaknesses: string[];
+}
+
+// Sub-criterion with max value constraint
+interface SubCriterionScore {
+  id: string;
+  label: string;
+  score: number; // 0 to maxScore
+  maxScore: number;
+}
+
+// Evidence with source reference
+interface EvidenceQuote {
+  text: string;
+  slideNumber?: number;
+  category: EvaluationCategory;
+  relevanceScore: number;
+}
+```
+
+#### Validation Rules
+
+- All scores must be between 0 and their max value
+- Evidence quotes must include a relevance score (0-100)
+- Categories must match the EVALUATION_CATEGORIES enum
+- Sub-criteria scores should be normalized for comparison
+
+### Metrics Types
+
+#### Standard Metrics
+
+```typescript
+// Standard SaaS metrics
+interface StartupMetrics {
+  arr: number; // Annual Recurring Revenue
+  customers: number;
+  growthRate: number; // Month-over-month percentage
+  runway: number; // Months of runway
+  ltv: number; // Lifetime Value
+  cac: number; // Customer Acquisition Cost
+  ltvCacRatio: number; // LTV:CAC ratio
+  grossMargin: number; // Percentage
+  churn: number; // Monthly churn rate
+}
+
+// Market size breakdown
+interface MarketSize {
+  tam: string; // "Total Addressable Market"
+  sam: string; // "Serviceable Addressable Market"
+  som: string; // "Serviceable Obtainable Market"
+  cagr?: string; // Compound Annual Growth Rate
+}
+```
+
+#### Data Quality Standards
+
+- ARR should be in whole numbers (no decimals)
+- Growth rates should be percentages (e.g., 15.5 for 15.5%)
+- Churn rates should be monthly percentages
+- Market sizes should use consistent formatting (e.g., "$45B")
+
+### UI State Types
+
+#### Component State Management
+
+```typescript
+// Severity and impact levels
+type SeverityLevel = 'high' | 'medium' | 'low';
+type ImpactLevel = 'high' | 'medium' | 'low' | 'positive';
+
+// Enhanced item types
+interface EnhancedSWOTItem {
+  id: string;
+  title: string;
+  description: string;
+  severity: SeverityLevel;
+  impact: ImpactLevel;
+  category?: string;
+}
+
+interface EnhancedPESTLEItem {
+  id: string;
+  factor: string;
+  impact: ImpactLevel;
+  trend: TrendDirection; // 'up' | 'down' | 'stable'
+  implications: string;
+  timeframe?: string; // 'short-term', 'medium-term', 'long-term'
+}
+```
+
+#### State Management Patterns
+
+```typescript
+// Collapsible sections
+interface CollapsibleState {
+  id: string;
+  isExpanded: boolean;
+}
+
+// Tab navigation
+interface TabState {
+  activeTab: string;
+  history: string[]; // For back navigation
+}
+
+// Filtering
+interface FilterState {
+  category?: string;
+  severity?: SeverityLevel;
+  impact?: ImpactLevel;
+  searchQuery?: string;
+}
+```
+
+### Type Safety Guidelines
+
+#### Import Patterns
+
+```typescript
+// Always import from barrel export
+import type { CategoryEvaluation, StartupMetrics, EnhancedSWOTItem } from '@/types/domain';
+
+// Use domain types consistently across the application
+interface PitchDeckDetailProps {
+  evaluation: CategoryEvaluation[];
+  metrics: StartupMetrics;
+  swotItems: EnhancedSWOTItem[];
+}
+```
+
+#### Extension Patterns
+
+```typescript
+// API response types can extend domain types
+interface AnalysisResultResponse extends EvaluationResult {
+  processingTime: number;
+  confidenceScore: number;
+}
+
+// Mock data types should conform to domain types
+const MOCK_EVALUATION: CategoryEvaluation = {
+  category: 'team',
+  score: 85,
+  weight: 0.15
+  // ... other properties
+};
+```
+
+#### Validation Utilities
+
+```typescript
+// Create validation functions for complex types
+const validateEvaluationScore = (score: number, maxScore: number): boolean => {
+  return score >= 0 && score <= maxScore;
+};
+
+const validateMarketSize = (market: MarketSize): boolean => {
+  return Boolean(market.tam && market.sam && market.som);
+};
+```
+
+### Best Practices
+
+1. **Consistency**: Use domain types throughout the application
+2. **Immutability**: Prefer readonly types for data that shouldn't change
+3. **Validation**: Implement runtime validation for critical types
+4. **Documentation**: Include JSDoc comments for complex types
+5. **Testing**: Create type tests for validation logic
+
+### Common Anti-patterns to Avoid
+
+```typescript
+// ❌ Don't use any
+const processData = (data: any) => { ... };
+
+// ❌ Don't duplicate types
+interface DuplicateUser {
+  name: string;
+  email: string;
+} // Should use User type from domain
+
+// ✅ Use domain types
+const processUser = (user: User) => { ... };
+
+// ❌ Don't create overly broad unions
+type Status = 'loading' | 'success' | 'error'; // Too generic
+
+// ✅ Use specific domain types
+type AnalysisStatus = 'analyzing' | 'completed' | 'failed';
 ```
 
 ---

@@ -61,6 +61,9 @@ export interface PipelineActions {
 
   // Reset
   reset: () => void;
+
+  // Mock mode for development/demo
+  mockCompleted: () => void;
 }
 
 export type PipelineStore = PipelineState & PipelineActions;

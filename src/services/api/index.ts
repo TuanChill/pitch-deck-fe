@@ -1,10 +1,10 @@
 // API Services exports
 export * from './analysis.service';
-export * from './auth.service';
 export * from './pitch-deck.service';
 export * from './pitch-deck-management.service';
 export * from './report.service';
 export * from './recommendation.service';
+export * from './vc-feedback.service';
 
 // Response types
 export type {

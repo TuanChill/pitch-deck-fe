@@ -1,22 +1,17 @@
 'use client';
 
 import { APP_URL } from '@/constants/routes';
-import {
-  deletePitchDeckByUuid,
-  getAnalysisByDeck,
-  pollAnalysisComplete,
-  startAnalysis
-} from '@/services/api';
+import { usePipelineAutoStart } from '@/hooks/use-pipeline-auto-start';
+import { deletePitchDeckByUuid } from '@/services/api';
 import { usePitchDeckManagementStore } from '@/stores';
-import type { AnalysisResponse } from '@/types/response/pitch-deck';
 import { ArrowLeft, FileX } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-import { AuthGuard } from '@/components/auth/auth-guard';
-import { AnalyticsDisplay } from '@/components/pitch-deck-analytics';
+import { PipelineCards } from '@/components/pipeline-visualization';
+import { PitchDeckTabs } from '@/components/pitch-deck-detail-tabs';
 import {
   PitchDeckActions,
   PitchDeckDetailHeader,
@@ -73,60 +68,57 @@ const Breadcrumb = ({ title }: { title: string }) => (
   </nav>
 );
 
-// UUID v4 validation regex
-const UUID_V4_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+// MongoDB ObjectId validation regex (24 hex characters)
+const MONGO_ID_REGEX = /^[0-9a-f]{24}$/i;
 
 function PitchDeckDetailContent() {
   const params = useParams();
   const router = useRouter();
-  const uuid = params.uuid as string;
+  const id = params.id as string;
 
-  // Validate UUID format before using
-  const isValidUuid = UUID_V4_REGEX.test(uuid);
+  // Validate ID format before using
+  const isValidId = MONGO_ID_REGEX.test(id);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [analysis, setAnalysis] = useState<AnalysisResponse | null>(null);
-  const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
-  const [analysisError, setAnalysisError] = useState<string | null>(null);
-  const analyticsSectionRef = useRef<HTMLDivElement>(null);
+  // const [analysis, setAnalysis] = useState<AnalysisResponse | null>(null);
+
+  // NEW: Pipeline auto-start hook
+  const {
+    isPolling: isPipelinePolling,
+    overallProgress,
+    overallStatus
+  } = usePipelineAutoStart(id, {
+    autoStart: true,
+    mock: true, // Mock mode for development/demo
+    onProgress: () => {
+      // Progress updates handled by store
+    },
+    onComplete: () => {
+      toast.success('Analysis completed successfully');
+    },
+    onError: (error) => {
+      toast.error(error);
+    }
+  });
 
   const { currentDeck, isLoading, error, fetchPitchDeckDetail, removePitchDeck } =
     usePitchDeckManagementStore();
 
   useEffect(() => {
-    if (uuid && isValidUuid) {
-      fetchPitchDeckDetail(uuid);
+    if (id && isValidId) {
+      fetchPitchDeckDetail(id);
     }
-  }, [uuid, isValidUuid, fetchPitchDeckDetail]);
-
-  // Fetch analysis after pitch deck data is loaded successfully
-  useEffect(() => {
-    if (currentDeck && uuid && isValidUuid) {
-      const loadAnalysis = async () => {
-        try {
-          const result = await getAnalysisByDeck(uuid);
-          setAnalysis(result);
-          setAnalysisError(null);
-        } catch (err) {
-          // Don't show error if analysis simply doesn't exist
-          if (err instanceof Error && !err.message.includes('404')) {
-            setAnalysisError(err.message);
-          }
-        }
-      };
-      loadAnalysis();
-    }
-  }, [currentDeck, uuid, isValidUuid]);
+  }, [id, isValidId, fetchPitchDeckDetail]);
 
   const handleDelete = async () => {
-    if (!uuid || !isValidUuid || !currentDeck) return;
+    if (!id || !isValidId || !currentDeck) return;
 
     setIsDeleting(true);
     try {
       // Optimistic remove from store
-      removePitchDeck(uuid);
+      removePitchDeck(id);
 
       // Call delete API
-      await deletePitchDeckByUuid(uuid);
+      await deletePitchDeckByUuid(id);
 
       toast.success('Pitch deck deleted successfully');
 
@@ -135,55 +127,14 @@ function PitchDeckDetailContent() {
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to delete pitch deck');
       // Re-fetch on error to restore state
-      fetchPitchDeckDetail(uuid);
+      fetchPitchDeckDetail(id);
     } finally {
       setIsDeleting(false);
     }
   };
 
-  const handleAnalyticsClick = async () => {
-    if (!uuid || !isValidUuid) return;
-
-    // If analysis exists and is completed, scroll to analytics section
-    if (analysis?.status === 'completed') {
-      analyticsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-      return;
-    }
-
-    // Start new analysis with polling
-    setIsAnalysisLoading(true);
-    setAnalysisError(null);
-
-    try {
-      const startedAnalysis = await startAnalysis(uuid);
-
-      // Update state with initial analysis data
-      setAnalysis(startedAnalysis);
-
-      // Poll until complete with progress updates
-      const result = await pollAnalysisComplete(startedAnalysis.uuid, {
-        onProgress: (progress) => {
-          setAnalysis((prev) => (prev ? { ...prev, progress, status: 'processing' } : null));
-        }
-      });
-
-      setAnalysis(result);
-      toast.success('Analysis completed successfully');
-
-      // Scroll to analytics section after completion
-      analyticsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to analyze pitch deck';
-      setAnalysisError(errorMsg);
-      toast.error(errorMsg);
-    } finally {
-      setIsAnalysisLoading(false);
-    }
-  };
-
   // Invalid UUID state
-  if (!isValidUuid) {
+  if (!isValidId) {
     return <NotFoundState error="Invalid pitch deck ID format" />;
   }
 
@@ -228,34 +179,59 @@ function PitchDeckDetailContent() {
       {/* Action buttons */}
       <div className="border-t pt-6">
         <PitchDeckActions
-          uuid={uuid}
+          id={id}
           status={currentDeck.status}
           title={currentDeck.title}
           isDeleting={isDeleting}
-          isAnalyzing={isAnalysisLoading}
+          isAnalyzing={isPipelinePolling}
           onDelete={handleDelete}
-          onAnalyticsClick={handleAnalyticsClick}
+          onAnalyticsClick={() => {
+            // Reserved for manual re-trigger
+            toast.info('Analysis already running');
+          }}
         />
       </div>
 
+      {/* NEW: Pipeline visualization */}
+      <div className="border-t pt-6">
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold">Analysis Pipeline</h3>
+          <div className="rounded-lg border bg-card p-4 overflow-x-auto">
+            <PipelineCards />
+          </div>
+          {isPipelinePolling && (
+            <p className="text-sm text-muted-foreground text-center">
+              Processing... {overallProgress}% complete
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Tabs section - only show after pipeline completes */}
+      {overallStatus === 'completed' && (
+        <div className="border-t pt-6">
+          <PitchDeckTabs />
+        </div>
+      )}
+
       {/* Analytics section */}
-      <div ref={analyticsSectionRef} className="border-t pt-6">
+      {/* <div className="border-t pt-6">
         <AnalyticsDisplay
           analysis={analysis}
-          isLoading={isAnalysisLoading}
-          error={analysisError ?? undefined}
-          onRetry={handleAnalyticsClick}
-          deckUuid={uuid}
+          isLoading={isPipelinePolling}
+          error={pipelineError ?? undefined}
+          onRetry={() => {
+            // Reserved for manual retry
+            usePipelineStore.getState().reset();
+            window.location.reload();
+          }}
+          deckUuid={id}
         />
-      </div>
+      </div> */}
     </div>
   );
 }
 
 export default function PitchDeckDetailPage() {
-  return (
-    <AuthGuard>
-      <PitchDeckDetailContent />
-    </AuthGuard>
-  );
+  return <PitchDeckDetailContent />;
 }

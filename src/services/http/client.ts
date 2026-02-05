@@ -1,6 +1,5 @@
 import { env } from '@/config/env';
-import { useUserStore } from '@/stores';
-import Axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import Axios, { AxiosError, AxiosResponse } from 'axios';
 
 // Backend API base URL (from Phase 01 API integration)
 const baseUrl = env.NEXT_PUBLIC_API_BASE || 'http://localhost:8082';
@@ -15,31 +14,7 @@ const axiosOptions = {
   maxBodyLength: 1024 * 1024 * 1024 // 1GB limit
 };
 
-const getCurrentAccessToken = async () => {
-  const token = useUserStore.getState().jwt;
-  if (!token) {
-    return null;
-  }
-
-  return token;
-};
-
 export const httpClient = Axios.create(axiosOptions);
-
-// Request interceptor to add token to request headers
-httpClient.interceptors.request.use(
-  async (config: InternalAxiosRequestConfig) => {
-    const token = await getCurrentAccessToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  (error: AxiosError) => {
-    return Promise.reject(error);
-  }
-);
 
 // Response interceptor for global error handling
 httpClient.interceptors.response.use(
@@ -47,11 +22,6 @@ httpClient.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized access
-      useUserStore.getState().clear();
-    }
-
     return Promise.reject(error);
   }
 );
