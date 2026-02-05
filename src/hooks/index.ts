@@ -1,2 +1,2 @@
 // Custom Hooks exports
-// Add custom hooks exports here when available
+export { usePipelineAutoStart } from './use-pipeline-auto-start';

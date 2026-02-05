@@ -127,28 +127,39 @@ export type PitchDeckFileResponse = {
  * Pitch deck list item and detail response
  * Based on backend: src/api/pitchdeck/dto/pitch-deck-response.dto.ts
  *
- * BACKEND CHANGES:
- * - Uses `uuid` as primary identifier (not `uploadId` from mock)
- * - File metadata moved to `files` array (multi-file support)
- * - Added `fileCount` property for quick reference
+ * Backend returns `id` as primary identifier
  */
 export type PitchDeckListItem = {
   id: string;
-  uuid: string;
   title: string;
   description: string | null;
   status: PitchDeckStatus;
   chunkCount: number;
-  fileCount: number;
+  astraCollection?: string;
   errorMessage: string | null;
-  tags: string[] | null;
-  files: PitchDeckFileResponse[];
-  createdAt: string;
-  updatedAt: string;
-  lastAccessedAt: string;
+  fileCount: number;
+  tags?: string[] | null;
+  files?: PitchDeckFileResponse[];
+  lastAccessedAt: string | Long;
+  createdAt: string | Long;
+  updatedAt: string | Long;
 };
 
-export type ListPitchDecksResponse = PitchDeckListItem[];
+/**
+ * Long type for MongoDB ObjectId timestamps
+ */
+export type Long = {
+  low: number;
+  high: number;
+  unsigned: boolean;
+};
+
+export type ListPitchDecksResponse = {
+  pitchDecks: PitchDeckListItem[];
+  total: number;
+  page: number;
+  limit: number;
+};
 
 export type PitchDeckDetailResponse = PitchDeckListItem;
 
@@ -160,6 +171,21 @@ export type PitchDeckDetailResponse = PitchDeckListItem;
 export type AnalysisStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
 /**
+ * Agent status in pipeline
+ */
+export type AgentStatus = 'pending' | 'running' | 'completed' | 'failed';
+
+/**
+ * Agent execution info
+ */
+export type AgentInfo = {
+  agentName: string;
+  status: AgentStatus;
+  executionOrder: number;
+  errorMessage?: string;
+};
+
+/**
  * Analysis status response
  * GET /analysis/:uuid/status
  */
@@ -169,6 +195,8 @@ export type AnalysisStatusResponse = {
   status: AnalysisStatus;
   progress: number;
   message?: string;
+  currentStep?: string;
+  agents?: AgentInfo[];
   updatedAt: string;
 };
 
