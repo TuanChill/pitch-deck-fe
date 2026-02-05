@@ -215,3 +215,89 @@ export type ListAnalysesResponse = AnalysisResponse[];
 export type DeleteSuccessResponse = {
   success: boolean;
 };
+
+// ==================== Recommendation Response Types ====================
+
+/**
+ * Recommendation status
+ */
+export type RecommendationStatus = 'pending' | 'searching' | 'analyzing' | 'completed' | 'failed';
+
+/**
+ * Market research findings
+ */
+export type MarketResearch = {
+  summary: string;
+  tam?: string;
+  sam?: string;
+  som?: string;
+  growthRate?: string;
+  trends: string[];
+  sources: Array<{ title: string; url: string }>;
+};
+
+/**
+ * Competitor information
+ */
+export type Competitor = {
+  name: string;
+  description: string;
+  strengths: string[];
+  weaknesses: string[];
+};
+
+/**
+ * Competitor analysis findings
+ */
+export type CompetitorAnalysis = {
+  summary: string;
+  competitors: Competitor[];
+  sources: Array<{ title: string; url: string }>;
+};
+
+/**
+ * Team member verification
+ */
+export type TeamMember = {
+  name: string;
+  role: string;
+  verified: boolean;
+  notes?: string;
+};
+
+/**
+ * Team verification findings
+ */
+export type TeamVerification = {
+  summary: string;
+  teamMembers: TeamMember[];
+  sources: Array<{ title: string; url: string }>;
+};
+
+/**
+ * Overall recommendation verdict
+ */
+export type OverallRecommendation = {
+  verdict: 'strong_buy' | 'buy' | 'hold' | 'pass';
+  confidence: number;
+  reasoning: string;
+  keyStrengths: string[];
+  keyConcerns: string[];
+  nextSteps: string[];
+};
+
+/**
+ * Recommendation response
+ * POST /recommendations/generate, GET /recommendations/:uuid
+ */
+export type RecommendationResponse = {
+  uuid: string;
+  status: RecommendationStatus;
+  content?: string;
+  marketResearch?: MarketResearch;
+  competitorAnalysis?: CompetitorAnalysis;
+  teamVerification?: TeamVerification;
+  overallRecommendation?: OverallRecommendation;
+  generatedAt?: string;
+  errorMessage?: string;
+};

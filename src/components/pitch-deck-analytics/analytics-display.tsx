@@ -11,12 +11,15 @@ import { AnalysisResult } from '@/components/pitch-deck/analysis-result';
 import { GenerateReportButton, ReportDisplay } from '@/components/reports';
 import { Button } from '@/components/ui/button';
 
+import { RecommendationSection } from './recommendation-section';
+
 type AnalyticsDisplayProps = {
   analysis: AnalysisResponse | null;
   isLoading: boolean;
   error?: string;
   onRetry?: () => void;
   onUpload?: () => void;
+  deckUuid?: string;
   className?: string;
 };
 
@@ -26,6 +29,7 @@ export const AnalyticsDisplay = ({
   error,
   onRetry,
   onUpload,
+  deckUuid,
   className
 }: AnalyticsDisplayProps) => {
   const { loadReports, reports } = useReportStore();
@@ -179,6 +183,13 @@ export const AnalyticsDisplay = ({
           </div>
           {hasReports && <ReportDisplay analysisUuid={analysis.uuid} />}
         </div>
+
+        {/* Recommendation Section */}
+        {deckUuid && (
+          <div id="recommendation-section" className="space-y-4">
+            <RecommendationSection deckUuid={deckUuid} />
+          </div>
+        )}
       </motion.div>
     );
   }

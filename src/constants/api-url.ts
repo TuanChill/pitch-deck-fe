@@ -36,5 +36,13 @@ export const API_URL = {
     LIST: (analysisUuid: string) => `/analysis/${analysisUuid}/reports`,
     DETAIL: (analysisUuid: string, reportUuid: string) =>
       `/analysis/${analysisUuid}/reports/${reportUuid}`
+  },
+
+  // Recommendation endpoints
+  RECOMMENDATION: {
+    GENERATE: '/recommendations/generate',
+    STATUS: (uuid: string) => `/recommendations/${uuid}/status`,
+    DETAIL: (uuid: string) => `/recommendations/${uuid}`,
+    BY_DECK: (deckUuid: string) => `/recommendations/by-deck/${deckUuid}`
   }
 } as const;

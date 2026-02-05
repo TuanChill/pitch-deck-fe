@@ -245,6 +245,7 @@ function PitchDeckDetailContent() {
           isLoading={isAnalysisLoading}
           error={analysisError ?? undefined}
           onRetry={handleAnalyticsClick}
+          deckUuid={uuid}
         />
       </div>
     </div>

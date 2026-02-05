@@ -26,14 +26,14 @@ export type ReportFormat = 'markdown' | 'json';
  */
 export interface ReportResponse {
   uuid: string;
-  reportType: ReportType;
-  format: ReportFormat;
+  reportType?: ReportType;
+  format?: ReportFormat;
   status: ReportStatus;
   content?: string;
   generatedAt?: string;
   errorMessage?: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 /**

@@ -5,7 +5,7 @@ import { VC_CATEGORY_CONFIG } from '@/constants/vc-framework';
 import { StrengthItem } from '@/types/response/pitch-deck';
 import { cn } from '@/utils';
 import { motion } from 'framer-motion';
-import { Quote } from 'lucide-react';
+import { ChevronDown, ChevronRight, Quote } from 'lucide-react';
 import { useState } from 'react';
 
 type StrengthCardProps = {
@@ -58,6 +58,15 @@ export const StrengthCard = ({ strength, className }: StrengthCardProps) => {
               </span>
             </div>
             <p className="text-sm text-muted-foreground line-clamp-2">{strength.description}</p>
+          </div>
+
+          {/* Expand/collapse indicator */}
+          <div className="shrink-0 pt-1">
+            {isExpanded ? (
+              <ChevronDown className="w-5 h-5 text-muted-foreground" />
+            ) : (
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            )}
           </div>
         </div>
 

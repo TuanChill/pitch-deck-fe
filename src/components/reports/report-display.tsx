@@ -3,7 +3,14 @@
 import { useReportStore } from '@/stores/report-store';
 import type { ReportResponse, ReportType } from '@/types/response/report';
 import { cn } from '@/utils';
-import { AlertCircle, Briefcase, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
+import {
+  AlertCircle,
+  Briefcase,
+  FileSpreadsheet,
+  FileText,
+  Loader2,
+  RefreshCw
+} from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
 
@@ -30,7 +37,7 @@ type ReportDisplayProps = {
 };
 
 export const ReportDisplay = ({ analysisUuid, reportType, className }: ReportDisplayProps) => {
-  const { reports, errors, isGenerating, clearError } = useReportStore();
+  const { reports, errors, isGenerating, clearError, generateReport } = useReportStore();
 
   const error = errors[analysisUuid];
   const generating = isGenerating(analysisUuid);
@@ -40,6 +47,16 @@ export const ReportDisplay = ({ analysisUuid, reportType, className }: ReportDis
   const report: ReportResponse | null = reportType
     ? analysisReports.find((r) => r.reportType === reportType) || null
     : analysisReports[0] || null;
+
+  // Handle regeneration
+  const handleRegenerate = async () => {
+    const regenerateType = report?.reportType || reportType || 'executive';
+    try {
+      await generateReport(analysisUuid, { reportType: regenerateType, format: 'markdown' });
+    } catch {
+      // Error is handled by store
+    }
+  };
 
   // Loading state - fetching reports
   if (!report && !error && !generating) {
@@ -86,7 +103,7 @@ export const ReportDisplay = ({ analysisUuid, reportType, className }: ReportDis
     );
   }
 
-  const config = REPORT_TYPE_CONFIG[report.reportType];
+  const config = REPORT_TYPE_CONFIG[report.reportType || 'executive'];
   const Icon = config.icon;
 
   return (
@@ -97,7 +114,21 @@ export const ReportDisplay = ({ analysisUuid, reportType, className }: ReportDis
             <Icon className="h-5 w-5" />
             <CardTitle>Report</CardTitle>
           </div>
-          <Badge variant={config.variant}>{config.label}</Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant={config.variant}>{config.label}</Badge>
+            {report.status === 'completed' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleRegenerate}
+                disabled={generating}
+                className="gap-1.5 h-8"
+              >
+                <RefreshCw className={cn('h-3.5 w-3.5', generating && 'animate-spin')} />
+                Regenerate
+              </Button>
+            )}
+          </div>
         </div>
         {report.generatedAt && (
           <CardDescription>

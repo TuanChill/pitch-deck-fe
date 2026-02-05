@@ -4,7 +4,7 @@ import { SEVERITY_CONFIG } from '@/constants/indicators';
 import { ImprovementItem } from '@/types/response/pitch-deck';
 import { cn } from '@/utils';
 import { motion } from 'framer-motion';
-import { AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ChevronDown, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
 type ImprovementCardProps = {
@@ -72,6 +72,15 @@ export const ImprovementCard = ({ improvement, className }: ImprovementCardProps
               </span>
             </div>
             <p className="text-sm text-muted-foreground line-clamp-2">{improvement.description}</p>
+          </div>
+
+          {/* Expand/collapse indicator */}
+          <div className="shrink-0 pt-1">
+            {isExpanded ? (
+              <ChevronDown className="w-5 h-5 text-muted-foreground" />
+            ) : (
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            )}
           </div>
         </div>
       </button>

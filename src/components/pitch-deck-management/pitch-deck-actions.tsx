@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/utils';
-import { ArrowRight, Loader2, Share2, Trash2 } from 'lucide-react';
+import { ArrowRight, Loader2, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -49,12 +49,6 @@ export const PitchDeckActions = ({
       >
         <Trash2 className="w-4 h-4" />
         Delete
-      </Button>
-
-      {/* Share Button (disabled placeholder) */}
-      <Button type="button" variant="outline" disabled>
-        <Share2 className="w-4 h-4" />
-        Share
       </Button>
 
       {/* Analytics Button - triggers analytics callback if status is ready */}

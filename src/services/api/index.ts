@@ -4,6 +4,7 @@ export * from './auth.service';
 export * from './pitch-deck.service';
 export * from './pitch-deck-management.service';
 export * from './report.service';
+export * from './recommendation.service';
 
 // Response types
 export type {
@@ -19,7 +20,13 @@ export type {
   AnalysisStatus,
   AnalysisResult,
   ListAnalysesResponse,
-  DeleteSuccessResponse
+  DeleteSuccessResponse,
+  RecommendationResponse,
+  RecommendationStatus,
+  MarketResearch,
+  CompetitorAnalysis,
+  TeamVerification,
+  OverallRecommendation
 } from '@/types/response/pitch-deck';
 
 // Request types
