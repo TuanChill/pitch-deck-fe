@@ -1,13 +1,12 @@
 /**
  * SWOT Tab
- * SWOT analysis tab with store integration and comprehensive data display
+ * SWOT analysis tab with comprehensive data display
  */
 
-import { useSwotStore } from '@/stores';
+import { useSwot } from '@/hooks';
 import type { SWOTData } from '@/types/mock-data/swot-pestle.types';
 import { MOCK_SWOT_DATA } from '@/types/mock-data/swot-pestle.types';
 import type { SwotData as ApiSwotData } from '@/types/response/swot-response.types';
-import { useEffect } from 'react';
 
 import { SWOTErrorState } from './swot-error-state';
 import { SWOTGrid } from './swot-grid';
@@ -53,50 +52,23 @@ function convertApiToDisplay(apiData: ApiSwotData): SWOTData {
 }
 
 export function SwotTab({ deckId }: SwotTabProps) {
-  const { swotData, statuses, loading, errors, generateSwot, fetchSwot } = useSwotStore();
+  const { data, status, error, isPolling, refetch } = useSwot(deckId || null);
 
   // Use mock data if no deckId provided (development mode)
-  const id = deckId || 'mock';
-  const apiSwot = deckId ? swotData[id] : null;
-  const status = deckId ? statuses[id] : 'completed';
-  const isLoading = deckId ? loading[id] : false;
-  const error = deckId ? errors[id] : null;
-
-  // Convert API data to display format
-  const displaySwot: SWOTData | null = apiSwot
-    ? convertApiToDisplay(apiSwot)
-    : deckId
-      ? null
-      : MOCK_SWOT_DATA;
-
-  // Always fetch on mount (like analytics tab)
-  useEffect(() => {
-    if (deckId) {
-      fetchSwot(deckId).catch(() => {
-        // If fetch fails (404), trigger generation
-        generateSwot(deckId);
-      });
-    }
-
-    // Cleanup
-    return () => {
-      // Optional: clear polling/cleanup when unmounting
-    };
-  }, [deckId, fetchSwot, generateSwot]);
+  const displaySwot: SWOTData | null = deckId
+    ? data
+      ? convertApiToDisplay(data)
+      : null
+    : MOCK_SWOT_DATA;
 
   // Loading state
-  if (isLoading || status === 'processing') {
+  if (status === 'loading' || isPolling) {
     return <SWOTLoadingState />;
   }
 
   // Error state
-  if (error || status === 'failed') {
-    return (
-      <SWOTErrorState
-        message={error || 'Failed to generate SWOT analysis'}
-        onRetry={() => deckId && generateSwot(deckId)}
-      />
-    );
+  if (status === 'error') {
+    return <SWOTErrorState message={error || 'Failed to load SWOT analysis'} onRetry={refetch} />;
   }
 
   // No data yet (and not loading/error)

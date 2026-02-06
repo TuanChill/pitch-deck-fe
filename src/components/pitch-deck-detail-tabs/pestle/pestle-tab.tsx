@@ -1,13 +1,12 @@
 /**
  * PESTLE Tab
- * PESTLE analysis tab with store integration and comprehensive data display
+ * PESTLE analysis tab with comprehensive data display
  */
 
-import { usePestleStore } from '@/stores';
+import { usePestle } from '@/hooks';
 import type { PESTLEData as MockPestleData } from '@/types/mock-data/swot-pestle.types';
 import { MOCK_PESTLE_DATA } from '@/types/mock-data/swot-pestle.types';
 import type { PestleData as ApiPestleData } from '@/types/response/pestle-response.types';
-import { useEffect } from 'react';
 
 import { PESTLEList } from './pestle-list';
 
@@ -71,39 +70,17 @@ function convertApiToDisplay(apiData: ApiPestleData): MockPestleData {
 }
 
 export function PestleTab({ deckId }: PestleTabProps) {
-  const { pestleData, statuses, loading, errors, generatePestle, fetchPestle } = usePestleStore();
+  const { data, status, error, isPolling, refetch } = usePestle(deckId || null);
 
   // Use mock data if no deckId provided (development mode)
-  const id = deckId || 'mock';
-  const apiPestle = deckId ? pestleData[id] : null;
-  const status = deckId ? statuses[id] : 'completed';
-  const isLoading = deckId ? loading[id] : false;
-  const error = deckId ? errors[id] : null;
-
-  // Convert API data to display format
-  const displayPestle: MockPestleData | null = apiPestle
-    ? convertApiToDisplay(apiPestle)
-    : deckId
-      ? null
-      : MOCK_PESTLE_DATA;
-
-  // Always fetch on mount (like analytics tab)
-  useEffect(() => {
-    if (deckId) {
-      fetchPestle(deckId).catch(() => {
-        // If fetch fails (404), trigger generation
-        generatePestle(deckId);
-      });
-    }
-
-    // Cleanup
-    return () => {
-      // Optional: clear polling/cleanup when unmounting
-    };
-  }, [deckId, fetchPestle, generatePestle]);
+  const displayPestle: MockPestleData | null = deckId
+    ? data
+      ? convertApiToDisplay(data)
+      : null
+    : MOCK_PESTLE_DATA;
 
   // Loading state - render loading message
-  if (isLoading || status === 'processing') {
+  if (status === 'loading' || isPolling) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -115,18 +92,16 @@ export function PestleTab({ deckId }: PestleTabProps) {
   }
 
   // Error state - render error message with retry button
-  if (error || status === 'failed') {
+  if (status === 'error') {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <p className="text-destructive">{error || 'Failed to generate PESTLE analysis'}</p>
-        {deckId && (
-          <button
-            onClick={() => generatePestle(deckId)}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-          >
-            Retry
-          </button>
-        )}
+        <p className="text-destructive">{error || 'Failed to load PESTLE analysis'}</p>
+        <button
+          onClick={refetch}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+        >
+          Retry
+        </button>
       </div>
     );
   }

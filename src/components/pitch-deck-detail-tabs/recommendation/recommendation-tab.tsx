@@ -1,15 +1,14 @@
 /**
  * Recommendation Tab
- * Investment recommendation display with real data from store
+ * Investment recommendation display with comprehensive data
  */
 
-import { useRecommendationStore } from '@/stores';
+import { useRecommendation } from '@/hooks';
 import { MOCK_RECOMMENDATION_DATA } from '@/types/mock-data/recommendation.types';
 import type {
   RecommendationData as ApiRecommendationData,
   RecommendationVerdict
 } from '@/types/response/recommendation-response.types';
-import { useEffect } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -191,75 +190,36 @@ function RecommendationContent({ data }: { data: ApiRecommendationData }) {
 }
 
 export function RecommendationTab({ deckId }: RecommendationTabProps) {
-  const {
-    recommendationData,
-    statuses,
-    loading,
-    errors,
-    generateRecommendation,
-    fetchRecommendation
-  } = useRecommendationStore();
+  const { data, status, error, isPolling, refetch } = useRecommendation(deckId || null);
 
   // Use mock data if no deckId provided (development mode)
-  const id = deckId || 'mock';
-  const apiRecommendation = deckId ? recommendationData[id] : null;
-  const status = deckId ? statuses[id] : 'completed';
-  const isLoading = deckId ? loading[id] : false;
-  const error = deckId ? errors[id] : null;
-
-  // Convert API data to display format (no conversion needed as structures match)
-  const displayRecommendation: ApiRecommendationData | null = apiRecommendation
-    ? apiRecommendation
-    : deckId
-      ? null
-      : (MOCK_RECOMMENDATION_DATA as unknown as ApiRecommendationData);
-
-  // Always fetch on mount (like analytics tab)
-  useEffect(() => {
-    if (deckId) {
-      fetchRecommendation(deckId).catch(() => {
-        // If fetch fails (404), trigger generation
-        generateRecommendation(deckId);
-      });
-    }
-
-    // Cleanup
-    return () => {
-      // Optional: clear polling/cleanup when unmounting
-    };
-  }, [deckId, fetchRecommendation, generateRecommendation]);
+  const displayRecommendation: ApiRecommendationData | null = deckId
+    ? data || null
+    : (MOCK_RECOMMENDATION_DATA as unknown as ApiRecommendationData);
 
   // Loading state - render loading message
-  if (isLoading || status === 'searching' || status === 'analyzing') {
+  if (status === 'loading' || isPolling) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">
-            {status === 'searching'
-              ? 'Searching market data...'
-              : status === 'analyzing'
-                ? 'Analyzing...'
-                : 'Generating recommendation...'}
-          </p>
+          <p className="text-muted-foreground">Generating recommendation...</p>
         </div>
       </div>
     );
   }
 
   // Error state - render error message with retry button
-  if (error || status === 'failed') {
+  if (status === 'error') {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <p className="text-destructive">{error || 'Failed to generate recommendation'}</p>
-        {deckId && (
-          <button
-            onClick={() => generateRecommendation(deckId)}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-          >
-            Retry
-          </button>
-        )}
+        <p className="text-destructive">{error || 'Failed to load recommendation'}</p>
+        <button
+          onClick={refetch}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+        >
+          Retry
+        </button>
       </div>
     );
   }

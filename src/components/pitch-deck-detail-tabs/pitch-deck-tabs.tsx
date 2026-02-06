@@ -41,11 +41,11 @@ export function PitchDeckTabs({ deckId }: PitchDeckTabsProps) {
         </TabsContent>
 
         <TabsContent value="pestle" className="mt-0">
-          <PestleTab />
+          <PestleTab deckId={deckId} />
         </TabsContent>
 
         <TabsContent value="recommendation" className="mt-0">
-          <RecommendationTab />
+          <RecommendationTab deckId={deckId} />
         </TabsContent>
       </TabContentWrapper>
     </Tabs>

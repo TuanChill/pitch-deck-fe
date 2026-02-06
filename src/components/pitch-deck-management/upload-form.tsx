@@ -6,6 +6,9 @@ import type { PitchDeckListItem } from '@/types/response/pitch-deck';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState, useRef, useEffect } from 'react';
 
+// Auto-redirect delay after successful upload (ms)
+const AUTO_REDIRECT_DELAY = 1500;
+
 import { FileUploader } from '@/components/pitch-deck/file-uploader';
 import { Button } from '@/components/ui/button';
 
@@ -113,6 +116,17 @@ export const UploadForm = ({ onSuccess, onCancel, className }: UploadFormProps) 
       }
     };
   }, []);
+
+  // Auto-redirect to detail deck after successful upload
+  useEffect(() => {
+    if (uploadState === 'success' && uploadedDeck) {
+      const redirectTimer = setTimeout(() => {
+        router.push(APP_URL.PITCH_DECK_DETAIL(uploadedDeck.id));
+      }, AUTO_REDIRECT_DELAY);
+
+      return () => clearTimeout(redirectTimer);
+    }
+  }, [uploadState, uploadedDeck, router]);
 
   const handleSubmit = useCallback(async () => {
     if (selectedFiles.length === 0 || !title.trim()) {
