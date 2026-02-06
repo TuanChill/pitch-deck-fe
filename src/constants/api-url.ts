@@ -40,12 +40,11 @@ export const API_URL = {
       `/analysis/${analysisUuid}/reports/${reportUuid}`
   },
 
-  // Recommendation endpoints
+  // Recommendation endpoints (3 total)
   RECOMMENDATION: {
-    GENERATE: '/recommendations/generate',
-    STATUS: (uuid: string) => `/recommendations/${uuid}/status`,
-    DETAIL: (uuid: string) => `/recommendations/${uuid}`,
-    BY_DECK: (deckUuid: string) => `/recommendations/by-deck/${deckUuid}`
+    GENERATE: (id: string) => `/pitchdeck/${id}/recommendation`,
+    BY_DECK: (id: string) => `/pitchdeck/${id}/recommendation`,
+    STATUS: (jobId: string) => `/recommendation/status/${jobId}`
   },
 
   // SWOT endpoints (4 total)
@@ -53,5 +52,12 @@ export const API_URL = {
     GENERATE: (id: string) => `/pitchdeck/${id}/swot/generate`,
     BY_DECK: (id: string) => `/pitchdeck/${id}/swot`,
     STATUS: (jobId: string) => `/swot/status/${jobId}`
+  },
+
+  // PESTLE endpoints (3 total)
+  PESTLE: {
+    GENERATE: (id: string) => `/pitchdeck/${id}/pestle`,
+    BY_DECK: (id: string) => `/pitchdeck/${id}/pestle`,
+    STATUS: (jobId: string) => `/pestle/status/${jobId}`
   }
 } as const;

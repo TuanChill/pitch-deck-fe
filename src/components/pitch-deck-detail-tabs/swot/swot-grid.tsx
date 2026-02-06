@@ -6,6 +6,7 @@
 import type { SWOTData } from '@/types/mock-data/swot-pestle.types';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { SWOTItemCard } from './swot-item-card';
 
 interface SWOTGridProps {

@@ -5,6 +5,8 @@ export { usePipelineStore } from './pipeline.store';
 export { useReportStore } from './report-store';
 export { useSwotStore } from './swot-store';
 export { useVcFeedbackStore } from './vc-feedback.store';
+export { usePestleStore } from './pestle-store';
+export { useRecommendationStore } from './recommendation-store';
 export type { AnalysisStage } from './pitch-deck.store';
 export type { PitchDeckAnalysisResponse } from '@/types/response/pitch-deck';
 export type {
@@ -15,3 +17,4 @@ export type {
   PipelineActions
 } from '@/types/domain/pipeline';
 export type { SwotStatus } from '@/types/response/swot-response.types';
+export type { RecommendationStatus } from '@/types/response/recommendation-response.types';

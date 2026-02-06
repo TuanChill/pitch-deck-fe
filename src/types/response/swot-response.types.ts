@@ -2,7 +2,6 @@
  * SWOT API Response Types
  * Types for SWOT analysis API requests and responses
  */
-import type { SWOTData } from '../mock-data/swot-pestle.types';
 
 export type SwotStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
@@ -59,5 +58,5 @@ export const SEVERITY_MAP: Record<string, 'high' | 'medium' | 'low'> = {
   critical: 'high',
   major: 'high',
   minor: 'medium',
-  info: 'low',
+  info: 'low'
 };

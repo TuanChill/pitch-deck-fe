@@ -10,7 +10,7 @@ const quadrants = [
   { name: 'Strengths', color: 'text-emerald-700 dark:text-emerald-400' },
   { name: 'Weaknesses', color: 'text-red-700 dark:text-red-400' },
   { name: 'Opportunities', color: 'text-blue-700 dark:text-blue-400' },
-  { name: 'Threats', color: 'text-amber-700 dark:text-amber-400' },
+  { name: 'Threats', color: 'text-amber-700 dark:text-amber-400' }
 ];
 
 export function SWOTLoadingState() {

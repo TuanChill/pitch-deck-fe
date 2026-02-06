@@ -32,7 +32,11 @@ export function VcFeedbackSectionCard({ section }: VcFeedbackSectionCardProps) {
 
   // Safety check: if metadata not found, log and skip rendering
   if (!meta) {
-    console.warn(`[VcFeedbackSectionCard] No metadata found for section: "${section.section}"`, section);
+    console.warn(
+      `[VcFeedbackSectionCard] No metadata found for section: "${section.section}"`,
+      section
+    );
+
     return null;
   }
 

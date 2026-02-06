@@ -6,10 +6,10 @@
  * Max polling duration: 5 minutes (100 attempts).
  */
 
+import { VC_FEEDBACK_SECTIONS } from '@/constants/vc-evaluation';
 import { getAnalytics } from '@/services/api';
 import type { VcFeedbackResponse } from '@/types/domain/vc-feedback';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { VC_FEEDBACK_SECTIONS } from '@/constants/vc-evaluation';
 
 type AnalyticsStatus = 'loading' | 'ready' | 'error';
 
@@ -62,10 +62,20 @@ export const useAnalytics = (
 
   const fetchAnalytics = useCallback(
     async (isPoll = false): Promise<void> => {
-      console.log('[useAnalytics] fetchAnalytics called', { deckId, enabled, isMounted: isMountedRef.current, isPoll });
+      console.log('[useAnalytics] fetchAnalytics called', {
+        deckId,
+        enabled,
+        isMounted: isMountedRef.current,
+        isPoll
+      });
 
       if (!deckId || !enabled || !isMountedRef.current) {
-        console.warn('[useAnalytics] Early return:', { deckId, enabled, isMounted: isMountedRef.current });
+        console.warn('[useAnalytics] Early return:', {
+          deckId,
+          enabled,
+          isMounted: isMountedRef.current
+        });
+
         return;
       }
 
@@ -91,11 +101,15 @@ export const useAnalytics = (
 
         // Validate and filter sections to prevent crashes
         if (response?.sections) {
-          const validSections = response.sections.filter(section => {
+          const validSections = response.sections.filter((section) => {
             const isValid = section.section in VC_FEEDBACK_SECTIONS;
             if (!isValid) {
-              console.warn(`[useAnalytics] Invalid section name: "${section.section}". Skipping.`, section);
+              console.warn(
+                `[useAnalytics] Invalid section name: "${section.section}". Skipping.`,
+                section
+              );
             }
+
             return isValid;
           });
 
@@ -103,7 +117,7 @@ export const useAnalytics = (
           if (validSections.length !== response.sections.length) {
             console.warn(
               `[useAnalytics] Filtered ${response.sections.length - validSections.length} invalid sections. ` +
-              `Original: ${response.sections.length}, Valid: ${validSections.length}`
+                `Original: ${response.sections.length}, Valid: ${validSections.length}`
             );
           }
 

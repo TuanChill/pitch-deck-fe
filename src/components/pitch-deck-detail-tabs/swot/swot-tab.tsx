@@ -3,11 +3,12 @@
  * SWOT analysis tab with store integration and comprehensive data display
  */
 
-import type { SWOTData } from '@/types/mock-data/swot-pestle.types';
-import type { SwotData as ApiSwotData } from '@/types/response/swot-response.types';
-import { MOCK_SWOT_DATA } from '@/types/mock-data/swot-pestle.types';
 import { useSwotStore } from '@/stores';
+import type { SWOTData } from '@/types/mock-data/swot-pestle.types';
+import { MOCK_SWOT_DATA } from '@/types/mock-data/swot-pestle.types';
+import type { SwotData as ApiSwotData } from '@/types/response/swot-response.types';
 import { useEffect } from 'react';
+
 import { SWOTErrorState } from './swot-error-state';
 import { SWOTGrid } from './swot-grid';
 import { SWOTLoadingState } from './swot-loading-state';
@@ -23,6 +24,7 @@ function mapSeverity(severity?: string): 'high' | 'medium' | 'low' | undefined {
   if (!severity) return undefined;
   if (severity === 'critical' || severity === 'major') return 'high';
   if (severity === 'minor') return 'medium';
+
   return 'low';
 }
 
@@ -33,20 +35,20 @@ function convertApiToDisplay(apiData: ApiSwotData): SWOTData {
   return {
     strengths: apiData.strengths.map((item) => ({
       ...item,
-      severity: mapSeverity(item.severity),
+      severity: mapSeverity(item.severity)
     })),
     weaknesses: apiData.weaknesses.map((item) => ({
       ...item,
-      severity: mapSeverity(item.severity),
+      severity: mapSeverity(item.severity)
     })),
     opportunities: apiData.opportunities.map((item) => ({
       ...item,
-      severity: mapSeverity(item.severity),
+      severity: mapSeverity(item.severity)
     })),
     threats: apiData.threats.map((item) => ({
       ...item,
-      severity: mapSeverity(item.severity),
-    })),
+      severity: mapSeverity(item.severity)
+    }))
   };
 }
 
@@ -61,18 +63,26 @@ export function SwotTab({ deckId }: SwotTabProps) {
   const error = deckId ? errors[id] : null;
 
   // Convert API data to display format
-  const displaySwot: SWOTData | null = apiSwot ? convertApiToDisplay(apiSwot) : deckId ? null : MOCK_SWOT_DATA;
+  const displaySwot: SWOTData | null = apiSwot
+    ? convertApiToDisplay(apiSwot)
+    : deckId
+      ? null
+      : MOCK_SWOT_DATA;
 
-  // Auto-fetch or generate on mount if deckId provided
+  // Always fetch on mount (like analytics tab)
   useEffect(() => {
-    if (deckId && !apiSwot && !status && !isLoading) {
-      // First try to fetch existing data
+    if (deckId) {
       fetchSwot(deckId).catch(() => {
-        // If fetch fails, trigger generation
+        // If fetch fails (404), trigger generation
         generateSwot(deckId);
       });
     }
-  }, [deckId, apiSwot, status, isLoading, fetchSwot, generateSwot]);
+
+    // Cleanup
+    return () => {
+      // Optional: clear polling/cleanup when unmounting
+    };
+  }, [deckId, fetchSwot, generateSwot]);
 
   // Loading state
   if (isLoading || status === 'processing') {

@@ -3,12 +3,13 @@
  * Enhanced card with expandable details for comprehensive SWOT analysis
  */
 
+import type { SWOTItem } from '@/types/mock-data/swot-pestle.types';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useState } from 'react';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import type { SWOTItem } from '@/types/mock-data/swot-pestle.types';
-import { useState } from 'react';
 
 interface SWOTItemCardProps {
   item: SWOTItem;
@@ -18,7 +19,7 @@ interface SWOTItemCardProps {
 const variantStyles = {
   positive: 'border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20',
   negative: 'border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/20',
-  neutral: 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20',
+  neutral: 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20'
 };
 
 const severityStyles: Record<string, string> = {
@@ -28,7 +29,7 @@ const severityStyles: Record<string, string> = {
   medium: 'border-amber-500 text-amber-700 bg-amber-50 dark:bg-amber-950/30',
   minor: 'border-blue-500 text-blue-700 bg-blue-50 dark:bg-blue-950/30',
   low: 'border-slate-500 text-slate-700 bg-slate-50 dark:bg-slate-950/30',
-  info: 'border-slate-400 text-slate-600 bg-slate-50 dark:bg-slate-950/30',
+  info: 'border-slate-400 text-slate-600 bg-slate-50 dark:bg-slate-950/30'
 };
 
 function SeverityBadge({ severity }: { severity?: string }) {
@@ -47,7 +48,9 @@ export function SWOTItemCard({ item, variant }: SWOTItemCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const hasDetails =
-    item.strategicImplications || item.evidence || (item.recommendations && item.recommendations.length > 0);
+    item.strategicImplications ||
+    item.evidence ||
+    (item.recommendations && item.recommendations.length > 0);
 
   return (
     <Card className={variantStyles[variant]}>

@@ -7,6 +7,7 @@ export * from './recommendation.service';
 export * from './swot.service';
 export * from './summary.service';
 export * from './vc-feedback.service';
+export * from './pestle.service';
 
 // Response types
 export type {
@@ -24,7 +25,6 @@ export type {
   ListAnalysesResponse,
   DeleteSuccessResponse,
   RecommendationResponse,
-  RecommendationStatus,
   MarketResearch,
   CompetitorAnalysis,
   TeamVerification,
@@ -41,8 +41,34 @@ export type {
   SwotData,
   SwotItem,
   SwotEvidence,
-  SwotStatus,
+  SwotStatus
 } from '@/types/response/swot-response.types';
+
+// PESTLE types
+export type {
+  PestleApiResponse,
+  PestleGenerateRequest,
+  PestleGenerateResponse,
+  PestleData,
+  PestleItem,
+  PestleEvidence,
+  PestleStatus
+} from '@/types/response/pestle-response.types';
+
+// Recommendation types
+export type {
+  RecommendationApiResponse,
+  RecommendationGenerateRequest,
+  RecommendationGenerateResponse,
+  RecommendationData,
+  MarketResearchData,
+  CompetitorData,
+  CompetitorAnalysisData,
+  FounderData,
+  TeamVerificationData,
+  RecommendationStatus,
+  RecommendationVerdict
+} from '@/types/response/recommendation-response.types';
 
 // Request types
 export type {

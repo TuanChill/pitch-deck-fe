@@ -11,7 +11,7 @@ import { httpClient } from '@/services/http/client';
 import type {
   SwotApiResponse,
   SwotGenerateRequest,
-  SwotGenerateResponse,
+  SwotGenerateResponse
 } from '@/types/response/swot-response.types';
 
 /**
@@ -36,16 +36,12 @@ type BackendSwotGenerateResponse = {
  * @param id - Unique identifier of the pitch deck
  * @returns Job ID and status for tracking generation progress
  */
-export const generateSwot = async (
-  id: string
-): Promise<SwotGenerateResponse> => {
-  const response = await httpClient.post<SwotGenerateResponse>(
-    API_URL.SWOT.GENERATE(id),
-    { id }
-  );
+export const generateSwot = async (id: string): Promise<SwotGenerateResponse> => {
+  const response = await httpClient.post<SwotGenerateResponse>(API_URL.SWOT.GENERATE(id), { id });
 
   // Backend wraps response: { success, data, statusCode }
   const backendResponse = response.data as unknown as BackendSwotGenerateResponse;
+
   return backendResponse.data;
 };
 
@@ -57,12 +53,11 @@ export const generateSwot = async (
  * @returns SWOT analysis data with all four quadrants
  */
 export const getSwotByDeck = async (id: string): Promise<SwotApiResponse> => {
-  const response = await httpClient.get<SwotApiResponse>(
-    API_URL.SWOT.BY_DECK(id)
-  );
+  const response = await httpClient.get<SwotApiResponse>(API_URL.SWOT.BY_DECK(id));
 
   // Backend wraps response: { success, data, statusCode }
   const backendResponse = response.data as unknown as BackendSwotResponse;
+
   return backendResponse.data;
 };
 
@@ -74,12 +69,11 @@ export const getSwotByDeck = async (id: string): Promise<SwotApiResponse> => {
  * @returns SWOT analysis with current status
  */
 export const pollSwotStatus = async (jobId: string): Promise<SwotApiResponse> => {
-  const response = await httpClient.get<SwotApiResponse>(
-    API_URL.SWOT.STATUS(jobId)
-  );
+  const response = await httpClient.get<SwotApiResponse>(API_URL.SWOT.STATUS(jobId));
 
   // Backend wraps response: { success, data, statusCode }
   const backendResponse = response.data as unknown as BackendSwotResponse;
+
   return backendResponse.data;
 };
 
@@ -87,5 +81,5 @@ export const pollSwotStatus = async (jobId: string): Promise<SwotApiResponse> =>
 export const swotService = {
   generateSwot,
   getSwotByDeck,
-  pollSwotStatus,
+  pollSwotStatus
 };
