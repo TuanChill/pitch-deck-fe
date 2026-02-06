@@ -4,17 +4,46 @@
  */
 
 import { calculateOverallScore } from '@/constants/vc-evaluation';
-import { MOCK_VC_FEEDBACK } from '@/types/mock-data/vc-feedback';
+import { useAnalytics } from '@/hooks/use-analytics';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
+import { AnalyticsError } from './analytics-error';
+import { AnalyticsSkeleton } from './analytics-skeleton';
 import { VcDecisionBadge } from './vc-decision-badge';
 import { VcFeedbackSectionCard } from './vc-feedback-section-card';
 import { VcScoreDisplay } from './vc-score-display';
 
-export function AnalyticsTab() {
-  const data = MOCK_VC_FEEDBACK;
+interface AnalyticsTabProps {
+  deckId: string;
+}
+
+export function AnalyticsTab({ deckId }: AnalyticsTabProps) {
+  const { data, status, error, isPolling, refetch } = useAnalytics(deckId);
+
+  // Early return if no deckId (defensive check)
+  if (!deckId) {
+    return <div className="text-center py-12 text-muted-foreground">Invalid pitch deck ID</div>;
+  }
+
+  // Loading state
+  if (status === 'loading' || isPolling) {
+    return <AnalyticsSkeleton />;
+  }
+
+  // Error state
+  if (status === 'error') {
+    return <AnalyticsError error={error} onRetry={refetch} isPolling={isPolling} />;
+  }
+
+  // No data
+  if (!data) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">No analytics data available</div>
+    );
+  }
+
   const overallScore = calculateOverallScore(data.sections);
 
   return (

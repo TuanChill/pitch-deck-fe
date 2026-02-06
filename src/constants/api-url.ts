@@ -12,12 +12,14 @@ export const API_URL = {
   LOGOUT: '/auth/logout',
   REFRESH_TOKEN: '/auth/refresh',
 
-  // Pitch deck endpoints (4 total)
+  // Pitch deck endpoints (6 total)
   PITCH_DECK: {
     UPLOAD: '/pitchdeck/upload',
     LIST: '/pitchdeck',
     DETAIL: (uuid: string) => `/pitchdeck/${uuid}`,
-    DELETE: (uuid: string) => `/pitchdeck/${uuid}`
+    DELETE: (uuid: string) => `/pitchdeck/${uuid}`,
+    SUMMARY: (uuid: string) => `/pitchdeck/${uuid}/summary`,
+    ANALYTICS: (uuid: string) => `/pitchdeck/${uuid}/analytics`
   },
 
   // Analysis endpoints (6 total)

@@ -3,26 +3,22 @@
  * Grid layout for summary tab startup snapshot
  */
 
-import type { SummaryData } from '@/types/mock-data/summary.types';
+import type { SummaryData } from '@/types/response/summary';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { SnapshotFieldPair } from './snapshot-field';
 
-const DECISION_STYLES: Record<SummaryData['decision'], { label: string; className: string }> = {
-  invest: { label: 'Invest', className: 'bg-emerald-500 hover:bg-emerald-600' },
-  deep_dive: { label: 'Deep Dive', className: 'bg-blue-500 hover:bg-blue-600' },
-  watchlist: { label: 'Watchlist', className: 'bg-amber-500 hover:bg-amber-600' },
-  pass: { label: 'Pass', className: 'bg-red-500 hover:bg-red-600' }
-};
-
 interface StartupSnapshotProps {
   data: SummaryData;
 }
 
 export function StartupSnapshot({ data }: StartupSnapshotProps) {
-  const decisionStyle = DECISION_STYLES[data.decision];
+  // Format decision for display (convert underscore to space, capitalize)
+  const decisionLabel = (data.decision || 'N/A')
+    .replace('_', ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
     <div className="space-y-6">
@@ -43,7 +39,7 @@ export function StartupSnapshot({ data }: StartupSnapshotProps) {
               <div className="text-xs font-medium text-muted-foreground">Overall Score</div>
               <div className="text-2xl font-bold">{data.overallScore}/100</div>
             </div>
-            <Badge className={decisionStyle.className}>{decisionStyle.label}</Badge>
+            <Badge>{decisionLabel}</Badge>
           </div>
         </CardContent>
       </Card>
@@ -84,7 +80,7 @@ export function StartupSnapshot({ data }: StartupSnapshotProps) {
           leftLabel="Fundraising"
           leftValue={data.fundraising}
           rightLabel="Decision"
-          rightValue={decisionStyle.label}
+          rightValue={decisionLabel}
           rightVariant={data.decision === 'pass' ? 'danger' : 'success'}
         />
       </div>

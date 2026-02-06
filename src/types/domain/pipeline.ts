@@ -4,6 +4,7 @@
  */
 
 import type { AnalysisStatusResponse } from '@/types/response/pitch-deck';
+import type { SummaryData } from '@/types/response/summary';
 
 export type PipelineStageStatus = 'pending' | 'running' | 'completed' | 'failed';
 
@@ -35,6 +36,9 @@ export interface PipelineState {
 
   // Error state
   error: string | null;
+
+  // Summary data
+  summaryData: SummaryData | null;
 }
 
 export interface PipelineActions {
@@ -58,6 +62,9 @@ export interface PipelineActions {
 
   // Error handling
   setError: (error: string | null) => void;
+
+  // Summary data
+  setSummaryData: (data: SummaryData | null) => void;
 
   // Reset
   reset: () => void;

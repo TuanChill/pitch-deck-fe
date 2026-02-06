@@ -33,8 +33,9 @@ export type VerdictType = 'strong_buy' | 'buy' | 'hold' | 'pass';
 /**
  * Decision types for Summary tab
  * Renamed from DecisionType to avoid collision with evaluation-criteria.ts
+ * Matches backend SummaryDecision type
  */
-export type SummaryDecision = 'invest' | 'deep_dive' | 'watchlist' | 'pass';
+export type SummaryDecision = 'pass' | 'meeting' | 'deep_dive';
 
 /**
  * Traffic light state for quick decision display

@@ -11,7 +11,8 @@ const initialState = {
   currentStage: null,
   isPolling: false,
   pollCount: 0,
-  error: null
+  error: null,
+  summaryData: null
 };
 
 export const usePipelineStore = create<PipelineStore>()(
@@ -31,7 +32,8 @@ export const usePipelineStore = create<PipelineStore>()(
           currentStage: null,
           isPolling: false,
           pollCount: 0,
-          error: null
+          error: null,
+          summaryData: null
         }),
 
       // Status updates
@@ -65,6 +67,9 @@ export const usePipelineStore = create<PipelineStore>()(
 
       // Error handling
       setError: (error) => set({ error }),
+
+      // Summary data
+      setSummaryData: (data) => set({ summaryData: data }),
 
       // Reset
       reset: () => set(initialState),

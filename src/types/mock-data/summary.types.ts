@@ -2,22 +2,7 @@
  * Summary Mock Data Types
  */
 
-import type { SummaryDecision } from '@/types/domain';
-
-export interface SummaryData {
-  oneLiner: string;
-  problem: string;
-  solution: string;
-  market: string;
-  product: string;
-  traction: string;
-  businessModel: string;
-  moat: string;
-  team: string;
-  fundraising: string;
-  overallScore: number;
-  decision: SummaryDecision;
-}
+import type { SummaryData } from '@/types/response/summary';
 
 export const MOCK_SUMMARY_DATA: SummaryData = {
   oneLiner:
@@ -36,5 +21,5 @@ export const MOCK_SUMMARY_DATA: SummaryData = {
   fundraising:
     'Raising $3M Seed for 18-month runway to scale sales, expand AI capabilities, grow team to 30',
   overallScore: 78,
-  decision: 'deep_dive'
+  decision: 'meeting'
 };

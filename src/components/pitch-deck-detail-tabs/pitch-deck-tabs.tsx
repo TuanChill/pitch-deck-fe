@@ -12,7 +12,11 @@ import { SummaryTab } from './summary';
 import { SwotTab } from './swot';
 import { TabContentWrapper } from './tab-content-wrapper';
 
-export function PitchDeckTabs() {
+interface PitchDeckTabsProps {
+  deckId?: string;
+}
+
+export function PitchDeckTabs({ deckId }: PitchDeckTabsProps) {
   return (
     <Tabs defaultValue="summary" className="w-full">
       <TabsList className="grid w-full grid-cols-5">
@@ -29,7 +33,7 @@ export function PitchDeckTabs() {
         </TabsContent>
 
         <TabsContent value="analytics" className="mt-0">
-          <AnalyticsTab />
+          <AnalyticsTab deckId={deckId || ''} />
         </TabsContent>
 
         <TabsContent value="swot" className="mt-0">

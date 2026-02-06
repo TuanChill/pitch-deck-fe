@@ -210,7 +210,7 @@ function PitchDeckDetailContent() {
       {/* Tabs section - only show after pipeline completes */}
       {overallStatus === 'completed' && (
         <div className="border-t pt-6">
-          <PitchDeckTabs />
+          <PitchDeckTabs deckId={id} />
         </div>
       )}
 

@@ -2,6 +2,7 @@ import { AGENT_TO_STAGE_MAP } from '@/constants/pipeline-stages';
 import {
   getAnalysisByDeck,
   getAnalysisStatus,
+  getPitchDeckSummary,
   pollAnalysisComplete,
   startAnalysis
 } from '@/services/api';
@@ -37,7 +38,8 @@ export const usePipelineAutoStart = (
     setPolling,
     resetPollCount,
     setError,
-    clearAnalysis
+    clearAnalysis,
+    setSummaryData
   } = usePipelineStore();
 
   // Map backend agents to pipeline stages
@@ -68,6 +70,18 @@ export const usePipelineAutoStart = (
     onProgress?.(statusResponse.progress);
   };
 
+  // Fetch summary data after pipeline completes
+  const fetchSummaryData = async (deckUuid: string) => {
+    try {
+      const summary = await getPitchDeckSummary(deckUuid);
+      setSummaryData(summary);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to fetch summary';
+      console.error('Failed to fetch summary:', errorMsg);
+      // Don't set error state - summary is optional, tabs can handle missing data
+    }
+  };
+
   // Check pipeline status on mount
   useEffect(() => {
     if (!deckUuid || hasChecked.current) return;
@@ -92,6 +106,9 @@ export const usePipelineAutoStart = (
           onProgress?.(100);
           onComplete?.(mockUuid);
           setPolling(false);
+
+          // Fetch summary data after pipeline completes (mock mode)
+          await fetchSummaryData(deckUuid);
 
           return;
         }
@@ -152,6 +169,9 @@ export const usePipelineAutoStart = (
             setPolling(false);
             onComplete?.(existingAnalysis.uuid);
 
+            // Fetch summary data after pipeline completes
+            await fetchSummaryData(deckUuid);
+
             return;
           }
 
@@ -181,6 +201,9 @@ export const usePipelineAutoStart = (
             });
             onComplete?.(existingAnalysis.uuid);
 
+            // Fetch summary data after pipeline completes
+            await fetchSummaryData(deckUuid);
+
             return;
           }
         } else {
@@ -198,6 +221,9 @@ export const usePipelineAutoStart = (
               }
             });
             onComplete?.(newAnalysis.uuid);
+
+            // Fetch summary data after pipeline completes
+            await fetchSummaryData(deckUuid);
           } else {
             setPolling(false);
           }

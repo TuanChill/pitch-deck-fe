@@ -11,6 +11,7 @@
 
 import { API_URL } from '@/constants/api-url';
 import { httpClient } from '@/services/http/client';
+import type { VcFeedbackResponse } from '@/types/domain/vc-feedback';
 import type { ListPitchDecksQuery, UploadPitchDeckRequest } from '@/types/request/pitch-deck';
 import type {
   DeleteSuccessResponse,
@@ -223,4 +224,18 @@ export const deletePitchDeck = async (uuid: string): Promise<DeleteSuccessRespon
   };
 
   return backendResponse.data;
+};
+
+/**
+ * Get pitch deck analytics by UUID
+ * GET /pitchdeck/:uuid/analytics
+ *
+ * @param uuid - Unique identifier of the pitch deck
+ * @returns VC-style analytics feedback
+ */
+export const getAnalytics = async (uuid: string): Promise<VcFeedbackResponse> => {
+  const response = await httpClient.get<VcFeedbackResponse>(API_URL.PITCH_DECK.ANALYTICS(uuid));
+
+  // Backend returns data directly (no wrapper for analytics)
+  return response.data;
 };

@@ -4,6 +4,7 @@ export * from './pitch-deck.service';
 export * from './pitch-deck-management.service';
 export * from './report.service';
 export * from './recommendation.service';
+export * from './summary.service';
 export * from './vc-feedback.service';
 
 // Response types
@@ -28,6 +29,8 @@ export type {
   TeamVerification,
   OverallRecommendation
 } from '@/types/response/pitch-deck';
+
+export type { SummaryData } from '@/types/response/summary';
 
 // Request types
 export type {
