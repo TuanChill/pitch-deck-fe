@@ -8,11 +8,7 @@
 
 import { API_URL } from '@/constants/api-url';
 import { httpClient } from '@/services/http/client';
-import type {
-  SwotApiResponse,
-  SwotGenerateRequest,
-  SwotGenerateResponse
-} from '@/types/response/swot-response.types';
+import type { SwotApiResponse, SwotGenerateResponse } from '@/types/response/swot-response.types';
 
 /**
  * Backend response wrapper

@@ -1,11 +1,13 @@
 # Codebase Summary
 
 ## Overview
+
 This document provides a comprehensive summary of the TBX Pitch Deck Management System frontend codebase, including the newly added Pipeline Visualization Component from Phase 03.
 
 ## Architecture Overview
 
 ### Tech Stack
+
 - **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript
 - **UI Components**: React 19 RC with shadcn/ui (Radix UI + Tailwind CSS)
@@ -14,6 +16,7 @@ This document provides a comprehensive summary of the TBX Pitch Deck Management 
 - **Flow Visualization**: ReactFlow v11.11.4
 
 ### Core Patterns
+
 - **YANGI-KISS-DRY-SOLID** principles enforced throughout
 - **200-line limit** per file - large components are split
 - **Kebab-case** filenames for consistency
@@ -23,14 +26,17 @@ This document provides a comprehensive summary of the TBX Pitch Deck Management 
 ## Key Components
 
 ### 1. Pipeline Visualization Component (Phase 03)
+
 Newly implemented ReactFlow-based pipeline visualization system for tracking AI analysis progress.
 
 **Files:**
+
 - `src/components/pipeline-visualization/pipeline-flow.tsx` - Main flow component with ReactFlow integration
 - `src/components/pipeline-visualization/pipeline-node.tsx` - Custom node component with status indicators
 - `src/components/pipeline-visualization/index.ts` - Barrel exports
 
 **Features:**
+
 - Visual representation of 6 pipeline stages: Extract Content → Generate Summary → VC Framework Analysis → SWOT Analysis → PESTLE Analysis → Investment Recommendation
 - Real-time status tracking (pending, running, completed, failed)
 - Animated connections between stages
@@ -39,18 +45,22 @@ Newly implemented ReactFlow-based pipeline visualization system for tracking AI 
 - Responsive design with ReactFlow controls
 
 **Dependencies:**
+
 - ReactFlow v11.11.4 (newly added)
 - Lucide React for icons
 - Zustand for state management
 
 ### 2. State Management
+
 **Pipeline Store (`src/stores/pipeline.store.ts`)**
+
 - Manages AI pipeline workflow state
 - Tracks individual stage progress and status
 - Handles polling mechanisms for real-time updates
 - Persists critical state to localStorage
 
 **Key State Properties:**
+
 ```typescript
 interface PipelineState {
   analysisUuid: string | null;
@@ -65,13 +75,17 @@ interface PipelineState {
 ```
 
 ### 3. Domain Types
+
 **Pipeline Types (`src/types/domain/pipeline.ts`)**
+
 - Defines type-safe contracts for pipeline operations
 - Includes stage management, status tracking, and error handling
 - Supports real-time progress updates
 
 ### 4. Constants and Configuration
+
 **Pipeline Stages (`src/constants/pipeline-stages.ts`)**
+
 - Defines stage order and labels
 - Maps backend agents to frontend stages
 - Provides initial stage configuration
@@ -79,11 +93,13 @@ interface PipelineState {
 ## Integration Points
 
 ### 1. Backend Integration
+
 - **API Layer**: Services in `src/services/api/` handle communication with NestJS backend
 - **Auth**: JWT tokens automatically attached via HTTP interceptors
 - **Real-time Updates**: Polling mechanism for pipeline progress
 
 ### 2. UI Integration
+
 - **Dashboard**: Pipeline visualization integrated into pitch deck management interface
 - **Status Indicators**: Visual feedback matches application-wide design system
 - **Responsive Design**: Works across different screen sizes
@@ -117,6 +133,7 @@ src/
 ## Key Features
 
 ### Pipeline Visualization
+
 - **Visual Flow**: Linear representation of AI processing stages
 - **Real-time Updates**: Live progress tracking with animated indicators
 - **Status Management**: Clear visual feedback for each stage state
@@ -124,6 +141,7 @@ src/
 - **Performance**: Optimized ReactFlow configuration for smooth rendering
 
 ### State Management
+
 - **Persistence**: Critical pipeline state survives page refreshes
 - **Atomic Updates**: Stage updates are handled atomically
 - **Polling Control**: Efficient polling with count tracking
@@ -154,6 +172,7 @@ src/
 ## Dependencies
 
 ### Core Dependencies
+
 - next: 15.0.0
 - react: 19.0.0
 - react-dom: 19.0.0
@@ -162,6 +181,7 @@ src/
 - reactflow: 11.11.4 (new)
 
 ### Development Dependencies
+
 - typescript: 5.3.3
 - @types/react: 18.2.79
 - tailwindcss: 3.3.0

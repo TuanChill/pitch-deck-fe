@@ -22,10 +22,11 @@ export const API_URL = {
     ANALYTICS: (uuid: string) => `/pitchdeck/${uuid}/analytics`
   },
 
-  // Analysis endpoints (6 total)
+  // Analysis endpoints (7 total)
   ANALYSIS: {
     START: '/analysis/start',
     STATUS: (uuid: string) => `/analysis/${uuid}/status`,
+    PROGRESS: (uuid: string) => `/analysis/${uuid}/progress`,
     DETAIL: (uuid: string) => `/analysis/${uuid}`,
     LIST: '/analysis',
     DELETE: (uuid: string) => `/analysis/${uuid}`,

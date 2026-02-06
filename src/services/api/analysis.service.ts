@@ -22,7 +22,8 @@ import type {
   AnalysisResponse,
   AnalysisStatusResponse,
   DeleteSuccessResponse,
-  ListAnalysesResponse
+  ListAnalysesResponse,
+  DetailedProgressResponse
 } from '@/types/response/pitch-deck';
 import Axios from 'axios';
 
@@ -66,6 +67,26 @@ export const startAnalysis = async (pitchDeckUuid: string): Promise<AnalysisResp
 export const getAnalysisStatus = async (analysisUuid: string): Promise<AnalysisStatusResponse> => {
   const response = await httpClient.get<AnalysisStatusResponse>(
     API_URL.ANALYSIS.STATUS(analysisUuid)
+  );
+
+  return response.data;
+};
+
+/**
+ * Get detailed progress with per-agent breakdown
+ * GET /analysis/:uuid/progress
+ *
+ * Returns per-agent progress (0-100%), current step, and ETA.
+ * Used for real-time progress tracking with 1s polling.
+ *
+ * @param analysisUuid - UUID of the analysis
+ * @returns Detailed progress response with per-agent breakdown
+ */
+export const getDetailedProgress = async (
+  analysisUuid: string
+): Promise<DetailedProgressResponse> => {
+  const response = await httpClient.get<DetailedProgressResponse>(
+    API_URL.ANALYSIS.PROGRESS(analysisUuid)
   );
 
   return response.data;

@@ -1191,6 +1191,7 @@ interface PipelineState {
 ```
 
 **Features:**
+
 - Real-time pipeline progress tracking
 - Stage-by-stage status updates
 - Polling mechanism with count tracking
@@ -1198,6 +1199,7 @@ interface PipelineState {
 - Atomic updates for race condition prevention
 
 **Key Actions:**
+
 ```typescript
 // Stage management
 updateStage(stageId: string, updates: Partial<PipelineStage>)
@@ -1427,10 +1429,10 @@ The `usePipelineAutoStart` hook provides intelligent pipeline management for pit
 
 ```typescript
 interface UsePipelineAutoStartOptions {
-  autoStart?: boolean;        // Enable auto-restart of failed analysis
-  onProgress?: (progress: number) => void;    // Progress callback
+  autoStart?: boolean; // Enable auto-restart of failed analysis
+  onProgress?: (progress: number) => void; // Progress callback
   onComplete?: (analysisUuid: string) => void; // Completion callback
-  onError?: (error: string) => void;        // Error callback
+  onError?: (error: string) => void; // Error callback
 }
 
 export const usePipelineAutoStart = (
@@ -1444,16 +1446,19 @@ export const usePipelineAutoStart = (
 #### Key Features
 
 1. **Intelligent Pipeline Detection**
+
    - Checks for existing analysis on component mount
    - Resumes polling from where it left off
    - Handles all analysis states (pending, processing, completed, failed)
 
 2. **Auto-Restart Capability**
+
    - Automatically restarts failed analysis when `autoStart=true`
    - Clears previous state and initiates new analysis
    - Graceful error handling with user feedback
 
 3. **Agent-Stage Mapping**
+
    - Maps backend agents to frontend pipeline stages
    - Updates stage status based on agent execution
    - Provides real-time progress tracking
@@ -1488,26 +1493,20 @@ Update Pipeline Store & Call Callbacks
 **1. Basic Usage**
 
 ```typescript
-const { isPolling, overallProgress, stages } = usePipelineAutoStart(
-  deckUuid,
-  {
-    autoStart: true,
-    onProgress: (progress) => console.log('Progress:', progress),
-    onComplete: (uuid) => console.log('Complete:', uuid)
-  }
-);
+const { isPolling, overallProgress, stages } = usePipelineAutoStart(deckUuid, {
+  autoStart: true,
+  onProgress: (progress) => console.log('Progress:', progress),
+  onComplete: (uuid) => console.log('Complete:', uuid)
+});
 ```
 
 **2. Conditional Auto-Start**
 
 ```typescript
-const { isPolling, error } = usePipelineAutoStart(
-  deckUuid,
-  {
-    autoStart: userPreference,
-    onError: (error) => toast.error(error)
-  }
-);
+const { isPolling, error } = usePipelineAutoStart(deckUuid, {
+  autoStart: userPreference,
+  onError: (error) => toast.error(error)
+});
 ```
 
 **3. With UI Components**
@@ -1547,18 +1546,21 @@ The Pipeline Visualization Component is a ReactFlow-based system for displaying 
 #### Core Components
 
 **PipelineFlow Component**
+
 - Manages ReactFlow instance and node positioning
 - Creates animated edges between stages
 - Handles real-time status updates
 - Provides SSR compatibility with wrapper
 
 **PipelineNode Component**
+
 - Custom ReactFlow node with status indicators
 - Displays stage name, status, and progress
 - Shows appropriate icons and colors
 - Handles connection points for linking
 
 **PipelineVisualization Wrapper**
+
 - SSR-compatible provider wrapper
 - Ensures proper hydration on client-side
 - Manages ReactFlow context

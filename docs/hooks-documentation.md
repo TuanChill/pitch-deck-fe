@@ -35,10 +35,10 @@ import { usePipelineAutoStart } from '@/hooks';
 
 ```typescript
 interface UsePipelineAutoStartOptions {
-  autoStart?: boolean;        // Enable auto-restart of failed analysis (default: true)
-  onProgress?: (progress: number) => void;    // Progress callback
+  autoStart?: boolean; // Enable auto-restart of failed analysis (default: true)
+  onProgress?: (progress: number) => void; // Progress callback
   onComplete?: (analysisUuid: string) => void; // Completion callback
-  onError?: (error: string) => void;        // Error callback
+  onError?: (error: string) => void; // Error callback
 }
 ```
 
@@ -46,13 +46,13 @@ interface UsePipelineAutoStartOptions {
 
 ```typescript
 {
-  isPolling: boolean;        // Whether polling is active
+  isPolling: boolean; // Whether polling is active
   analysisUuid: string | null; // Current analysis UUID
   overallStatus: string | null; // Overall analysis status
-  overallProgress: number;   // Overall progress percentage (0-100)
+  overallProgress: number; // Overall progress percentage (0-100)
   stages: Record<string, PipelineStage>; // Individual stage status
   currentStage: string | null; // Currently executing stage
-  error: string | null;      // Error message if any
+  error: string | null; // Error message if any
 }
 ```
 
@@ -77,12 +77,7 @@ function PitchDeckDetail({ deckUuid }) {
 
 ```typescript
 function PitchDeckDetail({ deckUuid }) {
-  const {
-    isPolling,
-    overallProgress,
-    analysisUuid,
-    error
-  } = usePipelineAutoStart(deckUuid, {
+  const { isPolling, overallProgress, analysisUuid, error } = usePipelineAutoStart(deckUuid, {
     autoStart: true,
     onProgress: (progress) => {
       console.log(`Analysis progress: ${progress}%`);
@@ -105,15 +100,12 @@ function PitchDeckDetail({ deckUuid }) {
 
 ```typescript
 function PitchDeckDetail({ deckUuid, userPreferences }) {
-  const { isPolling, error } = usePipelineAutoStart(
-    deckUuid,
-    {
-      autoStart: userPreferences.autoRestartAnalysis,
-      onError: (errorMsg) => {
-        // Custom error handling
-      }
+  const { isPolling, error } = usePipelineAutoStart(deckUuid, {
+    autoStart: userPreferences.autoRestartAnalysis,
+    onError: (errorMsg) => {
+      // Custom error handling
     }
-  );
+  });
 
   // ... component JSX
 }
@@ -144,7 +136,7 @@ export const AGENT_TO_STAGE_MAP: Record<string, string> = {
   'History Behavior Agent': 'analytics',
   'Strengths Agent': 'swot',
   'Weaknesses Agent': 'swot',
-  'Competitive Agent': 'swot',
+  'Competitive Agent': 'swot'
   // ... more agents
 };
 ```
@@ -304,10 +296,7 @@ function PitchDeckAnalysis({ deckUuid }) {
 ```typescript
 function PitchDeckDetail({ deckUuid }) {
   const { user } = useUserStore();
-  const {
-    isPolling,
-    overallProgress
-  } = usePipelineAutoStart(deckUuid, {
+  const { isPolling, overallProgress } = usePipelineAutoStart(deckUuid, {
     autoStart: user?.preferences?.autoRestart
   });
 
@@ -348,10 +337,7 @@ function PitchDeckDetail({ deckUuid }) {
 ```typescript
 function useAnalysisService(deckUuid: string) {
   const { startAnalysis, getAnalysisStatus } = useAnalysisApi();
-  const {
-    analysisUuid,
-    setAnalysisUuid
-  } = usePipelineStore();
+  const { analysisUuid, setAnalysisUuid } = usePipelineStore();
 
   const manualStart = async () => {
     const newAnalysis = await startAnalysis(deckUuid);
@@ -392,9 +378,7 @@ function useAnalysisService(deckUuid: string) {
 ```typescript
 function useFilteredData(data: any[], filter: string) {
   const filtered = useMemo(() => {
-    return data.filter(item =>
-      item.name.toLowerCase().includes(filter.toLowerCase())
-    );
+    return data.filter((item) => item.name.toLowerCase().includes(filter.toLowerCase()));
   }, [data, filter]);
 
   return filtered;
@@ -469,9 +453,7 @@ import { mockAnalysisApi } from '__mocks__/analysis-api';
 
 describe('usePipelineAutoStart', () => {
   it('should start polling when deckUuid is provided', () => {
-    const { result } = renderHook(() =>
-      usePipelineAutoStart('test-uuid')
-    );
+    const { result } = renderHook(() => usePipelineAutoStart('test-uuid'));
 
     expect(result.current.isPolling).toBe(true);
   });
@@ -510,10 +492,7 @@ describe('usePipelineAutoStart', () => {
  * @param options.onError - Callback for error handling
  * @returns Pipeline state and polling status
  */
-export const usePipelineAutoStart = (
-  deckUuid: string,
-  options?: UsePipelineAutoStartOptions
-) => {
+export const usePipelineAutoStart = (deckUuid: string, options?: UsePipelineAutoStartOptions) => {
   // Implementation
 };
 ```
@@ -584,7 +563,7 @@ const { updateState } = useLocalState();
 updateState(state + 1);
 
 // Use:
-updateState(prev => prev + 1);
+updateState((prev) => prev + 1);
 ```
 
 #### Re-render Issues

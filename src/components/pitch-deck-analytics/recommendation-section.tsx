@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  generateRecommendationAndWait,
-  getRecommendationByDeck,
-  VERDICT_COLORS
-} from '@/services/api';
+import { generateRecommendation, getRecommendationByDeck } from '@/services/api';
 import type { RecommendationResponse } from '@/types/response/pitch-deck';
 import { cn } from '@/utils';
 import { motion } from 'framer-motion';
@@ -31,6 +27,30 @@ import { Separator } from '@/components/ui/separator';
 type RecommendationSectionProps = {
   deckUuid: string;
   className?: string;
+};
+
+// Verdict styling colors
+const VERDICT_COLORS = {
+  strong_buy: {
+    border: 'border-green-500',
+    bg: 'bg-green-100 dark:bg-green-900',
+    text: 'text-green-800 dark:text-green-100'
+  },
+  buy: {
+    border: 'border-emerald-500',
+    bg: 'bg-emerald-100 dark:bg-emerald-900',
+    text: 'text-emerald-800 dark:text-emerald-100'
+  },
+  hold: {
+    border: 'border-amber-500',
+    bg: 'bg-amber-100 dark:bg-amber-900',
+    text: 'text-amber-800 dark:text-amber-100'
+  },
+  pass: {
+    border: 'border-red-500',
+    bg: 'bg-red-100 dark:bg-red-900',
+    text: 'text-red-800 dark:text-red-100'
+  }
 };
 
 export const RecommendationSection = ({ deckUuid, className }: RecommendationSectionProps) => {
@@ -67,13 +87,33 @@ export const RecommendationSection = ({ deckUuid, className }: RecommendationSec
       setError(null);
       setProgressStatus('Starting...');
 
-      const result = await generateRecommendationAndWait(deckUuid, {
-        onProgress: (status) => {
-          setProgressStatus(status.charAt(0).toUpperCase() + status.slice(1));
-        }
-      });
+      await generateRecommendation(deckUuid);
 
-      setRecommendation(result);
+      // After generation starts, poll for result
+      setProgressStatus('Processing...');
+      let attempts = 0;
+      const maxAttempts = 60; // 3 minutes with 3s intervals
+
+      const pollForResult = async (): Promise<void> => {
+        try {
+          const result = await getRecommendationByDeck(deckUuid);
+          setRecommendation(result);
+          setProgressStatus('Complete');
+        } catch (err) {
+          if (err && typeof err === 'object' && 'response' in err) {
+            const axiosError = err as { response?: { status?: number } };
+            if (axiosError.response?.status === 404 && attempts < maxAttempts) {
+              attempts++;
+              await new Promise((resolve) => setTimeout(resolve, 3000));
+
+              return pollForResult();
+            }
+          }
+          throw err;
+        }
+      };
+
+      await pollForResult();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate recommendation');
     } finally {

@@ -39,10 +39,13 @@ export const AGENT_TO_STAGE_MAP: Record<string, string> = {
   'Strengths Agent': 'swot',
   'Weaknesses Agent': 'swot',
   'Competitive Agent': 'swot',
-  'Overall Assessment Agent': 'analytics',
-  'Market Opportunity Agent': 'analytics',
-  'Business Model Agent': 'analytics',
-  'Team Execution Agent': 'analytics',
-  'Financial Projections Agent': 'analytics',
-  'Competitive Landscape Agent': 'analytics'
+  // Phase 01: New category-based agents
+  OverallAssessmentAgent: 'analytics',
+  MarketOpportunityAgent: 'analytics',
+  BusinessModelAgent: 'analytics',
+  TeamExecutionAgent: 'analytics',
+  FinancialProjectionsAgent: 'analytics',
+  CompetitiveLandscapeAgent: 'analytics',
+  ContentAgent: 'summary',
+  PresentationAgent: 'analytics'
 };

@@ -21,11 +21,11 @@ This document provides comprehensive documentation for the TypeScript type defin
 
 ```typescript
 export type UploadPitchDeckResponse = {
-  uuid: string;          // Unique identifier for the upload
-  filename: string;       // Original filename
-  fileSize: number;      // File size in bytes
-  fileType: string;      // MIME type
-  uploadedAt: string;    // ISO timestamp
+  uuid: string; // Unique identifier for the upload
+  filename: string; // Original filename
+  fileSize: number; // File size in bytes
+  fileType: string; // MIME type
+  uploadedAt: string; // ISO timestamp
 };
 ```
 
@@ -33,14 +33,14 @@ export type UploadPitchDeckResponse = {
 
 ```typescript
 export type PitchDeckListItem = {
-  id: string;            // Database primary key
-  title: string;         // Deck title
+  id: string; // Database primary key
+  title: string; // Deck title
   description: string | null; // Deck description
   status: PitchDeckStatus; // Current status
-  chunkCount: number;    // Number of text chunks
+  chunkCount: number; // Number of text chunks
   astraCollection?: string; // AstraDB collection name
   errorMessage: string | null; // Error details
-  fileCount: number;    // Number of files
+  fileCount: number; // Number of files
   tags?: string[] | null; // User tags
   files?: PitchDeckFileResponse[]; // File details
   lastAccessedAt: string | Long; // Last access timestamp
@@ -53,14 +53,14 @@ export type PitchDeckListItem = {
 
 ```typescript
 export type PitchDeckFileResponse = {
-  uuid: string;          // File UUID
+  uuid: string; // File UUID
   originalFileName: string; // Original filename
-  mimeType: string;      // MIME type (PDF, PPTX, etc.)
-  fileSize: number;     // File size in bytes
+  mimeType: string; // MIME type (PDF, PPTX, etc.)
+  fileSize: number; // File size in bytes
   status: PitchDeckStatus; // File processing status
-  storagePath: string;   // File system path
-  createdAt: string;    // Creation timestamp
-  updatedAt: string;    // Last update timestamp
+  storagePath: string; // File system path
+  createdAt: string; // Creation timestamp
+  updatedAt: string; // Last update timestamp
 };
 ```
 
@@ -82,10 +82,10 @@ export type AgentStatus = 'pending' | 'running' | 'completed' | 'failed';
 
 ```typescript
 export type AgentInfo = {
-  agentName: string;       // Backend agent identifier
-  status: AgentStatus;     // Current execution status
-  executionOrder: number;  // Sequence number
-  errorMessage?: string;   // Error details if failed
+  agentName: string; // Backend agent identifier
+  status: AgentStatus; // Current execution status
+  executionOrder: number; // Sequence number
+  errorMessage?: string; // Error details if failed
 };
 ```
 
@@ -93,14 +93,14 @@ export type AgentInfo = {
 
 ```typescript
 export type AnalysisStatusResponse = {
-  id: string;              // Database ID
-  uuid: string;            // Analysis UUID
+  id: string; // Database ID
+  uuid: string; // Analysis UUID
   status: AnalysisStatus; // Overall status
-  progress: number;       // Progress percentage (0-100)
-  message?: string;       // Status message
-  currentStep?: string;   // Currently executing step
-  agents?: AgentInfo[];   // Individual agent status
-  updatedAt: string;      // Last update timestamp
+  progress: number; // Progress percentage (0-100)
+  message?: string; // Status message
+  currentStep?: string; // Currently executing step
+  agents?: AgentInfo[]; // Individual agent status
+  updatedAt: string; // Last update timestamp
 };
 ```
 
@@ -108,16 +108,16 @@ export type AnalysisStatusResponse = {
 
 ```typescript
 export type AnalysisResponse = {
-  id: string;                    // Database ID
-  uuid: string;                  // Analysis UUID
-  deckId: string;               // Associated pitch deck UUID
-  status: AnalysisStatus;       // Current status
-  progress: number;             // Progress percentage
-  createdAt: string;            // Creation timestamp
-  updatedAt: string;            // Last update timestamp
-  completedAt?: string;         // Completion timestamp
-  errorMessage?: string;        // Error details
-  results?: AnalysisResult;     // Analysis results if completed
+  id: string; // Database ID
+  uuid: string; // Analysis UUID
+  deckId: string; // Associated pitch deck UUID
+  status: AnalysisStatus; // Current status
+  progress: number; // Progress percentage
+  createdAt: string; // Creation timestamp
+  updatedAt: string; // Last update timestamp
+  completedAt?: string; // Completion timestamp
+  errorMessage?: string; // Error details
+  results?: AnalysisResult; // Analysis results if completed
 };
 ```
 
@@ -125,12 +125,12 @@ export type AnalysisResponse = {
 
 ```typescript
 export type AnalysisResult = {
-  overallScore: number;                         // Overall score (0-100)
-  categoryScores: VCCategoryScore;              // Scores by category
-  strengths: StrengthItem[];                    // Identified strengths
-  improvements: ImprovementItem[];              // Suggested improvements
-  competitiveAnalysis?: CompetitiveAnalysis;     // Competitive positioning
-  analyzedAt: string;                          // Analysis timestamp
+  overallScore: number; // Overall score (0-100)
+  categoryScores: VCCategoryScore; // Scores by category
+  strengths: StrengthItem[]; // Identified strengths
+  improvements: ImprovementItem[]; // Suggested improvements
+  competitiveAnalysis?: CompetitiveAnalysis; // Competitive positioning
+  analyzedAt: string; // Analysis timestamp
 };
 ```
 
@@ -154,9 +154,9 @@ export type VCCategory =
 ```typescript
 export type VCCategoryScore = {
   [K in VCCategory]: {
-    score: number;      // Score (0-100)
-    weight: number;     // Category weight
-    details?: string;   // Detailed explanation
+    score: number; // Score (0-100)
+    weight: number; // Category weight
+    details?: string; // Detailed explanation
   };
 };
 ```
@@ -165,12 +165,12 @@ export type VCCategoryScore = {
 
 ```typescript
 export type StrengthItem = {
-  id: string;                    // Unique identifier
-  title: string;                // Strength title
-  description: string;          // Detailed description
-  evidence: EvidenceQuote[];    // Supporting evidence
-  impact: ImpactLevel;          // Impact assessment
-  category: VCCategory;         // VC category
+  id: string; // Unique identifier
+  title: string; // Strength title
+  description: string; // Detailed description
+  evidence: EvidenceQuote[]; // Supporting evidence
+  impact: ImpactLevel; // Impact assessment
+  category: VCCategory; // VC category
 };
 ```
 
@@ -178,13 +178,13 @@ export type StrengthItem = {
 
 ```typescript
 export type ImprovementItem = {
-  id: string;                    // Unique identifier
-  title: string;                // Improvement title
-  description: string;          // Detailed description
-  recommendation: string;       // Recommendation text
-  severity: SeverityLevel;      // Severity level
-  priority: number;             // Priority order
-  category: VCCategory;         // VC category
+  id: string; // Unique identifier
+  title: string; // Improvement title
+  description: string; // Detailed description
+  recommendation: string; // Recommendation text
+  severity: SeverityLevel; // Severity level
+  priority: number; // Priority order
+  category: VCCategory; // VC category
 };
 ```
 
@@ -192,11 +192,12 @@ export type ImprovementItem = {
 
 ```typescript
 export type CompetitiveAnalysis = {
-  positioning: CompetitivePosition[];   // Market positioning map
-  differentiators: Differentiator[];    // Key differentiators
-  marketOpportunity: {                  // Market analysis
-    size: string;                       // TAM
-    growth: string;                     // Growth rate
+  positioning: CompetitivePosition[]; // Market positioning map
+  differentiators: Differentiator[]; // Key differentiators
+  marketOpportunity: {
+    // Market analysis
+    size: string; // TAM
+    growth: string; // Growth rate
     trend: 'rising' | 'stable' | 'declining'; // Market trend
   };
 };
@@ -212,14 +213,14 @@ export type CompetitiveAnalysis = {
 
 ```typescript
 export type CategoryEvaluation = {
-  category: VCCategory;          // VC category
-  score: number;                // Current score (0-100)
-  maxScore: number;             // Maximum possible score
-  weight: number;               // Category weight
-  details: string;              // Detailed evaluation
-  evidence: EvidenceQuote[];     // Supporting evidence
-  recommendations: string[];     // Improvement recommendations
-  lastUpdated: string;          // Evaluation timestamp
+  category: VCCategory; // VC category
+  score: number; // Current score (0-100)
+  maxScore: number; // Maximum possible score
+  weight: number; // Category weight
+  details: string; // Detailed evaluation
+  evidence: EvidenceQuote[]; // Supporting evidence
+  recommendations: string[]; // Improvement recommendations
+  lastUpdated: string; // Evaluation timestamp
 };
 ```
 
@@ -227,10 +228,10 @@ export type CategoryEvaluation = {
 
 ```typescript
 export type EvidenceQuote = {
-  text: string;                  // Evidence text
-  slide?: number;               // Source slide number
-  category: VCCategory;         // Related category
-  confidence: number;           // Confidence level (0-100)
+  text: string; // Evidence text
+  slide?: number; // Source slide number
+  category: VCCategory; // Related category
+  confidence: number; // Confidence level (0-100)
 };
 ```
 
@@ -252,13 +253,13 @@ export type SeverityLevel = 'high' | 'medium' | 'low';
 
 ```typescript
 export type StartupMetrics = {
-  marketCap?: number;           // Market capitalization
-  revenue?: number;             // Annual revenue
-  growthRate?: number;         // Year-over-year growth
-  employeeCount: number;        // Number of employees
-  fundingStage: string;         // Current funding stage
-  valuation?: number;           // Company valuation
-  foundedAt: string;            // Company founding date
+  marketCap?: number; // Market capitalization
+  revenue?: number; // Annual revenue
+  growthRate?: number; // Year-over-year growth
+  employeeCount: number; // Number of employees
+  fundingStage: string; // Current funding stage
+  valuation?: number; // Company valuation
+  foundedAt: string; // Company founding date
 };
 ```
 
@@ -266,13 +267,13 @@ export type StartupMetrics = {
 
 ```typescript
 export type MarketData = {
-  tam: string;                  // Total Addressable Market
-  sam: string;                  // Serviceable Addressable Market
-  som: string;                  // Serviceable Obtainable Market
-  growthRate: string;          // Market growth rate
+  tam: string; // Total Addressable Market
+  sam: string; // Serviceable Addressable Market
+  som: string; // Serviceable Obtainable Market
+  growthRate: string; // Market growth rate
   marketTrend: 'rising' | 'stable' | 'declining'; // Market trend
-  competitorCount: number;      // Number of competitors
-  marketShare?: number;         // Current market share
+  competitorCount: number; // Number of competitors
+  marketShare?: number; // Current market share
 };
 ```
 
@@ -282,13 +283,13 @@ export type MarketData = {
 
 ```typescript
 export type PipelineStage = {
-  id: string;                   // Stage identifier
-  name: string;                 // Display name
+  id: string; // Stage identifier
+  name: string; // Display name
   status: 'pending' | 'running' | 'completed' | 'failed';
-  progress: number;             // Progress percentage (0-100)
-  startTime?: string;            // Start timestamp
-  endTime?: string;             // End timestamp
-  error?: string;               // Error message if failed
+  progress: number; // Progress percentage (0-100)
+  startTime?: string; // Start timestamp
+  endTime?: string; // End timestamp
+  error?: string; // Error message if failed
 };
 ```
 
@@ -296,14 +297,14 @@ export type PipelineStage = {
 
 ```typescript
 export type PipelineStore = {
-  analysisUuid: string | null;   // Current analysis UUID
+  analysisUuid: string | null; // Current analysis UUID
   overallStatus: string | null; // Overall analysis status
-  overallProgress: number;      // Overall progress percentage
+  overallProgress: number; // Overall progress percentage
   stages: Record<string, PipelineStage>; // Individual stages
-  currentStage: string | null;  // Currently executing stage
-  isPolling: boolean;          // Whether polling is active
-  pollCount: number;           // Number of poll attempts
-  error: string | null;         // Error message
+  currentStage: string | null; // Currently executing stage
+  isPolling: boolean; // Whether polling is active
+  pollCount: number; // Number of poll attempts
+  error: string | null; // Error message
 };
 ```
 
@@ -311,17 +312,17 @@ export type PipelineStore = {
 
 ```typescript
 export type EnhancedSWOTItem = {
-  id: string;                   // Unique identifier
+  id: string; // Unique identifier
   category: 'strength' | 'weakness' | 'opportunity' | 'threat';
-  title: string;                // Item title
-  description: string;          // Detailed description
-  impact: ImpactLevel;          // Impact level
-  confidence: number;           // Confidence level (0-100)
-  priority: number;             // Priority order
-  source: string;               // Evidence source
+  title: string; // Item title
+  description: string; // Detailed description
+  impact: ImpactLevel; // Impact level
+  confidence: number; // Confidence level (0-100)
+  priority: number; // Priority order
+  source: string; // Evidence source
   relatedCategory?: VCCategory; // Related VC category
-  createdAt: string;            // Creation timestamp
-  updatedAt: string;            // Last update timestamp
+  createdAt: string; // Creation timestamp
+  updatedAt: string; // Last update timestamp
 };
 ```
 
@@ -335,10 +336,10 @@ export type EnhancedSWOTItem = {
 
 ```typescript
 export type UploadPitchDeckRequest = {
-  files: File[];                // Files to upload
-  title?: string;               // Deck title
-  description?: string;         // Deck description
-  tags?: string[];              // User tags
+  files: File[]; // Files to upload
+  title?: string; // Deck title
+  description?: string; // Deck description
+  tags?: string[]; // User tags
 };
 ```
 
@@ -346,10 +347,10 @@ export type UploadPitchDeckRequest = {
 
 ```typescript
 export type ListPitchDecksQuery = {
-  page?: number;                // Page number (default: 1)
-  limit?: number;               // Items per page (default: 10)
-  status?: PitchDeckStatus;     // Filter by status
-  tags?: string[];              // Filter by tags
+  page?: number; // Page number (default: 1)
+  limit?: number; // Items per page (default: 10)
+  status?: PitchDeckStatus; // Filter by status
+  tags?: string[]; // Filter by tags
 };
 ```
 
@@ -357,7 +358,7 @@ export type ListPitchDecksQuery = {
 
 ```typescript
 export type StartAnalysisRequest = {
-  deckId: string;               // Pitch deck UUID
+  deckId: string; // Pitch deck UUID
   options?: {
     includeCompetitive?: boolean; // Include competitive analysis
     includeRecommendation?: boolean; // Include investment recommendation
@@ -371,11 +372,11 @@ export type StartAnalysisRequest = {
 
 ```typescript
 export type GenerateRecommendationRequest = {
-  deckId: string;               // Pitch deck UUID
-  analysisUuid?: string;       // Optional analysis UUID
-  includeMarket: boolean;      // Include market research
-  includeCompetitors: boolean;  // Include competitor analysis
-  includeTeam: boolean;        // Include team verification
+  deckId: string; // Pitch deck UUID
+  analysisUuid?: string; // Optional analysis UUID
+  includeMarket: boolean; // Include market research
+  includeCompetitors: boolean; // Include competitor analysis
+  includeTeam: boolean; // Include team verification
 };
 ```
 
@@ -437,10 +438,10 @@ export const AGENT_TO_STAGE_MAP: Record<string, string> = {
 
 ```typescript
 export const DEFAULT_POLL_CONFIG = {
-  maxAttempts: 30,              // Maximum polling attempts
-  initialDelay: 1000,           // Initial delay (1 second)
-  maxDelay: 30000,              // Maximum delay (30 seconds)
-  jitterFactor: 0.5             // Random jitter factor
+  maxAttempts: 30, // Maximum polling attempts
+  initialDelay: 1000, // Initial delay (1 second)
+  maxDelay: 30000, // Maximum delay (30 seconds)
+  jitterFactor: 0.5 // Random jitter factor
 } as const;
 ```
 
@@ -545,20 +546,20 @@ export type UserStore = Store<UserState, UserActions>;
 
 ```typescript
 interface BaseComponentProps {
-  className?: string;           // CSS classes
-  children?: React.ReactNode;   // Child components
-  id?: string;                 // Component ID
-  'data-testid'?: string;     // Test ID
+  className?: string; // CSS classes
+  children?: React.ReactNode; // Child components
+  id?: string; // Component ID
+  'data-testid'?: string; // Test ID
 }
 
 interface LoadingProps extends BaseComponentProps {
-  isLoading: boolean;          // Loading state
-  loadingText?: string;        // Loading message
+  isLoading: boolean; // Loading state
+  loadingText?: string; // Loading message
 }
 
 interface ErrorProps extends BaseComponentProps {
-  error: string | Error;       // Error message
-  onRetry?: () => void;        // Retry handler
+  error: string | Error; // Error message
+  onRetry?: () => void; // Retry handler
 }
 ```
 
@@ -719,12 +720,12 @@ type analysisStatus = string;
 
 ```typescript
 // Good
-src/types/response/pitch-deck.ts
-src/hooks/use-pipeline-auto-start.ts
+src / types / response / pitch - deck.ts;
+src / hooks / use - pipeline - auto - start.ts;
 
 // Bad
-src/types/response/PitchDeck.ts
-src/hooks/usePipelineAutoStart.ts
+src / types / response / PitchDeck.ts;
+src / hooks / usePipelineAutoStart.ts;
 ```
 
 ### 3. Organization

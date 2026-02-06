@@ -3,6 +3,7 @@
  * Explains VC evaluation framework: sections, weights, scores, decisions
  */
 
+import { VC_FEEDBACK_SECTIONS, VC_DECISIONS, VC_SCORE_RANGES } from '@/constants/vc-evaluation';
 import type { LucideIcon } from 'lucide-react';
 import {
   FileText,
@@ -15,10 +16,9 @@ import {
   Calculator
 } from 'lucide-react';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { VC_FEEDBACK_SECTIONS, VC_DECISIONS, VC_SCORE_RANGES } from '@/constants/vc-evaluation';
 
 // Icon mapping for sections
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -92,7 +92,9 @@ export function AnalyticsScoringGuideSidebar({ className }: AnalyticsScoringGuid
 
               return (
                 <div key={key} className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{range.min} - {range.max}</span>
+                  <span className="text-muted-foreground">
+                    {range.min} - {range.max}
+                  </span>
                   <Badge className={colorClass} variant="outline">
                     {range.label}
                   </Badge>

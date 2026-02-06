@@ -84,7 +84,9 @@ export function SWOTItemCard({ item, variant }: SWOTItemCardProps) {
                   Supporting Evidence
                 </p>
                 {item.evidence.quote && (
-                  <p className="text-xs italic mb-1 text-foreground/80">"{item.evidence.quote}"</p>
+                  <p className="text-xs italic mb-1 text-foreground/80">
+                    &ldquo;{item.evidence.quote}&rdquo;
+                  </p>
                 )}
                 {item.evidence.metric && (
                   <p className="text-xs font-medium text-primary mb-1">{item.evidence.metric}</p>

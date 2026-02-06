@@ -9,17 +9,20 @@ The Pipeline Visualization Component is a ReactFlow-based visualization system t
 ### Main Components
 
 #### 1. `PipelineFlow`
+
 The core component that manages the ReactFlow instance and renders the pipeline.
 
 **File:** `src/components/pipeline-visualization/pipeline-flow.tsx`
 
 **Key Features:**
+
 - Renders nodes based on pipeline stages
 - Creates animated edges between stages
 - Handles node positioning and layout
 - Provides SSR compatibility wrapper
 
 **Props:**
+
 ```typescript
 interface PipelineFlowProps {
   className?: string;
@@ -27,6 +30,7 @@ interface PipelineFlowProps {
 ```
 
 **Usage:**
+
 ```typescript
 import { PipelineFlow } from '@/components/pipeline-visualization';
 
@@ -34,17 +38,20 @@ import { PipelineFlow } from '@/components/pipeline-visualization';
 ```
 
 #### 2. `PipelineNode`
+
 Custom ReactFlow node component that displays individual pipeline stages.
 
 **File:** `src/components/pipeline-visualization/pipeline-node.tsx`
 
 **Features:**
+
 - Status-based visual styling (pending, running, completed, failed)
 - Animated progress indicator for running stages
 - Icon representation for each status
 - Input/output connection handles
 
 **Props:** (Inherited from ReactFlow NodeProps)
+
 ```typescript
 interface NodeProps<PipelineNodeData> {
   data: PipelineStage;
@@ -53,11 +60,13 @@ interface NodeProps<PipelineNodeData> {
 ```
 
 #### 3. `PipelineVisualization`
+
 SSR-compatible wrapper component.
 
 **File:** `src/components/pipeline-visualization/pipeline-flow.tsx`
 
 **Usage:**
+
 ```typescript
 import { PipelineVisualization } from '@/components/pipeline-visualization';
 
@@ -67,6 +76,7 @@ import { PipelineVisualization } from '@/components/pipeline-visualization';
 ## Pipeline Stages
 
 ### Stage Order
+
 The pipeline follows a sequential flow through 6 stages:
 
 1. **Extract Content** - Extracts text content from pitch deck
@@ -80,23 +90,23 @@ The pipeline follows a sequential flow through 6 stages:
 
 Each stage can have one of four statuses:
 
-| Status | Icon | Color | Description |
-|--------|------|------|-------------|
-| `pending` | ⏰ | Gray | Waiting to start |
-| `running` | 🔄 | Blue | In progress with progress bar |
-| `completed` | ✅ | Green | Successfully completed |
-| `failed` | ❌ | Red | Failed with error message |
+| Status      | Icon | Color | Description                   |
+| ----------- | ---- | ----- | ----------------------------- |
+| `pending`   | ⏰   | Gray  | Waiting to start              |
+| `running`   | 🔄   | Blue  | In progress with progress bar |
+| `completed` | ✅   | Green | Successfully completed        |
+| `failed`    | ❌   | Red   | Failed with error message     |
 
 ### Stage Data Structure
 
 ```typescript
 interface PipelineStage {
-  id: string;           // Stage identifier
-  name: string;         // Display name
+  id: string; // Stage identifier
+  name: string; // Display name
   status: 'pending' | 'running' | 'completed' | 'failed';
-  progress: number;     // 0-100 percentage
-  startTime?: Date;     // When stage started
-  endTime?: Date;      // When stage completed
+  progress: number; // 0-100 percentage
+  startTime?: Date; // When stage started
+  endTime?: Date; // When stage completed
   errorMessage?: string; // Error message if failed
 }
 ```
@@ -141,12 +151,12 @@ setError(error: string | null)
 
 ### Color Scheme
 
-| Status | Background | Text | Border |
-|--------|------------|------|---------|
-| pending | bg-gray-100 | text-gray-600 | border-gray-300 |
-| running | bg-blue-50 | text-blue-600 | border-blue-300 |
+| Status    | Background  | Text           | Border           |
+| --------- | ----------- | -------------- | ---------------- |
+| pending   | bg-gray-100 | text-gray-600  | border-gray-300  |
+| running   | bg-blue-50  | text-blue-600  | border-blue-300  |
 | completed | bg-green-50 | text-green-600 | border-green-300 |
-| failed | bg-red-50 | text-red-600 | border-red-300 |
+| failed    | bg-red-50   | text-red-600   | border-red-300   |
 
 ## Integration
 

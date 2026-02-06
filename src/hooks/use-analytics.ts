@@ -62,7 +62,7 @@ export const useAnalytics = (
 
   const fetchAnalytics = useCallback(
     async (isPoll = false): Promise<void> => {
-      console.log('[useAnalytics] fetchAnalytics called', {
+      console.warn('[useAnalytics] fetchAnalytics called', {
         deckId,
         enabled,
         isMounted: isMountedRef.current,
@@ -91,13 +91,13 @@ export const useAnalytics = (
         }
       }
 
-      console.log('[useAnalytics] Calling getAnalytics API...');
+      console.warn('[useAnalytics] Calling getAnalytics API...');
       try {
         const response = await getAnalytics(deckId);
         if (!isMountedRef.current) return;
 
         // DEBUG: Log the raw response
-        console.log('[useAnalytics] Raw API response:', response);
+        console.warn('[useAnalytics] Raw API response:', response);
 
         // Validate and filter sections to prevent crashes
         if (response?.sections) {
@@ -141,7 +141,7 @@ export const useAnalytics = (
           }
         }
 
-        console.log('[useAnalytics] Validated response:', response);
+        console.warn('[useAnalytics] Validated response:', response);
         setIsPolling(false);
         setData(response);
         setStatus('ready');
@@ -197,7 +197,7 @@ export const useAnalytics = (
 
   // Initial fetch
   useEffect(() => {
-    console.log('[useAnalytics] useEffect triggered', { deckId, enabled });
+    console.warn('[useAnalytics] useEffect triggered', { deckId, enabled });
     isMountedRef.current = true;
 
     if (deckId && enabled) {
@@ -208,7 +208,7 @@ export const useAnalytics = (
 
     return () => {
       // Set mounted flag FIRST to prevent any state updates
-      console.log('[useAnalytics] useEffect cleanup');
+      console.warn('[useAnalytics] useEffect cleanup');
       isMountedRef.current = false;
       clearPolling();
     };
