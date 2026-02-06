@@ -112,13 +112,6 @@ export const PitchDeckInfo = ({
           </div>
         </InfoSection>
       )}
-
-      {/* Empty state when no info available */}
-      {!description && (!tags || tags.length === 0) && !hasFiles && (
-        <div className="text-center py-8 text-muted-foreground text-sm">
-          No additional information available for this pitch deck.
-        </div>
-      )}
     </div>
   );
 };

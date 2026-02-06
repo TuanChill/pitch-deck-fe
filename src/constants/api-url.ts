@@ -46,5 +46,12 @@ export const API_URL = {
     STATUS: (uuid: string) => `/recommendations/${uuid}/status`,
     DETAIL: (uuid: string) => `/recommendations/${uuid}`,
     BY_DECK: (deckUuid: string) => `/recommendations/by-deck/${deckUuid}`
+  },
+
+  // SWOT endpoints (4 total)
+  SWOT: {
+    GENERATE: (id: string) => `/pitchdeck/${id}/swot/generate`,
+    BY_DECK: (id: string) => `/pitchdeck/${id}/swot`,
+    STATUS: (jobId: string) => `/swot/status/${jobId}`
   }
 } as const;

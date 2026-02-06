@@ -54,6 +54,12 @@ export const VC_FEEDBACK_SECTIONS: Record<
     description: 'Overall impression, strengths, risks, recommendation',
     weight: 0,
     icon: 'Star'
+  },
+  overall_assessment: {
+    label: 'Overall Assessment',
+    description: 'Overall impression, strengths, risks, recommendation',
+    weight: 0,
+    icon: 'Star'
   }
 };
 

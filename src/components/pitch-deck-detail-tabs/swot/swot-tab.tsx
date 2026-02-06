@@ -1,105 +1,99 @@
 /**
  * SWOT Tab
- * SWOT analysis tab with mock data
+ * SWOT analysis tab with store integration and comprehensive data display
  */
 
 import type { SWOTData } from '@/types/mock-data/swot-pestle.types';
-
+import type { SwotData as ApiSwotData } from '@/types/response/swot-response.types';
+import { MOCK_SWOT_DATA } from '@/types/mock-data/swot-pestle.types';
+import { useSwotStore } from '@/stores';
+import { useEffect } from 'react';
+import { SWOTErrorState } from './swot-error-state';
 import { SWOTGrid } from './swot-grid';
+import { SWOTLoadingState } from './swot-loading-state';
 
-// This will be replaced with real data from the store in the future
-const MOCK_SWOT_DATA: SWOTData = {
-  strengths: [
-    {
-      id: 's1',
-      title: 'Proprietary AI Technology',
-      description:
-        'Custom NLP model trained on 10M+ customer service conversations with 94% accuracy',
-      severity: 'high'
-    },
-    {
-      id: 's2',
-      title: 'Strong Unit Economics',
-      description: 'LTV:CAC of 4.2:1, 85% gross margins, clear path to profitability',
-      severity: 'high'
-    },
-    {
-      id: 's3',
-      title: 'Experienced Technical Team',
-      description: 'Ex-Google AI lead with proven track record in building scalable ML systems',
-      severity: 'medium'
-    },
-    {
-      id: 's4',
-      title: 'Product-Market Fit',
-      description: 'Fast traction with 500 paying customers and 35% MoM growth',
-      severity: 'high'
-    }
-  ],
-  weaknesses: [
-    {
-      id: 'w1',
-      title: 'Limited Marketing Budget',
-      description: 'Bootstrapped growth so far, need capital to scale customer acquisition',
-      severity: 'medium'
-    },
-    {
-      id: 'w2',
-      title: 'Small Team Size',
-      description: '15-person team may struggle to support rapid growth and enterprise customers',
-      severity: 'high'
-    },
-    {
-      id: 'w3',
-      title: 'Customer Concentration',
-      description: 'Top 10 customers account for 45% of revenue, creating concentration risk',
-      severity: 'medium'
-    }
-  ],
-  opportunities: [
-    {
-      id: 'o1',
-      title: 'Enterprise Market Expansion',
-      description: '$2M+ pipeline indicates strong demand from enterprise segment with higher ACV',
-      severity: 'high'
-    },
-    {
-      id: 'o2',
-      title: 'Platform Expansion',
-      description:
-        'Opportunity to expand beyond chatbots into full AI customer experience platform',
-      severity: 'medium'
-    },
-    {
-      id: 'o3',
-      title: 'Strategic Partnerships',
-      description:
-        'Integration partnerships with CRM and communication platforms could accelerate distribution',
-      severity: 'medium'
-    }
-  ],
-  threats: [
-    {
-      id: 't1',
-      title: 'Competition from Big Tech',
-      description: 'Google, Microsoft, and Salesforce launching competing AI support solutions',
-      severity: 'high'
-    },
-    {
-      id: 't2',
-      title: 'AI Regulation',
-      description: 'Emerging EU AI Act and US regulations could impact deployment requirements',
-      severity: 'medium'
-    },
-    {
-      id: 't3',
-      title: 'Open Source Alternatives',
-      description: 'Growing ecosystem of open-source LLMs that competitors could leverage',
-      severity: 'medium'
-    }
-  ]
-};
+interface SwotTabProps {
+  deckId?: string;
+}
 
-export function SwotTab() {
-  return <SWOTGrid data={MOCK_SWOT_DATA} />;
+/**
+ * Convert API severity to display severity
+ */
+function mapSeverity(severity?: string): 'high' | 'medium' | 'low' | undefined {
+  if (!severity) return undefined;
+  if (severity === 'critical' || severity === 'major') return 'high';
+  if (severity === 'minor') return 'medium';
+  return 'low';
+}
+
+/**
+ * Convert API SwotData to display SWOTData
+ */
+function convertApiToDisplay(apiData: ApiSwotData): SWOTData {
+  return {
+    strengths: apiData.strengths.map((item) => ({
+      ...item,
+      severity: mapSeverity(item.severity),
+    })),
+    weaknesses: apiData.weaknesses.map((item) => ({
+      ...item,
+      severity: mapSeverity(item.severity),
+    })),
+    opportunities: apiData.opportunities.map((item) => ({
+      ...item,
+      severity: mapSeverity(item.severity),
+    })),
+    threats: apiData.threats.map((item) => ({
+      ...item,
+      severity: mapSeverity(item.severity),
+    })),
+  };
+}
+
+export function SwotTab({ deckId }: SwotTabProps) {
+  const { swotData, statuses, loading, errors, generateSwot, fetchSwot } = useSwotStore();
+
+  // Use mock data if no deckId provided (development mode)
+  const id = deckId || 'mock';
+  const apiSwot = deckId ? swotData[id] : null;
+  const status = deckId ? statuses[id] : 'completed';
+  const isLoading = deckId ? loading[id] : false;
+  const error = deckId ? errors[id] : null;
+
+  // Convert API data to display format
+  const displaySwot: SWOTData | null = apiSwot ? convertApiToDisplay(apiSwot) : deckId ? null : MOCK_SWOT_DATA;
+
+  // Auto-fetch or generate on mount if deckId provided
+  useEffect(() => {
+    if (deckId && !apiSwot && !status && !isLoading) {
+      // First try to fetch existing data
+      fetchSwot(deckId).catch(() => {
+        // If fetch fails, trigger generation
+        generateSwot(deckId);
+      });
+    }
+  }, [deckId, apiSwot, status, isLoading, fetchSwot, generateSwot]);
+
+  // Loading state
+  if (isLoading || status === 'processing') {
+    return <SWOTLoadingState />;
+  }
+
+  // Error state
+  if (error || status === 'failed') {
+    return (
+      <SWOTErrorState
+        message={error || 'Failed to generate SWOT analysis'}
+        onRetry={() => deckId && generateSwot(deckId)}
+      />
+    );
+  }
+
+  // No data yet (and not loading/error)
+  if (!displaySwot) {
+    return <SWOTLoadingState />;
+  }
+
+  // Display SWOT data
+  return <SWOTGrid data={displaySwot} />;
 }

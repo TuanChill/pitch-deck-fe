@@ -161,12 +161,7 @@ function PitchDeckDetailContent() {
       <Breadcrumb title={currentDeck.title} />
 
       {/* Header with title, status, dates */}
-      <PitchDeckDetailHeader
-        title={currentDeck.title}
-        status={currentDeck.status}
-        createdAt={currentDeck.createdAt}
-        updatedAt={currentDeck.updatedAt}
-      />
+      <PitchDeckDetailHeader title={currentDeck.title} status={currentDeck.status} />
 
       {/* Info section: description, tags, files */}
       <PitchDeckInfo

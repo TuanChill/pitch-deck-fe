@@ -37,7 +37,7 @@ export function PitchDeckTabs({ deckId }: PitchDeckTabsProps) {
         </TabsContent>
 
         <TabsContent value="swot" className="mt-0">
-          <SwotTab />
+          <SwotTab deckId={deckId} />
         </TabsContent>
 
         <TabsContent value="pestle" className="mt-0">

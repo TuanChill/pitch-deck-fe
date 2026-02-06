@@ -4,6 +4,7 @@ export * from './pitch-deck.service';
 export * from './pitch-deck-management.service';
 export * from './report.service';
 export * from './recommendation.service';
+export * from './swot.service';
 export * from './summary.service';
 export * from './vc-feedback.service';
 
@@ -31,6 +32,17 @@ export type {
 } from '@/types/response/pitch-deck';
 
 export type { SummaryData } from '@/types/response/summary';
+
+// SWOT types
+export type {
+  SwotApiResponse,
+  SwotGenerateRequest,
+  SwotGenerateResponse,
+  SwotData,
+  SwotItem,
+  SwotEvidence,
+  SwotStatus,
+} from '@/types/response/swot-response.types';
 
 // Request types
 export type {

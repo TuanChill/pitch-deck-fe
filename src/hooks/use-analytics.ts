@@ -79,6 +79,7 @@ export const useAnalytics = (
         const response = await getAnalytics(deckId);
         if (!isMountedRef.current) return;
 
+        setIsPolling(false);
         setData(response);
         setStatus('ready');
         setError(null);

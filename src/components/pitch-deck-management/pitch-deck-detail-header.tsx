@@ -8,8 +8,6 @@ import { cn } from '@/utils';
 export type PitchDeckDetailHeaderProps = {
   title: string;
   status: PitchDeckStatus;
-  createdAt: string | Long;
-  updatedAt: string | Long;
   className?: string;
 };
 
@@ -37,13 +35,7 @@ const formatDate = (dateValue: string | Long): string => {
   }).format(date);
 };
 
-export const PitchDeckDetailHeader = ({
-  title,
-  status,
-  createdAt,
-  updatedAt,
-  className
-}: PitchDeckDetailHeaderProps) => {
+export const PitchDeckDetailHeader = ({ title, status, className }: PitchDeckDetailHeaderProps) => {
   const statusColor = getStatusColor(status);
   const statusLabel = getStatusLabel(status);
 
@@ -54,11 +46,6 @@ export const PitchDeckDetailHeader = ({
         <span className={cn('px-2.5 py-1 rounded-full text-xs font-medium shrink-0', statusColor)}>
           {statusLabel}
         </span>
-      </div>
-
-      <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
-        <span>Created {formatDate(createdAt)}</span>
-        {updatedAt !== createdAt && <span>Updated {formatDate(updatedAt)}</span>}
       </div>
     </div>
   );
