@@ -46,6 +46,13 @@ export function AnalyticsTab({ deckId }: AnalyticsTabProps) {
 
   const overallScore = calculateOverallScore(data.sections);
 
+  // DEBUG: Log data when rendering
+  console.log('[AnalyticsTab] Rendering with data:', {
+    sectionsCount: data.sections?.length,
+    overall: data.overall,
+    overallScore
+  });
+
   return (
     <div className="space-y-6">
       {/* Overall Decision Card */}

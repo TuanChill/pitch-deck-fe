@@ -14,7 +14,8 @@ export type VcFeedbackSection =
   | 'competitive' // Lợi thế cạnh tranh
   | 'team' // Đội ngũ
   | 'presentation' // Trình bày
-  | 'overall'; // Đánh giá tổng thể
+  | 'overall' // Đánh giá tổng thể
+  | 'overall_assessment'; // Overall Assessment Section
 
 /**
  * Individual section feedback

@@ -9,6 +9,7 @@
 import { getAnalytics } from '@/services/api';
 import type { VcFeedbackResponse } from '@/types/domain/vc-feedback';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { VC_FEEDBACK_SECTIONS } from '@/constants/vc-evaluation';
 
 type AnalyticsStatus = 'loading' | 'ready' | 'error';
 
@@ -61,7 +62,12 @@ export const useAnalytics = (
 
   const fetchAnalytics = useCallback(
     async (isPoll = false): Promise<void> => {
-      if (!deckId || !enabled || !isMountedRef.current) return;
+      console.log('[useAnalytics] fetchAnalytics called', { deckId, enabled, isMounted: isMountedRef.current, isPoll });
+
+      if (!deckId || !enabled || !isMountedRef.current) {
+        console.warn('[useAnalytics] Early return:', { deckId, enabled, isMounted: isMountedRef.current });
+        return;
+      }
 
       // Check if we've exceeded max duration
       if (isPoll && startTimeRef.current) {
@@ -75,10 +81,53 @@ export const useAnalytics = (
         }
       }
 
+      console.log('[useAnalytics] Calling getAnalytics API...');
       try {
         const response = await getAnalytics(deckId);
         if (!isMountedRef.current) return;
 
+        // DEBUG: Log the raw response
+        console.log('[useAnalytics] Raw API response:', response);
+
+        // Validate and filter sections to prevent crashes
+        if (response?.sections) {
+          const validSections = response.sections.filter(section => {
+            const isValid = section.section in VC_FEEDBACK_SECTIONS;
+            if (!isValid) {
+              console.warn(`[useAnalytics] Invalid section name: "${section.section}". Skipping.`, section);
+            }
+            return isValid;
+          });
+
+          // Log if any sections were filtered
+          if (validSections.length !== response.sections.length) {
+            console.warn(
+              `[useAnalytics] Filtered ${response.sections.length - validSections.length} invalid sections. ` +
+              `Original: ${response.sections.length}, Valid: ${validSections.length}`
+            );
+          }
+
+          // Update response with filtered sections
+          response.sections = validSections;
+        }
+
+        // Validate overall object has required fields
+        if (response?.overall) {
+          if (!response.overall.decision) {
+            console.warn('[useAnalytics] Missing overall.decision, setting default');
+            response.overall.decision = 'watchlist' as const;
+          }
+          if (!Array.isArray(response.overall.keyStrengths)) {
+            console.warn('[useAnalytics] keyStrengths is not an array, defaulting to empty');
+            response.overall.keyStrengths = [];
+          }
+          if (!Array.isArray(response.overall.keyRisks)) {
+            console.warn('[useAnalytics] keyRisks is not an array, defaulting to empty');
+            response.overall.keyRisks = [];
+          }
+        }
+
+        console.log('[useAnalytics] Validated response:', response);
         setIsPolling(false);
         setData(response);
         setStatus('ready');
@@ -134,12 +183,18 @@ export const useAnalytics = (
 
   // Initial fetch
   useEffect(() => {
+    console.log('[useAnalytics] useEffect triggered', { deckId, enabled });
+    isMountedRef.current = true;
+
     if (deckId && enabled) {
       fetchAnalytics();
+    } else {
+      console.warn('[useAnalytics] useEffect skipped - no deckId or disabled', { deckId, enabled });
     }
 
     return () => {
       // Set mounted flag FIRST to prevent any state updates
+      console.log('[useAnalytics] useEffect cleanup');
       isMountedRef.current = false;
       clearPolling();
     };

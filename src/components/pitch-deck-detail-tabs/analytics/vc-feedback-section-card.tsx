@@ -30,6 +30,12 @@ const formatReference = (reference: { page?: number; area?: string }): string =>
 export function VcFeedbackSectionCard({ section }: VcFeedbackSectionCardProps) {
   const meta = VC_FEEDBACK_SECTIONS[section.section];
 
+  // Safety check: if metadata not found, log and skip rendering
+  if (!meta) {
+    console.warn(`[VcFeedbackSectionCard] No metadata found for section: "${section.section}"`, section);
+    return null;
+  }
+
   return (
     <Card>
       <CardHeader>
