@@ -28,4 +28,11 @@ export const getStatusColor = (status: PitchDeckStatus): string => PITCH_DECK_ST
 
 // ==================== Deck Current Step (AI Pipeline) ====================
 
-export type DeckCurrentStep = 'extract' | 'summary' | 'analytics' | 'swot' | 'pestle' | 'recommendation' | 'done';
+export type DeckCurrentStep =
+  | 'extract'
+  | 'summary'
+  | 'analytics'
+  | 'swot'
+  | 'pestle'
+  | 'recommendation'
+  | 'done';

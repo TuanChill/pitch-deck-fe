@@ -2,6 +2,8 @@
 
 import type { PitchDeckStatus, DeckCurrentStep } from '@/constants/pitch-deck-status';
 
+import type { RecommendationStatus } from './recommendation-response.types';
+
 export type UploadPitchDeckResponse = {
   uuid: string;
   filename: string;
@@ -280,11 +282,8 @@ export type DeleteSuccessResponse = {
 };
 
 // ==================== Recommendation Response Types ====================
-
-/**
- * Recommendation status
- */
-export type RecommendationStatus = 'pending' | 'searching' | 'analyzing' | 'completed' | 'failed';
+// Re-export RecommendationStatus from recommendation-response.types
+export type { RecommendationStatus } from './recommendation-response.types';
 
 /**
  * Market research findings

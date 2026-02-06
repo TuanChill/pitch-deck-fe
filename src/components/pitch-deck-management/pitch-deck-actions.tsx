@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/utils';
-import { ArrowRight, Loader2, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -24,9 +24,9 @@ export const PitchDeckActions = ({
   status,
   title,
   isDeleting = false,
-  isAnalyzing = false,
+  isAnalyzing: _isAnalyzing = false,
   onDelete,
-  onAnalyticsClick,
+  onAnalyticsClick: _onAnalyticsClick,
   className
 }: PitchDeckActionsProps) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -36,7 +36,8 @@ export const PitchDeckActions = ({
     onDelete?.();
   };
 
-  const canAnalyze = status === 'ready';
+  // Reserved for future use
+  void status;
 
   return (
     <div className={cn('flex flex-wrap items-center gap-3', className)}>
@@ -52,7 +53,7 @@ export const PitchDeckActions = ({
       </Button>
 
       {/* Analytics Button - triggers analytics callback if status is ready */}
-      <Button
+      {/* <Button
         type="button"
         variant="default"
         onClick={onAnalyticsClick}
@@ -69,7 +70,7 @@ export const PitchDeckActions = ({
             <ArrowRight className="w-4 h-4" />
           </>
         )}
-      </Button>
+      </Button> */}
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog

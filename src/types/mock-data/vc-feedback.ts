@@ -104,7 +104,8 @@ const generateStrengths = (section: VcFeedbackSection, score: number): VcFeedbac
       { text: 'Design is professional and visually appealing', page: 1, area: 'Overall Design' },
       { text: 'Storytelling is engaging', page: 16, area: 'Closing' }
     ],
-    overall: []
+    overall: [],
+    overall_assessment: []
   };
 
   const baseStrengths = strengthsMap[section] || [];
@@ -161,7 +162,8 @@ const generateConcerns = (section: VcFeedbackSection, score: number): VcFeedback
       { text: 'Design is not consistent throughout', page: 5, area: 'Visual Style' },
       { text: 'Key supporting data visuals are missing', page: 9, area: 'Charts & Graphs' }
     ],
-    overall: []
+    overall: [],
+    overall_assessment: []
   };
 
   const baseConcerns = concernsMap[section] || [];
@@ -220,7 +222,8 @@ const generateRecommendations = (section: VcFeedbackSection, score: number): VcF
       { text: 'Add charts/data for main arguments', page: 9, area: 'Data Visualization' },
       { text: 'Improve design consistency', page: 1, area: 'Visual Design' }
     ],
-    overall: []
+    overall: [],
+    overall_assessment: []
   };
 
   return recommendationsMap[section]?.map((s) => createFeedbackItem(s.text, s.page, s.area)) || [];

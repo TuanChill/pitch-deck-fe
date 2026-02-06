@@ -81,10 +81,15 @@ function PitchDeckDetailContent() {
   const [isDeleting, setIsDeleting] = useState(false);
   // const [analysis, setAnalysis] = useState<AnalysisResponse | null>(null);
 
+  // Get currentDeck from store BEFORE using it in pipeline hook
+  const { currentDeck, isLoading, error, fetchPitchDeckDetail, removePitchDeck } =
+    usePitchDeckManagementStore();
+
   // NEW: Pipeline auto-start hook
   const { isPolling: isPipelinePolling, overallStatus } = usePipelineAutoStart(id, {
     autoStart: true,
     mock: true, // Mock mode for development/demo
+    currentStep: currentDeck?.currentStep, // Sync with backend currentStep
     onProgress: () => {
       // Progress updates handled by store
     },
@@ -95,9 +100,6 @@ function PitchDeckDetailContent() {
       toast.error(error);
     }
   });
-
-  const { currentDeck, isLoading, error, fetchPitchDeckDetail, removePitchDeck } =
-    usePitchDeckManagementStore();
 
   useEffect(() => {
     if (id && isValidId) {
