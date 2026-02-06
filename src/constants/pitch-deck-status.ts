@@ -25,3 +25,7 @@ export const PITCH_DECK_STATUS: Record<PitchDeckStatus, { label: string; color: 
 export const getStatusLabel = (status: PitchDeckStatus): string => PITCH_DECK_STATUS[status].label;
 
 export const getStatusColor = (status: PitchDeckStatus): string => PITCH_DECK_STATUS[status].color;
+
+// ==================== Deck Current Step (AI Pipeline) ====================
+
+export type DeckCurrentStep = 'extract' | 'summary' | 'analytics' | 'swot' | 'pestle' | 'recommendation' | 'done';

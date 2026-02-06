@@ -82,11 +82,7 @@ function PitchDeckDetailContent() {
   // const [analysis, setAnalysis] = useState<AnalysisResponse | null>(null);
 
   // NEW: Pipeline auto-start hook
-  const {
-    isPolling: isPipelinePolling,
-    overallProgress,
-    overallStatus
-  } = usePipelineAutoStart(id, {
+  const { isPolling: isPipelinePolling, overallStatus } = usePipelineAutoStart(id, {
     autoStart: true,
     mock: true, // Mock mode for development/demo
     onProgress: () => {
@@ -156,7 +152,7 @@ function PitchDeckDetailContent() {
   }));
 
   return (
-    <div className="container max-w-4xl mx-auto py-8 px-4 space-y-8">
+    <div className="container max-w-6xl mx-auto py-8 px-4 space-y-8">
       {/* Breadcrumb */}
       <Breadcrumb title={currentDeck.title} />
 
@@ -187,23 +183,20 @@ function PitchDeckDetailContent() {
         />
       </div>
 
-      {/* NEW: Pipeline visualization */}
-      <div className="border-t pt-6">
-        <div className="space-y-3">
-          <h3 className="text-lg font-semibold">Analysis Pipeline</h3>
-          <div className="rounded-lg border bg-card p-4 overflow-x-auto">
-            <PipelineCards />
+      {/* Pipeline visualization - hide when done */}
+      {currentDeck.currentStep !== 'done' && (
+        <div className="border-t pt-6">
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold">Analysis Pipeline</h3>
+            <div className="rounded-lg border bg-card p-4 overflow-x-auto">
+              <PipelineCards />
+            </div>
           </div>
-          {isPipelinePolling && (
-            <p className="text-sm text-muted-foreground text-center">
-              Processing... {overallProgress}% complete
-            </p>
-          )}
         </div>
-      </div>
+      )}
 
-      {/* Tabs section - only show after pipeline completes */}
-      {overallStatus === 'completed' && (
+      {/* Tabs section - show when pipeline completes or currentStep is done */}
+      {(overallStatus === 'completed' || currentDeck.currentStep === 'done') && (
         <div className="border-t pt-6">
           <PitchDeckTabs deckId={id} />
         </div>

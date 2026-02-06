@@ -1,6 +1,6 @@
 // Response types for pitch deck API endpoints
 
-import type { PitchDeckStatus } from '@/constants/pitch-deck-status';
+import type { PitchDeckStatus, DeckCurrentStep } from '@/constants/pitch-deck-status';
 
 export type UploadPitchDeckResponse = {
   uuid: string;
@@ -134,6 +134,7 @@ export type PitchDeckListItem = {
   title: string;
   description: string | null;
   status: PitchDeckStatus;
+  currentStep?: DeckCurrentStep;
   chunkCount: number;
   astraCollection?: string;
   errorMessage: string | null;
@@ -186,6 +187,27 @@ export type AgentInfo = {
 };
 
 /**
+ * Agent progress info (0-100%)
+ */
+export type AgentProgress = {
+  agentName: string;
+  progress: number;
+  status: AgentStatus;
+  currentStep?: string;
+};
+
+/**
+ * Overall progress with per-agent breakdown
+ */
+export type OverallProgress = {
+  overall: number;
+  currentAgent: string;
+  currentStep: string;
+  agents: AgentProgress[];
+  estimatedTimeRemaining: number;
+};
+
+/**
  * Analysis status response
  * GET /analysis/:uuid/status
  */
@@ -198,6 +220,19 @@ export type AnalysisStatusResponse = {
   currentStep?: string;
   agents?: AgentInfo[];
   updatedAt: string;
+};
+
+/**
+ * Detailed progress response with per-agent breakdown
+ * GET /analysis/:uuid/progress
+ */
+export type DetailedProgressResponse = {
+  uuid: string;
+  status: AnalysisStatus;
+  progress: OverallProgress;
+  agents: AgentProgress[];
+  errorMessage?: string;
+  startedAt?: string;
 };
 
 /**
