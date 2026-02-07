@@ -47,5 +47,8 @@ export const AGENT_TO_STAGE_MAP: Record<string, string> = {
   FinancialProjectionsAgent: 'analytics',
   CompetitiveLandscapeAgent: 'analytics',
   ContentAgent: 'summary',
-  PresentationAgent: 'analytics'
+  PresentationAgent: 'analytics',
+  // PESTLE and Recommendation agents
+  PestleAgent: 'pestle',
+  RecommendationAgent: 'recommendation'
 };

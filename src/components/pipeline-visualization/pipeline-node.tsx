@@ -40,20 +40,10 @@ export function PipelineNode({ data, selected }: NodeProps<PipelineNodeData>) {
         <span className="font-medium text-sm">{data.name}</span>
       </div>
 
-      {/* Progress bar for running stage */}
-      {data.status === 'running' && (
-        <div className="w-full bg-gray-200 rounded-full h-1.5 mb-1">
-          <div
-            className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
-            style={{ width: `${data.progress}%` }}
-          />
-        </div>
-      )}
-
       {/* Status text */}
       <div className="text-xs text-gray-600">
         {data.status === 'pending' && 'Waiting...'}
-        {data.status === 'running' && `${data.progress}%`}
+        {data.status === 'running' && 'Generating content'}
         {data.status === 'completed' && 'Complete'}
         {data.status === 'failed' && data.errorMessage}
       </div>

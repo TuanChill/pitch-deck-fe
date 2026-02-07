@@ -1,20 +1,10 @@
-import { AGENT_TO_STAGE_MAP } from '@/constants/pipeline-stages';
-import {
-  getAnalysisByDeck,
-  getDetailedProgress,
-  getPitchDeckDetail,
-  getPitchDeckSummary,
-  startAnalysis
-} from '@/services/api';
+import { getPitchDeckDetail, getPitchDeckSummary } from '@/services/api';
 import { usePipelineStore } from '@/stores/pipeline.store';
-import type { DetailedProgressResponse } from '@/types/response/pitch-deck';
 import { useEffect, useRef } from 'react';
 
 interface UsePipelineAutoStartOptions {
-  autoStart?: boolean;
   currentStep?: 'extract' | 'summary' | 'analytics' | 'swot' | 'pestle' | 'recommendation' | 'done';
-  onProgress?: (progress: number) => void;
-  onComplete?: (analysisUuid: string) => void;
+  onComplete?: (deckUuid: string) => void;
   onError?: (error: string) => void;
   onDeckUpdate?: (deck: { currentStep: string }) => void;
 }
@@ -22,34 +12,24 @@ interface UsePipelineAutoStartOptions {
 const STAGES = ['extract', 'summary', 'analytics', 'swot', 'pestle', 'recommendation'] as const;
 type Stage = (typeof STAGES)[number];
 const POLL_INTERVAL = 2000; // 2 seconds for polling
-const MAX_POLLS = 180; // 15 minutes max
+const MAX_POLLS = 450; // 15 minutes max
 
 export const usePipelineAutoStart = (
   deckUuid: string,
   options: UsePipelineAutoStartOptions = {}
 ) => {
-  const {
-    autoStart = true,
-    currentStep,
-    onProgress,
-    onComplete,
-    onError,
-    onDeckUpdate
-  } = options;
+  const { currentStep, onComplete, onError, onDeckUpdate } = options;
 
-  const hasChecked = useRef(false);
   const isPollingRef = useRef(false);
   const deckStepRef = useRef<string | undefined>(undefined);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const {
-    analysisUuid,
-    setAnalysisUuid,
     setOverallStatus,
     setOverallProgress,
     updateStage,
     setCurrentStage,
     setPolling,
-    resetPollCount,
     setError,
     setSummaryData
   } = usePipelineStore();
@@ -94,192 +74,84 @@ export const usePipelineAutoStart = (
       // Progress based on completed stages only
       const progress = Math.round((stepIndex / STAGES.length) * 100);
       setOverallProgress(progress);
-      onProgress?.(progress);
+      setOverallStatus('running');
     }
   };
 
-  const completePipeline = async (analysisUuid: string) => {
+  const completePipeline = async () => {
     setOverallStatus('completed');
     setPolling(false);
     setOverallProgress(100);
-    onProgress?.(100);
-    onComplete?.(analysisUuid);
+    onComplete?.(deckUuid);
     await fetchSummaryData(deckUuid);
+    stopPolling();
   };
 
-  const handleFailedPipeline = (errorMessage?: string) => {
-    setOverallStatus('failed');
+  const stopPolling = () => {
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+    isPollingRef.current = false;
     setPolling(false);
-    const errorMsg = errorMessage || 'Analysis failed';
-    setError(errorMsg);
-    onError?.(errorMsg);
   };
 
-  const mapAgentsToStages = (progressResponse: DetailedProgressResponse) => {
-    if (!progressResponse.agents) return;
-
-    progressResponse.agents.forEach((agent) => {
-      const stageId = AGENT_TO_STAGE_MAP[agent.agentName];
-      if (stageId) {
-        updateStage(stageId, {
-          status: agent.status,
-          progress: agent.progress
-        });
-      }
-    });
-
-    if (progressResponse.progress.currentAgent) {
-      const currentStageId = AGENT_TO_STAGE_MAP[progressResponse.progress.currentAgent];
-      if (currentStageId) {
-        setCurrentStage(currentStageId);
-      }
-    }
-
-    setOverallProgress(progressResponse.progress.overall);
-    onProgress?.(progressResponse.progress.overall);
-  };
-
-  const runPipeline = async () => {
-    if (!deckUuid) return;
-
-    if (hasChecked.current && !currentStep) return;
-    hasChecked.current = true;
-
-    if (currentStep === 'done') {
-      syncStagesWithCurrentStep('done');
-      await completePipeline(deckUuid);
-
-      return;
-    }
-
-    // Sync with current step before starting
-    if (currentStep) {
-      syncStagesWithCurrentStep(currentStep);
-    }
-
-    setPolling(true);
-    resetPollCount();
-    isPollingRef.current = true;
+  const pollDeckStatus = async () => {
+    if (!deckUuid || !isPollingRef.current) return;
 
     try {
-      const existingAnalysis = await getAnalysisByDeck(deckUuid);
+      const deckDetail = await getPitchDeckDetail(deckUuid);
+      const newDeckStep = deckDetail.currentStep;
 
-      if (existingAnalysis) {
-        setAnalysisUuid(existingAnalysis.uuid);
-        setOverallStatus(existingAnalysis.status);
+      if (newDeckStep && newDeckStep !== deckStepRef.current) {
+        deckStepRef.current = newDeckStep;
+        syncStagesWithCurrentStep(newDeckStep);
+        onDeckUpdate?.({ currentStep: newDeckStep });
 
-        const progressResponse = await getDetailedProgress(existingAnalysis.uuid);
-        mapAgentsToStages(progressResponse);
-
-        if (existingAnalysis.status === 'completed') {
-          await completePipeline(existingAnalysis.uuid);
-
-          return;
+        if (newDeckStep === 'done') {
+          await completePipeline();
         }
-
-        if (existingAnalysis.status === 'failed') {
-          handleFailedPipeline(existingAnalysis.errorMessage);
-          if (autoStart) {
-            const newAnalysis = await startAnalysis(deckUuid);
-            setAnalysisUuid(newAnalysis.uuid);
-            setOverallStatus(newAnalysis.status);
-          } else {
-            return;
-          }
-        }
-
-        for (let i = 0; i < MAX_POLLS; i++) {
-          const progressResponse = await getDetailedProgress(existingAnalysis.uuid);
-          mapAgentsToStages(progressResponse);
-
-          const deckDetail = await getPitchDeckDetail(deckUuid);
-          const newDeckStep = deckDetail.currentStep;
-
-          if (newDeckStep && newDeckStep !== deckStepRef.current) {
-            deckStepRef.current = newDeckStep;
-            syncStagesWithCurrentStep(newDeckStep);
-            onDeckUpdate?.({ currentStep: newDeckStep });
-
-            if (newDeckStep === 'done') {
-              await completePipeline(existingAnalysis.uuid);
-
-              return;
-            }
-          }
-
-          if (progressResponse.status === 'completed') {
-            await completePipeline(existingAnalysis.uuid);
-
-            return;
-          }
-
-          if (progressResponse.status === 'failed') {
-            handleFailedPipeline(progressResponse.errorMessage);
-
-            return;
-          }
-
-          await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));
-        }
-
-        setError('Analysis timed out');
-        setPolling(false);
-        onError?.('Analysis timed out');
-      } else if (autoStart) {
-        const newAnalysis = await startAnalysis(deckUuid);
-        setAnalysisUuid(newAnalysis.uuid);
-        setOverallStatus(newAnalysis.status);
-
-        for (let i = 0; i < MAX_POLLS; i++) {
-          const progressResponse = await getDetailedProgress(newAnalysis.uuid);
-          mapAgentsToStages(progressResponse);
-
-          const deckDetail = await getPitchDeckDetail(deckUuid);
-          const newDeckStep = deckDetail.currentStep;
-
-          if (newDeckStep && newDeckStep !== deckStepRef.current) {
-            deckStepRef.current = newDeckStep;
-            syncStagesWithCurrentStep(newDeckStep);
-            onDeckUpdate?.({ currentStep: newDeckStep });
-
-            if (newDeckStep === 'done') {
-              await completePipeline(newAnalysis.uuid);
-
-              return;
-            }
-          }
-
-          if (progressResponse.status === 'completed') {
-            await completePipeline(newAnalysis.uuid);
-
-            return;
-          }
-
-          if (progressResponse.status === 'failed') {
-            handleFailedPipeline(progressResponse.errorMessage);
-
-            return;
-          }
-
-          await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));
-        }
-
-        setError('Analysis timed out');
-        setPolling(false);
-        onError?.('Analysis timed out');
-      } else {
-        setPolling(false);
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Pipeline failed';
-      setError(errorMsg);
-      setPolling(false);
-      onError?.(errorMsg);
-    } finally {
-      isPollingRef.current = false;
-      setPolling(false);
+      console.error('Failed to poll deck status:', err);
     }
   };
+
+  const startPolling = () => {
+    if (isPollingRef.current) return;
+
+    isPollingRef.current = true;
+    setPolling(true);
+
+    // Initial sync with current step
+    if (currentStep) {
+      syncStagesWithCurrentStep(currentStep);
+      deckStepRef.current = currentStep;
+
+      if (currentStep === 'done') {
+        completePipeline();
+
+        return;
+      }
+    }
+
+    // Start polling interval
+    pollIntervalRef.current = setInterval(pollDeckStatus, POLL_INTERVAL);
+    // Also poll immediately
+    pollDeckStatus();
+  };
+
+  // Start polling on mount
+  useEffect(() => {
+    if (!deckUuid) return;
+
+    startPolling();
+
+    return () => {
+      stopPolling();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deckUuid]);
 
   // Sync when currentStep prop changes
   useEffect(() => {
@@ -288,32 +160,14 @@ export const usePipelineAutoStart = (
       deckStepRef.current = currentStep;
 
       if (currentStep === 'done') {
-        setOverallStatus('completed');
-        onComplete?.(deckUuid);
+        completePipeline();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep]);
 
-  // Run pipeline on mount
-  useEffect(() => {
-    runPipeline();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deckUuid, autoStart]);
-
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      if (isPollingRef.current) {
-        setPolling(false);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return {
     isPolling: usePipelineStore((s) => s.isPolling),
-    analysisUuid,
     overallStatus: usePipelineStore((s) => s.overallStatus),
     overallProgress: usePipelineStore((s) => s.overallProgress),
     stages: usePipelineStore((s) => s.stages),

@@ -62,20 +62,10 @@ export function PipelineCards() {
                   <span className="font-semibold text-xs">{stage.name}</span>
                 </div>
 
-                {/* Progress bar */}
-                {stage.status === 'running' && (
-                  <div className="w-full bg-gray-200 rounded-full h-1.5">
-                    <div
-                      className="bg-blue-500 h-1.5 rounded-full transition-all duration-100"
-                      style={{ width: `${stage.progress}%` }}
-                    />
-                  </div>
-                )}
-
                 {/* Status text */}
                 <div className="text-xs font-medium mt-1">
                   {stage.status === 'pending' && 'Waiting'}
-                  {stage.status === 'running' && `${stage.progress}%`}
+                  {stage.status === 'running' && 'Generating content'}
                   {stage.status === 'completed' && 'Done'}
                   {stage.status === 'failed' && 'Failed'}
                 </div>
