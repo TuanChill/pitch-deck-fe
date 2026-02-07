@@ -12,7 +12,6 @@ import { useEffect, useRef } from 'react';
 
 interface UsePipelineAutoStartOptions {
   autoStart?: boolean;
-  mock?: boolean;
   currentStep?: 'extract' | 'summary' | 'analytics' | 'swot' | 'pestle' | 'recommendation' | 'done';
   onProgress?: (progress: number) => void;
   onComplete?: (analysisUuid: string) => void;
@@ -22,10 +21,7 @@ interface UsePipelineAutoStartOptions {
 
 const STAGES = ['extract', 'summary', 'analytics', 'swot', 'pestle', 'recommendation'] as const;
 type Stage = (typeof STAGES)[number];
-const MOCK_MAX_PROGRESS = 99; // Mock stops at 99%, waits for backend step update
-const MOCK_PROGRESS_INTERVAL = 800; // Update every 100ms
-const MOCK_PROGRESS_INCREMENT = 2; // 2% increment per update (reaches 99% in ~5s)
-const POLL_INTERVAL = 2000; // 2 seconds for real polling
+const POLL_INTERVAL = 2000; // 2 seconds for polling
 const MAX_POLLS = 180; // 15 minutes max
 
 export const usePipelineAutoStart = (
@@ -34,7 +30,6 @@ export const usePipelineAutoStart = (
 ) => {
   const {
     autoStart = true,
-    mock = false,
     currentStep,
     onProgress,
     onComplete,
@@ -44,10 +39,7 @@ export const usePipelineAutoStart = (
 
   const hasChecked = useRef(false);
   const isPollingRef = useRef(false);
-  const previousStepRef = useRef<string | undefined>(undefined);
   const deckStepRef = useRef<string | undefined>(undefined);
-  const mockIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const mockProgressRef = useRef(0);
 
   const {
     analysisUuid,
@@ -59,7 +51,6 @@ export const usePipelineAutoStart = (
     setPolling,
     resetPollCount,
     setError,
-    clearAnalysis,
     setSummaryData
   } = usePipelineStore();
 
@@ -148,101 +139,8 @@ export const usePipelineAutoStart = (
     onProgress?.(progressResponse.progress.overall);
   };
 
-  /**
-   * Start mock progress for current step (stops at 99%)
-   */
-  const startMockProgress = (step: string) => {
-    const stepIndex = STAGES.indexOf(step as Stage);
-    if (stepIndex < 0) return;
-
-    // Clear any existing mock interval
-    if (mockIntervalRef.current) {
-      clearInterval(mockIntervalRef.current);
-    }
-
-    mockProgressRef.current = 0;
-    const stageId = STAGES[stepIndex];
-
-    updateStage(stageId, { status: 'running', progress: 0 });
-    setCurrentStage(stageId);
-
-    mockIntervalRef.current = setInterval(() => {
-      mockProgressRef.current += MOCK_PROGRESS_INCREMENT;
-
-      if (mockProgressRef.current >= MOCK_MAX_PROGRESS) {
-        mockProgressRef.current = MOCK_MAX_PROGRESS;
-        clearInterval(mockIntervalRef.current!);
-        mockIntervalRef.current = null;
-      }
-
-      updateStage(stageId, { progress: mockProgressRef.current });
-
-      const overallProgress = Math.round(
-        (stepIndex * 100 + mockProgressRef.current) / STAGES.length
-      );
-      setOverallProgress(overallProgress);
-      onProgress?.(overallProgress);
-    }, MOCK_PROGRESS_INTERVAL);
-  };
-
-  /**
-   * Poll deck for currentStep changes (used in mock mode)
-   */
-  const pollDeckForStepChange = async () => {
-    while (isPollingRef.current) {
-      try {
-        const deckDetail = await getPitchDeckDetail(deckUuid);
-        const newDeckStep = deckDetail.currentStep;
-
-        if (newDeckStep && newDeckStep !== deckStepRef.current) {
-          deckStepRef.current = newDeckStep;
-
-          // Complete previous stage
-          if (previousStepRef.current && previousStepRef.current !== 'done') {
-            const prevIndex = STAGES.indexOf(previousStepRef.current as Stage);
-            if (prevIndex >= 0) {
-              updateStage(STAGES[prevIndex], { status: 'completed', progress: 100 });
-            }
-          }
-
-          previousStepRef.current = newDeckStep;
-          onDeckUpdate?.({ currentStep: newDeckStep });
-
-          if (newDeckStep === 'done') {
-            if (mockIntervalRef.current) {
-              clearInterval(mockIntervalRef.current);
-              mockIntervalRef.current = null;
-            }
-
-            await completePipeline(deckUuid);
-
-            return;
-          }
-
-          // Start mock for new step
-          syncStagesWithCurrentStep(newDeckStep);
-          startMockProgress(newDeckStep);
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));
-      } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Polling failed';
-        setError(errorMsg);
-        setPolling(false);
-        onError?.(errorMsg);
-
-        return;
-      }
-    }
-  };
-
   const runPipeline = async () => {
     if (!deckUuid) return;
-
-    if (currentStep && deckStepRef.current === undefined) {
-      deckStepRef.current = currentStep;
-      previousStepRef.current = currentStep;
-    }
 
     if (hasChecked.current && !currentStep) return;
     hasChecked.current = true;
@@ -254,30 +152,16 @@ export const usePipelineAutoStart = (
       return;
     }
 
+    // Sync with current step before starting
+    if (currentStep) {
+      syncStagesWithCurrentStep(currentStep);
+    }
+
     setPolling(true);
     resetPollCount();
     isPollingRef.current = true;
 
     try {
-      // === MOCK MODE ===
-      if (mock) {
-        clearAnalysis();
-
-        if (currentStep) {
-          syncStagesWithCurrentStep(currentStep);
-          if (currentStep === 'recommendation') {
-            await completePipeline(deckUuid);
-
-            return;
-          }
-          startMockProgress(currentStep);
-          pollDeckForStepChange();
-        }
-
-        return;
-      }
-
-      // === REAL MODE ===
       const existingAnalysis = await getAnalysisByDeck(deckUuid);
 
       if (existingAnalysis) {
@@ -299,7 +183,6 @@ export const usePipelineAutoStart = (
             const newAnalysis = await startAnalysis(deckUuid);
             setAnalysisUuid(newAnalysis.uuid);
             setOverallStatus(newAnalysis.status);
-            clearAnalysis();
           } else {
             return;
           }
@@ -393,22 +276,16 @@ export const usePipelineAutoStart = (
       setPolling(false);
       onError?.(errorMsg);
     } finally {
-      if (!mock) {
-        isPollingRef.current = false;
-        setPolling(false);
-      }
+      isPollingRef.current = false;
+      setPolling(false);
     }
   };
 
   // Sync when currentStep prop changes
   useEffect(() => {
-    if (currentStep && currentStep !== previousStepRef.current) {
+    if (currentStep && currentStep !== deckStepRef.current) {
       syncStagesWithCurrentStep(currentStep);
-      previousStepRef.current = currentStep;
-
-      if (mock && mockIntervalRef.current === null) {
-        startMockProgress(currentStep);
-      }
+      deckStepRef.current = currentStep;
 
       if (currentStep === 'done') {
         setOverallStatus('completed');
@@ -422,14 +299,11 @@ export const usePipelineAutoStart = (
   useEffect(() => {
     runPipeline();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deckUuid, autoStart, mock]);
+  }, [deckUuid, autoStart]);
 
   // Cleanup
   useEffect(() => {
     return () => {
-      if (mockIntervalRef.current) {
-        clearInterval(mockIntervalRef.current);
-      }
       if (isPollingRef.current) {
         setPolling(false);
       }

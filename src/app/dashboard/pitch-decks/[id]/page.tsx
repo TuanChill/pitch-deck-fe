@@ -83,7 +83,6 @@ function PitchDeckDetailContent() {
   // NEW: Pipeline auto-start hook
   const { isPolling: isPipelinePolling, overallStatus } = usePipelineAutoStart(id, {
     autoStart: true,
-    mock: true,
     currentStep: currentDeck?.currentStep,
     onProgress: () => {
       // Progress updates handled by store
