@@ -15,7 +15,7 @@ interface DeleteConfirmationDialogProps {
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
   deckTitle: string;
-  isDeleting: boolean;
+  isDeleting?: boolean;
 }
 
 export const DeleteConfirmationDialog = ({
@@ -23,12 +23,8 @@ export const DeleteConfirmationDialog = ({
   onOpenChange,
   onConfirm,
   deckTitle,
-  isDeleting
+  isDeleting = false
 }: DeleteConfirmationDialogProps) => {
-  const handleConfirm = () => {
-    onConfirm();
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -45,19 +41,12 @@ export const DeleteConfirmationDialog = ({
           <span className="font-semibold text-foreground">&ldquo;{deckTitle}&rdquo;</span>? This
           action cannot be undone.
         </DialogDescription>
-        <DialogFooter className="gap-2 sm:gap-0 pt-4">
+        <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isDeleting}>
             Cancel
           </Button>
-          <Button variant="destructive" onClick={handleConfirm} disabled={isDeleting}>
-            {isDeleting ? (
-              <>
-                <span className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                Deleting...
-              </>
-            ) : (
-              'Delete'
-            )}
+          <Button variant="destructive" onClick={onConfirm} disabled={isDeleting}>
+            {isDeleting ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogFooter>
       </DialogContent>

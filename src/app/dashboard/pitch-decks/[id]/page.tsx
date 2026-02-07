@@ -2,12 +2,11 @@
 
 import { APP_URL } from '@/constants/routes';
 import { usePipelineAutoStart } from '@/hooks/use-pipeline-auto-start';
-import { deletePitchDeckByUuid } from '@/services/api';
 import { usePitchDeckManagementStore } from '@/stores';
 import { ArrowLeft, FileX } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { toast } from 'sonner';
 
 import { PipelineCards } from '@/components/pipeline-visualization';
@@ -73,23 +72,19 @@ const MONGO_ID_REGEX = /^[0-9a-f]{24}$/i;
 
 function PitchDeckDetailContent() {
   const params = useParams();
-  const router = useRouter();
   const id = params.id as string;
 
   // Validate ID format before using
   const isValidId = MONGO_ID_REGEX.test(id);
-  const [isDeleting, setIsDeleting] = useState(false);
-  // const [analysis, setAnalysis] = useState<AnalysisResponse | null>(null);
 
   // Get currentDeck from store BEFORE using it in pipeline hook
-  const { currentDeck, isLoading, error, fetchPitchDeckDetail, removePitchDeck } =
-    usePitchDeckManagementStore();
+  const { currentDeck, isLoading, error, fetchPitchDeckDetail } = usePitchDeckManagementStore();
 
   // NEW: Pipeline auto-start hook
   const { isPolling: isPipelinePolling, overallStatus } = usePipelineAutoStart(id, {
     autoStart: true,
-    mock: true, // Mock mode for development/demo
-    currentStep: currentDeck?.currentStep, // Sync with backend currentStep
+    mock: true,
+    currentStep: currentDeck?.currentStep,
     onProgress: () => {
       // Progress updates handled by store
     },
@@ -98,6 +93,10 @@ function PitchDeckDetailContent() {
     },
     onError: (error) => {
       toast.error(error);
+    },
+    onDeckUpdate: () => {
+      // Refresh deck data when currentStep changes during polling
+      fetchPitchDeckDetail(id);
     }
   });
 
@@ -106,30 +105,6 @@ function PitchDeckDetailContent() {
       fetchPitchDeckDetail(id);
     }
   }, [id, isValidId, fetchPitchDeckDetail]);
-
-  const handleDelete = async () => {
-    if (!id || !isValidId || !currentDeck) return;
-
-    setIsDeleting(true);
-    try {
-      // Optimistic remove from store
-      removePitchDeck(id);
-
-      // Call delete API
-      await deletePitchDeckByUuid(id);
-
-      toast.success('Pitch deck deleted successfully');
-
-      // Navigate to list page
-      router.push(APP_URL.PITCH_DECKS);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to delete pitch deck');
-      // Re-fetch on error to restore state
-      fetchPitchDeckDetail(id);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
 
   // Invalid UUID state
   if (!isValidId) {
@@ -175,9 +150,7 @@ function PitchDeckDetailContent() {
           id={id}
           status={currentDeck.status}
           title={currentDeck.title}
-          isDeleting={isDeleting}
           isAnalyzing={isPipelinePolling}
-          onDelete={handleDelete}
           onAnalyticsClick={() => {
             // Reserved for manual re-trigger
             toast.info('Analysis already running');

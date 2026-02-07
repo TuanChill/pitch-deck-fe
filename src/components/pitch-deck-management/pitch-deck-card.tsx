@@ -1,22 +1,9 @@
 import { PITCH_DECK_STATUS } from '@/constants/pitch-deck-status';
-import type { Long, PitchDeckListItem } from '@/types/response/pitch-deck';
+import type { PitchDeckListItem } from '@/types/response/pitch-deck';
 import { cn } from '@/utils';
-import { formatDistanceToNow } from 'date-fns';
 import { Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-
-/** Convert Long type or string to Date */
-const longToDate = (value: string | Long): Date => {
-  if (typeof value === 'string') {
-    return new Date(value);
-  }
-
-  // Convert MongoDB Long to number (high * 2^32 + low) for milliseconds
-  const timestamp = (value.high * 2 ** 32 + value.low) * 1000;
-
-  return new Date(timestamp);
-};
 
 interface PitchDeckCardProps {
   deck: PitchDeckListItem;
@@ -45,10 +32,6 @@ export const PitchDeckCard = ({ deck, onDelete, onClick }: PitchDeckCardProps) =
 
   const statusColor = STATUS_COLORS[deck.status] || STATUS_COLORS.ready;
   const statusLabel = PITCH_DECK_STATUS[deck.status]?.label || deck.status;
-  const createdDate = longToDate(deck.createdAt);
-  const timeAgo = isNaN(createdDate.getTime())
-    ? 'Invalid date'
-    : formatDistanceToNow(createdDate, { addSuffix: true });
 
   return (
     <div
@@ -87,7 +70,6 @@ export const PitchDeckCard = ({ deck, onDelete, onClick }: PitchDeckCardProps) =
             {deck.chunkCount} {deck.chunkCount === 1 ? 'file' : 'files'}
           </span>
         </div>
-        <span>{timeAgo}</span>
       </div>
 
       {deck.errorMessage && (

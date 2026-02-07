@@ -1,10 +1,7 @@
 'use client';
 
 import { cn } from '@/utils';
-import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
-
-import { Button } from '@/components/ui/button';
 
 import { DeleteConfirmationDialog } from './delete-confirmation-dialog';
 
@@ -12,9 +9,7 @@ export type PitchDeckActionsProps = {
   id: string;
   status: string;
   title: string;
-  isDeleting?: boolean;
   isAnalyzing?: boolean;
-  onDelete?: () => void;
   onAnalyticsClick?: () => void;
   className?: string;
 };
@@ -23,9 +18,7 @@ export const PitchDeckActions = ({
   id: _id,
   status,
   title,
-  isDeleting = false,
   isAnalyzing: _isAnalyzing = false,
-  onDelete,
   onAnalyticsClick: _onAnalyticsClick,
   className
 }: PitchDeckActionsProps) => {
@@ -33,7 +26,6 @@ export const PitchDeckActions = ({
 
   const handleDeleteConfirm = () => {
     setIsDeleteDialogOpen(false);
-    onDelete?.();
   };
 
   // Reserved for future use
@@ -42,16 +34,6 @@ export const PitchDeckActions = ({
   return (
     <div className={cn('flex flex-wrap items-center gap-3', className)}>
       {/* Delete Button */}
-      <Button
-        type="button"
-        variant="destructive"
-        onClick={() => setIsDeleteDialogOpen(true)}
-        disabled={isDeleting}
-      >
-        <Trash2 className="w-4 h-4" />
-        Delete
-      </Button>
-
       {/* Analytics Button - triggers analytics callback if status is ready */}
       {/* <Button
         type="button"
@@ -78,7 +60,6 @@ export const PitchDeckActions = ({
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleDeleteConfirm}
         deckTitle={title}
-        isDeleting={isDeleting}
       />
     </div>
   );
