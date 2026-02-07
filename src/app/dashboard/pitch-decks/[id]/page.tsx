@@ -82,16 +82,9 @@ function PitchDeckDetailContent() {
 
   // NEW: Pipeline auto-start hook
   const { isPolling: isPipelinePolling, overallStatus } = usePipelineAutoStart(id, {
-    autoStart: true,
     currentStep: currentDeck?.currentStep,
-    onProgress: () => {
-      // Progress updates handled by store
-    },
     onComplete: () => {
       toast.success('Analysis completed successfully');
-    },
-    onError: (error) => {
-      toast.error(error);
     },
     onDeckUpdate: () => {
       // Refresh deck data when currentStep changes during polling

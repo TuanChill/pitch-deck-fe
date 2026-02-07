@@ -5,20 +5,18 @@ import { useEffect, useRef } from 'react';
 interface UsePipelineAutoStartOptions {
   currentStep?: 'extract' | 'summary' | 'analytics' | 'swot' | 'pestle' | 'recommendation' | 'done';
   onComplete?: (deckUuid: string) => void;
-  onError?: (error: string) => void;
   onDeckUpdate?: (deck: { currentStep: string }) => void;
 }
 
 const STAGES = ['extract', 'summary', 'analytics', 'swot', 'pestle', 'recommendation'] as const;
 type Stage = (typeof STAGES)[number];
 const POLL_INTERVAL = 2000; // 2 seconds for polling
-const MAX_POLLS = 450; // 15 minutes max
 
 export const usePipelineAutoStart = (
   deckUuid: string,
   options: UsePipelineAutoStartOptions = {}
 ) => {
-  const { currentStep, onComplete, onError, onDeckUpdate } = options;
+  const { currentStep, onComplete, onDeckUpdate } = options;
 
   const isPollingRef = useRef(false);
   const deckStepRef = useRef<string | undefined>(undefined);
@@ -30,7 +28,6 @@ export const usePipelineAutoStart = (
     updateStage,
     setCurrentStage,
     setPolling,
-    setError,
     setSummaryData
   } = usePipelineStore();
 
@@ -74,7 +71,7 @@ export const usePipelineAutoStart = (
       // Progress based on completed stages only
       const progress = Math.round((stepIndex / STAGES.length) * 100);
       setOverallProgress(progress);
-      setOverallStatus('running');
+      setOverallStatus('processing');
     }
   };
 
