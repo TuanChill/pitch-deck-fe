@@ -16,11 +16,12 @@ interface PESTLESectionProps {
   title: string;
   items: PESTLEData[keyof PESTLEData];
   color: string;
+  id: string;
 }
 
-function PESTLESection({ title, items, color }: PESTLESectionProps) {
+function PESTLESection({ title, items, color, id }: PESTLESectionProps) {
   return (
-    <Card>
+    <Card id={id} className="scroll-mt-4">
       <CardHeader>
         <CardTitle className={`text-lg ${color}`}>{title}</CardTitle>
       </CardHeader>
@@ -57,27 +58,37 @@ export function PESTLEList({ data }: PESTLEListProps) {
         title="Political"
         items={data.political}
         color="text-blue-700 dark:text-blue-400"
+        id="pestle-political"
       />
       <PESTLESection
         title="Economic"
         items={data.economic}
         color="text-emerald-700 dark:text-emerald-400"
+        id="pestle-economic"
       />
       <PESTLESection
         title="Social"
         items={data.social}
         color="text-purple-700 dark:text-purple-400"
+        id="pestle-social"
       />
       <PESTLESection
         title="Technological"
         items={data.technological}
         color="text-cyan-700 dark:text-cyan-400"
+        id="pestle-technological"
       />
-      <PESTLESection title="Legal" items={data.legal} color="text-red-700 dark:text-red-400" />
+      <PESTLESection
+        title="Legal"
+        items={data.legal}
+        color="text-red-700 dark:text-red-400"
+        id="pestle-legal"
+      />
       <PESTLESection
         title="Environmental"
         items={data.environmental}
         color="text-lime-700 dark:text-lime-400"
+        id="pestle-environmental"
       />
     </div>
   );

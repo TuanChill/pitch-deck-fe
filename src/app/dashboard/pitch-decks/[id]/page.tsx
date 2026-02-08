@@ -165,7 +165,7 @@ function PitchDeckDetailContent() {
       {/* Tabs section - show when pipeline completes or currentStep is done */}
       {(overallStatus === 'completed' || currentDeck.currentStep === 'done') && (
         <div className="border-t pt-6">
-          <PitchDeckTabs deckId={id} />
+          <PitchDeckTabs deckId={id} currentStep={currentDeck.currentStep} />
         </div>
       )}
 

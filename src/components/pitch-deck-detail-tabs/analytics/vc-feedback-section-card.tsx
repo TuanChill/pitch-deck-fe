@@ -14,6 +14,7 @@ import { VcScoreDisplay } from './vc-score-display';
 
 interface VcFeedbackSectionCardProps {
   section: VcSectionFeedback;
+  id?: string;
 }
 
 /**
@@ -27,7 +28,7 @@ const formatReference = (reference: { page?: number; area?: string }): string =>
   return parts.join(' • ');
 };
 
-export function VcFeedbackSectionCard({ section }: VcFeedbackSectionCardProps) {
+export function VcFeedbackSectionCard({ section, id }: VcFeedbackSectionCardProps) {
   const meta = VC_FEEDBACK_SECTIONS[section.section];
 
   // Safety check: if metadata not found, log and skip rendering
@@ -41,7 +42,7 @@ export function VcFeedbackSectionCard({ section }: VcFeedbackSectionCardProps) {
   }
 
   return (
-    <Card>
+    <Card id={id} className="scroll-mt-4">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">

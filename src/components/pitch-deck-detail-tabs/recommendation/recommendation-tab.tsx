@@ -14,6 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
+import { RecommendationIndexList } from './recommendation-index-list';
+
 const VERDICT_STYLES: Record<RecommendationVerdict, { label: string; className: string }> = {
   strong_buy: {
     label: 'Strong Buy',
@@ -37,7 +39,7 @@ function RecommendationContent({ data }: { data: ApiRecommendationData }) {
   return (
     <div className="space-y-6">
       {/* Verdict Card */}
-      <Card>
+      <Card id="investment-recommendation" className="scroll-mt-4">
         <CardHeader>
           <CardTitle>Investment Recommendation</CardTitle>
         </CardHeader>
@@ -57,13 +59,13 @@ function RecommendationContent({ data }: { data: ApiRecommendationData }) {
       </Card>
 
       {/* Key Strengths */}
-      <Card>
+      <Card id="key-strengths" className="scroll-mt-4">
         <CardHeader>
           <CardTitle className="text-lg">Key Strengths</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
-            {data.keyStrengths.map((strength, i) => (
+            {(data.keyStrengths || []).map((strength, i) => (
               <li key={i} className="flex items-start gap-2 text-sm">
                 <span className="text-emerald-500 mt-0.5">✓</span>
                 <span>{strength}</span>
@@ -74,13 +76,13 @@ function RecommendationContent({ data }: { data: ApiRecommendationData }) {
       </Card>
 
       {/* Key Risks */}
-      <Card>
+      <Card id="key-risks" className="scroll-mt-4">
         <CardHeader>
           <CardTitle className="text-lg">Key Risks</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
-            {data.keyRisks.map((risk, i) => (
+            {(data.keyRisks || []).map((risk, i) => (
               <li key={i} className="flex items-start gap-2 text-sm">
                 <span className="text-red-500 mt-0.5">⚠</span>
                 <span>{risk}</span>
@@ -93,7 +95,7 @@ function RecommendationContent({ data }: { data: ApiRecommendationData }) {
       <Separator />
 
       {/* Market Research */}
-      <Card>
+      <Card id="market-research" className="scroll-mt-4">
         <CardHeader>
           <CardTitle className="text-lg">Market Research</CardTitle>
         </CardHeader>
@@ -121,7 +123,7 @@ function RecommendationContent({ data }: { data: ApiRecommendationData }) {
       </Card>
 
       {/* Competitor Analysis */}
-      <Card>
+      <Card id="competitive-positioning" className="scroll-mt-4">
         <CardHeader>
           <CardTitle className="text-lg">Competitive Positioning</CardTitle>
         </CardHeader>
@@ -151,7 +153,7 @@ function RecommendationContent({ data }: { data: ApiRecommendationData }) {
       </Card>
 
       {/* Team Verification */}
-      <Card>
+      <Card id="team-verification" className="scroll-mt-4">
         <CardHeader>
           <CardTitle className="text-lg">Team Verification</CardTitle>
         </CardHeader>
@@ -170,13 +172,13 @@ function RecommendationContent({ data }: { data: ApiRecommendationData }) {
       </Card>
 
       {/* Investment Considerations */}
-      <Card>
+      <Card id="investment-considerations" className="scroll-mt-4">
         <CardHeader>
           <CardTitle className="text-lg">Investment Considerations</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
-            {data.investmentConsiderations.map((consideration, i) => (
+            {(data.investmentConsiderations || []).map((consideration, i) => (
               <li key={i} className="flex items-start gap-2 text-sm">
                 <span className="text-blue-500 mt-0.5">•</span>
                 <span>{consideration}</span>
@@ -234,5 +236,20 @@ export function RecommendationTab({ deckId }: RecommendationTabProps) {
   }
 
   // Display recommendation data
-  return <RecommendationContent data={displayRecommendation} />;
+  const indexItems = [
+    { id: 'investment-recommendation', label: 'Investment Recommendation' },
+    { id: 'key-strengths', label: 'Key Strengths' },
+    { id: 'key-risks', label: 'Key Risks' },
+    { id: 'market-research', label: 'Market Research' },
+    { id: 'competitive-positioning', label: 'Competitive Positioning' },
+    { id: 'team-verification', label: 'Team Verification' },
+    { id: 'investment-considerations', label: 'Investment Considerations' }
+  ];
+
+  return (
+    <>
+      <RecommendationIndexList items={indexItems} />
+      <RecommendationContent data={displayRecommendation} />
+    </>
+  );
 }

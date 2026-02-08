@@ -17,7 +17,7 @@ export function SWOTGrid({ data }: SWOTGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Strengths */}
-      <Card>
+      <Card id="swot-strengths" className="scroll-mt-4">
         <CardHeader>
           <CardTitle className="text-lg text-emerald-700 dark:text-emerald-400">
             Strengths
@@ -31,7 +31,7 @@ export function SWOTGrid({ data }: SWOTGridProps) {
       </Card>
 
       {/* Weaknesses */}
-      <Card>
+      <Card id="swot-weaknesses" className="scroll-mt-4">
         <CardHeader>
           <CardTitle className="text-lg text-red-700 dark:text-red-400">Weaknesses</CardTitle>
         </CardHeader>
@@ -43,7 +43,7 @@ export function SWOTGrid({ data }: SWOTGridProps) {
       </Card>
 
       {/* Opportunities */}
-      <Card>
+      <Card id="swot-opportunities" className="scroll-mt-4">
         <CardHeader>
           <CardTitle className="text-lg text-blue-700 dark:text-blue-400">Opportunities</CardTitle>
         </CardHeader>
@@ -55,7 +55,7 @@ export function SWOTGrid({ data }: SWOTGridProps) {
       </Card>
 
       {/* Threats */}
-      <Card>
+      <Card id="swot-threats" className="scroll-mt-4">
         <CardHeader>
           <CardTitle className="text-lg text-amber-700 dark:text-amber-400">Threats</CardTitle>
         </CardHeader>

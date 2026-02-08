@@ -8,6 +8,7 @@ import type { PESTLEData as MockPestleData } from '@/types/mock-data/swot-pestle
 import { MOCK_PESTLE_DATA } from '@/types/mock-data/swot-pestle.types';
 import type { PestleData as ApiPestleData } from '@/types/response/pestle-response.types';
 
+import { PestleIndexList } from './pestle-index-list';
 import { PESTLEList } from './pestle-list';
 
 interface PestleTabProps {
@@ -116,5 +117,19 @@ export function PestleTab({ deckId }: PestleTabProps) {
   }
 
   // Display PESTLE data
-  return <PESTLEList data={displayPestle} />;
+  const indexItems = [
+    { id: 'pestle-political', label: 'Political' },
+    { id: 'pestle-economic', label: 'Economic' },
+    { id: 'pestle-social', label: 'Social' },
+    { id: 'pestle-technological', label: 'Technological' },
+    { id: 'pestle-legal', label: 'Legal' },
+    { id: 'pestle-environmental', label: 'Environmental' }
+  ];
+
+  return (
+    <>
+      <PestleIndexList items={indexItems} />
+      <PESTLEList data={displayPestle} />
+    </>
+  );
 }

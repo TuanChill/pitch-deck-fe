@@ -46,6 +46,7 @@ Newly implemented category-sectioned table layout for the Summary tab, replacing
 - Responsive design with min-width on label columns
 
 **Critical Issues Identified (Code Review):**
+
 1. Type safety issues in value access (`renderCellValue`)
 2. Missing null/undefined handling
 3. Constants not extracted to separate files (violates project guidelines)
@@ -233,6 +234,7 @@ This summary reflects the current state of the codebase as of Phase 01 Summary T
 ## Current Implementation Status
 
 ### Completed Features
+
 - ✅ Pitch deck upload functionality
 - ✅ Pipeline visualization with ReactFlow
 - ✅ AI analysis pipeline integration
@@ -242,12 +244,14 @@ This summary reflects the current state of the codebase as of Phase 01 Summary T
 - ✅ Dark mode support
 
 ### Critical Issues (Recently Identified)
+
 1. **Type Safety**: Unsafe value access in summary table rendering
 2. **Null Handling**: Missing null/undefined checks
 3. **Performance**: Missing React.memo and useCallback
 4. **Code Organization**: Constants should be in separate files
 
 ### Best Practices Enforced
+
 - YANGI-KISS-DRY-SOLID principles
 - Kebab-case filenames throughout
 - Barrel exports for clean imports

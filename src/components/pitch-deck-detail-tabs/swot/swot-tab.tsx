@@ -10,6 +10,7 @@ import type { SwotData as ApiSwotData } from '@/types/response/swot-response.typ
 
 import { SWOTErrorState } from './swot-error-state';
 import { SWOTGrid } from './swot-grid';
+import { SwotIndexList } from './swot-index-list';
 import { SWOTLoadingState } from './swot-loading-state';
 
 interface SwotTabProps {
@@ -77,5 +78,17 @@ export function SwotTab({ deckId }: SwotTabProps) {
   }
 
   // Display SWOT data
-  return <SWOTGrid data={displaySwot} />;
+  const indexItems = [
+    { id: 'swot-strengths', label: 'Strengths' },
+    { id: 'swot-weaknesses', label: 'Weaknesses' },
+    { id: 'swot-opportunities', label: 'Opportunities' },
+    { id: 'swot-threats', label: 'Threats' }
+  ];
+
+  return (
+    <>
+      <SwotIndexList items={indexItems} />
+      <SWOTGrid data={displaySwot} />
+    </>
+  );
 }
