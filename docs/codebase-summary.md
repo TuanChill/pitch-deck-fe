@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides a comprehensive summary of the TBX Pitch Deck Management System frontend codebase, including the newly added Pipeline Visualization Component from Phase 03.
+This document provides a comprehensive summary of the TBX Pitch Deck Management System frontend codebase, including the latest Summary Table refactor from Phase 01 and Pipeline Visualization from Phase 03.
 
 ## Architecture Overview
 
@@ -14,6 +14,7 @@ This document provides a comprehensive summary of the TBX Pitch Deck Management 
 - **State Management**: Zustand with localStorage persistence
 - **HTTP Client**: Axios with JWT interceptors
 - **Flow Visualization**: ReactFlow v11.11.4
+- **Package Manager**: pnpm 9.1.1+ (SHA-locked)
 
 ### Core Patterns
 
@@ -25,9 +26,34 @@ This document provides a comprehensive summary of the TBX Pitch Deck Management 
 
 ## Key Components
 
-### 1. Pipeline Visualization Component (Phase 03)
+### 1. Summary Table Component (Phase 01 - Recently Completed)
 
-Newly implemented ReactFlow-based pipeline visualization system for tracking AI analysis progress.
+Newly implemented category-sectioned table layout for the Summary tab, replacing the previous card-based design.
+
+**Files:**
+
+- `src/components/ui/table.tsx` - shadcn/ui Table component (newly added)
+- `src/components/pitch-deck-detail-tabs/summary/summary-table.tsx` - Main table component
+- `src/components/pitch-deck-detail-tabs/summary/summary-tab.tsx` - Updated to use table layout
+
+**Features:**
+
+- 5 logical category groups: Overview, Problem & Solution, Market & Product, Business Model, Competitive Advantage
+- All 12 summary data fields displayed in organized table format
+- Decision badges with color coding (pass=red, meeting=green, deep_dive=yellow)
+- Overall score formatted as "X/100"
+- Loading state preserved during API polling
+- Responsive design with min-width on label columns
+
+**Critical Issues Identified (Code Review):**
+1. Type safety issues in value access (`renderCellValue`)
+2. Missing null/undefined handling
+3. Constants not extracted to separate files (violates project guidelines)
+4. Performance optimizations needed (missing React.memo)
+
+### 2. Pipeline Visualization Component (Phase 03)
+
+ReactFlow-based pipeline visualization system for tracking AI analysis progress.
 
 **Files:**
 
@@ -46,11 +72,11 @@ Newly implemented ReactFlow-based pipeline visualization system for tracking AI 
 
 **Dependencies:**
 
-- ReactFlow v11.11.4 (newly added)
+- ReactFlow v11.11.4
 - Lucide React for icons
 - Zustand for state management
 
-### 2. State Management
+### 3. State Management
 
 **Pipeline Store (`src/stores/pipeline.store.ts`)**
 
@@ -74,7 +100,7 @@ interface PipelineState {
 }
 ```
 
-### 3. Domain Types
+### 4. Domain Types
 
 **Pipeline Types (`src/types/domain/pipeline.ts`)**
 
@@ -82,7 +108,7 @@ interface PipelineState {
 - Includes stage management, status tracking, and error handling
 - Supports real-time progress updates
 
-### 4. Constants and Configuration
+### 5. Constants and Configuration
 
 **Pipeline Stages (`src/constants/pipeline-stages.ts`)**
 
@@ -202,4 +228,29 @@ src/
 - Code standards in `/docs/code-standards.md`
 - Type definitions in `/docs/type-definitions.md`
 
-This summary reflects the current state of the codebase as of Phase 03 Pipeline Visualization implementation.
+This summary reflects the current state of the codebase as of Phase 01 Summary Table and Phase 03 Pipeline Visualization implementations.
+
+## Current Implementation Status
+
+### Completed Features
+- ✅ Pitch deck upload functionality
+- ✅ Pipeline visualization with ReactFlow
+- ✅ AI analysis pipeline integration
+- ✅ Summary data display (recently refactored to table layout)
+- ✅ Loading states and error handling
+- ✅ Responsive design
+- ✅ Dark mode support
+
+### Critical Issues (Recently Identified)
+1. **Type Safety**: Unsafe value access in summary table rendering
+2. **Null Handling**: Missing null/undefined checks
+3. **Performance**: Missing React.memo and useCallback
+4. **Code Organization**: Constants should be in separate files
+
+### Best Practices Enforced
+- YANGI-KISS-DRY-SOLID principles
+- Kebab-case filenames throughout
+- Barrel exports for clean imports
+- 200-line limit per file (modularization)
+- TypeScript strict mode
+- ESLint + Prettier integration

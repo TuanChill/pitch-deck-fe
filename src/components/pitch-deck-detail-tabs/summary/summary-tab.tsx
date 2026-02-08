@@ -6,7 +6,7 @@
 import { usePipelineStore } from '@/stores/pipeline.store';
 import { MOCK_SUMMARY_DATA } from '@/types/mock-data/summary.types';
 
-import { StartupSnapshot } from './startup-snapshot';
+import { SummaryTable } from './summary-table';
 
 export function SummaryTab() {
   const { summaryData, overallStatus, isPolling } = usePipelineStore();
@@ -26,5 +26,5 @@ export function SummaryTab() {
   // Use summary data from API if available, otherwise fallback to mock (for development)
   const data = summaryData || MOCK_SUMMARY_DATA;
 
-  return <StartupSnapshot data={data} />;
+  return <SummaryTable data={data} />;
 }
