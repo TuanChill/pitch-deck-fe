@@ -4,6 +4,7 @@
  */
 
 export { AnalyticsTab } from './analytics-tab';
+export { AnalyticsGeneralTab } from './analytics-general';
 export { AnalyticsIndexList } from './analytics-index-list';
 export { VcFeedbackSectionCard } from './vc-feedback-section-card';
 export { VcDecisionBadge } from './vc-decision-badge';

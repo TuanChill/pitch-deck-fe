@@ -1,158 +1,38 @@
 /**
  * Analytics Tab
- * VC Feedback tab with comprehensive pitch deck evaluation
+ * Container for nested analytics tabs: General, SWOT, PESTLE
  */
 
-import { calculateOverallScore } from '@/constants/vc-evaluation';
-import { useAnalytics } from '@/hooks/use-analytics';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-
-import { AnalyticsError } from './analytics-error';
-import { AnalyticsIndexList } from './analytics-index-list';
-import { AnalyticsScoringGuideSidebar } from './analytics-scoring-guide-sidebar';
-import { AnalyticsSkeleton } from './analytics-skeleton';
-import { VcDecisionBadge } from './vc-decision-badge';
-import { VcFeedbackSectionCard } from './vc-feedback-section-card';
-import { VcScoreDisplay } from './vc-score-display';
-
-interface IndexItem {
-  id: string;
-  label: string;
-}
+import { PestleTab } from '../pestle';
+import { SwotTab } from '../swot';
+import { AnalyticsGeneralTab } from './analytics-general';
 
 interface AnalyticsTabProps {
   deckId: string;
 }
 
 export function AnalyticsTab({ deckId }: AnalyticsTabProps) {
-  const { data, status, error, isPolling, refetch } = useAnalytics(deckId);
-
-  // Early return if no deckId (defensive check)
-  if (!deckId) {
-    return <div className="text-center py-12 text-muted-foreground">Invalid pitch deck ID</div>;
-  }
-
-  // Loading state
-  if (status === 'loading' || isPolling) {
-    return <AnalyticsSkeleton />;
-  }
-
-  // Error state
-  if (status === 'error') {
-    return <AnalyticsError error={error} onRetry={refetch} isPolling={isPolling} />;
-  }
-
-  // No data
-  if (!data) {
-    return (
-      <div className="text-center py-12 text-muted-foreground">No analytics data available</div>
-    );
-  }
-
-  const overallScore = calculateOverallScore(data.sections);
-
-  // Generate index items
-  const indexItems: IndexItem[] = [
-    { id: 'overall-assessment', label: 'Overall Assessment' },
-    ...(data.overall.keyStrengths.length > 0
-      ? [{ id: 'key-strengths', label: 'Key Strengths' }]
-      : []),
-    ...(data.overall.keyRisks.length > 0 ? [{ id: 'key-risks', label: 'Key Risks' }] : []),
-    ...data.sections.map((s) => ({ id: `section-${s.section}`, label: s.section }))
-  ];
-
-  // DEBUG: Log data when rendering
-  console.warn('[AnalyticsTab] Rendering with data:', {
-    sectionsCount: data.sections?.length,
-    overall: data.overall,
-    overallScore
-  });
-
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
-      {/* Main Content */}
-      <div className="space-y-6">
-        {/* Index List */}
-        <AnalyticsIndexList items={indexItems} />
+    <Tabs defaultValue="general" className="w-full">
+      <TabsList className="grid w-full grid-cols-3">
+        <TabsTrigger value="general">General</TabsTrigger>
+        <TabsTrigger value="swot">SWOT</TabsTrigger>
+        <TabsTrigger value="pestle">PESTLE</TabsTrigger>
+      </TabsList>
 
-        {/* Overall Decision Card */}
-        <Card id="overall-assessment" className="scroll-mt-4">
-          <CardHeader>
-            <CardTitle>Overall Assessment</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="text-sm text-muted-foreground">Investment Decision</div>
-                <div className="flex items-center gap-3 mt-2">
-                  <VcDecisionBadge decision={data.overall.decision} size="lg" />
-                  <VcScoreDisplay score={overallScore} size="lg" showLabel={false} />
-                </div>
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground mt-2">{data.overall.summary}</p>
-          </CardContent>
-        </Card>
+      <TabsContent value="general" className="mt-0">
+        <AnalyticsGeneralTab deckId={deckId} />
+      </TabsContent>
 
-        {/* Key Strengths */}
-        {data.overall.keyStrengths.length > 0 && (
-          <Card id="key-strengths" className="scroll-mt-4">
-            <CardHeader>
-              <CardTitle className="text-lg">Key Strengths</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                {data.overall.keyStrengths.map((strength, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm">
-                    <span className="text-emerald-500 mt-0.5">✓</span>
-                    <span>{strength}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        )}
+      <TabsContent value="swot" className="mt-0">
+        <SwotTab deckId={deckId} />
+      </TabsContent>
 
-        {/* Key Risks */}
-        {data.overall.keyRisks.length > 0 && (
-          <Card id="key-risks" className="scroll-mt-4">
-            <CardHeader>
-              <CardTitle className="text-lg">Key Risks</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                {data.overall.keyRisks.map((risk, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm">
-                    <span className="text-red-500 mt-0.5">⚠</span>
-                    <span>{risk}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        )}
-
-        <Separator />
-
-        {/* Section-by-Section Feedback */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Detailed Section Feedback</h3>
-          {data.sections.map((section) => (
-            <VcFeedbackSectionCard
-              key={section.section}
-              section={section}
-              id={`section-${section.section}`}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Right Sidebar - Scoring Guide */}
-      <aside className="lg:sticky lg:top-4 h-fit self-start">
-        <AnalyticsScoringGuideSidebar />
-      </aside>
-    </div>
+      <TabsContent value="pestle" className="mt-0">
+        <PestleTab deckId={deckId} />
+      </TabsContent>
+    </Tabs>
   );
 }
